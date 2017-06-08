@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Net;
 using System.IO;
+using System.Globalization;
 
 namespace MetadataHarvester
 {
@@ -205,7 +206,7 @@ namespace MetadataHarvester
         /// </summary>
         public void ReadCountries()
         {
-            string countriesFileUrl = "ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-countries.txt";
+            string countriesFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-countries.txt";
 
             var client = new WebClient();
             using (var stream = client.OpenRead(countriesFileUrl))
@@ -229,7 +230,7 @@ namespace MetadataHarvester
         /// </summary>
         public void ReadStates()
         {
-            string statesFileUrl = "ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-states.txt";
+            string statesFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-states.txt";
 
             var client = new WebClient();
             using (var stream = client.OpenRead(statesFileUrl))
@@ -251,7 +252,7 @@ namespace MetadataHarvester
         {
             Console.WriteLine("Reading Sites from GHCN file ghcn-stations.txt ...");
 
-            string sitesUrl = "ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt";
+            string sitesUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt";
 
             var client = new WebClient();
             using (var stream = client.OpenRead(sitesUrl))
@@ -265,9 +266,9 @@ namespace MetadataHarvester
                     string countryName = _countries[countryCode];
                     string networkCode = code.Substring(2, 1);
 
-                    float lat = Convert.ToSingle(line.Substring(_siteColPos["lat"].Start, _siteColPos["lat"].Length));
-                    float lon = Convert.ToSingle(line.Substring(_siteColPos["lon"].Start, _siteColPos["lon"].Length));
-                    float elev = Convert.ToSingle(line.Substring(_siteColPos["elevation"].Start, _siteColPos["elevation"].Length));
+                    float lat = Convert.ToSingle(line.Substring(_siteColPos["lat"].Start, _siteColPos["lat"].Length), CultureInfo.InvariantCulture);
+                    float lon = Convert.ToSingle(line.Substring(_siteColPos["lon"].Start, _siteColPos["lon"].Length), CultureInfo.InvariantCulture);
+                    float elev = Convert.ToSingle(line.Substring(_siteColPos["elevation"].Start, _siteColPos["elevation"].Length), CultureInfo.InvariantCulture);
                     string stateCode = (line.Substring(_siteColPos["state"].Start, _siteColPos["state"].Length)).Trim();
 
                     string stateName = String.Empty;
