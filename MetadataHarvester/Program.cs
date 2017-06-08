@@ -11,6 +11,7 @@ namespace MetadataHarvester
         static void Main(string[] args)
         {
             SiteHarvester h = new SiteHarvester();
+            h.UpdateVariables();
             h.ReadCountries();
             h.ReadStates();
             h.ReadStations();
