@@ -12,6 +12,12 @@ namespace MetadataHarvester
         {
             SiteHarvester h = new SiteHarvester();
             h.UpdateVariables();
+            h.UpdateSources();
+
+            SeriesCatalogManager seriesManager = new SeriesCatalogManager();
+            seriesManager.UpdateSeriesCatalog();
+
+            // read countries from the gncnd-countries.txt file
             h.ReadCountries();
             h.ReadStates();
             h.ReadStations();
