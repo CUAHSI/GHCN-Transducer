@@ -141,11 +141,19 @@ namespace WaterOneFlow.odws
             {
                 using (SqlCommand cmd = new SqlCommand())
                 {
-                    string sqlSites = "SELECT plaveninycz.Stations.st_id, st_name, altitude, location_id, lat, lon FROM plaveninycz.Stations INNER JOIN StationsVariables stv ON Stations.st_id = stv.st_id " +                  
-                    "WHERE var_id in (1, 4, 5, 16) AND lat IS NOT NULL";
+                    string sqlSites = "SELECT * FROM dbo.Sites WHERE Latitude >= @lat1 AND Latitude <= @lat2 AND Longitude >= @lon1 AND Longitude <= @lon2";
+                    
+                    //sqlSites = "SELECT plaveninycz.Stations.st_id, st_name, altitude, location_id, lat, lon FROM plaveninycz.Stations INNER JOIN StationsVariables stv ON Stations.st_id = stv.st_id " +                  
+                    //"WHERE var_id in (1, 4, 5, 16) AND lat IS NOT NULL";
                     
                     cmd.CommandText = sqlSites;
                     cmd.Connection = conn;
+
+                    cmd.Parameters.Add(new SqlParameter("@lat1", queryBox.South));
+                    cmd.Parameters.Add(new SqlParameter("@lat2", queryBox.North));
+                    cmd.Parameters.Add(new SqlParameter("@lon1", queryBox.West));
+                    cmd.Parameters.Add(new SqlParameter("@lon2", queryBox.East));
+
                     conn.Open();
                     SqlDataReader dr = cmd.ExecuteReader();
 
@@ -154,9 +162,9 @@ namespace WaterOneFlow.odws
                         SiteInfoResponseTypeSite newSite = new SiteInfoResponseTypeSite();
                         SiteInfoType si = new SiteInfoType();
 
-                        if (dr["altitude"] != DBNull.Value)
+                        if (dr["Elevation_m"] != DBNull.Value)
                         {
-                            si.elevation_m = Convert.ToDouble(dr["altitude"]);
+                            si.elevation_m = Math.Round(Convert.ToDouble(dr["Elevation_m"]), 1);
                             si.elevation_mSpecified = true;
                         }
                         else
@@ -167,27 +175,36 @@ namespace WaterOneFlow.odws
                         si.geoLocation = new SiteInfoTypeGeoLocation();
 
                         LatLonPointType latLon = new LatLonPointType();
-                        latLon.latitude = Convert.ToDouble(dr["Lat"]);
-                        latLon.longitude = Convert.ToDouble(dr["lon"]);
+                        latLon.latitude = Math.Round(Convert.ToDouble(dr["Latitude"]), 4);
+                        latLon.longitude = Math.Round(Convert.ToDouble(dr["Longitude"]), 4);
                         latLon.srs = "EPSG:4326";
                         si.geoLocation.geogLocation = latLon;
-                        si.geoLocation.localSiteXY = new SiteInfoTypeGeoLocationLocalSiteXY[1];
-                        si.geoLocation.localSiteXY[0] = new SiteInfoTypeGeoLocationLocalSiteXY();
-                        si.geoLocation.localSiteXY[0].X = latLon.longitude;
-                        si.geoLocation.localSiteXY[0].Y = latLon.latitude;
-                        si.geoLocation.localSiteXY[0].ZSpecified = false;
-                        si.geoLocation.localSiteXY[0].projectionInformation = si.geoLocation.geogLocation.srs;
+                        //si.geoLocation.localSiteXY = new SiteInfoTypeGeoLocationLocalSiteXY[1];
+                        //si.geoLocation.localSiteXY[0] = new SiteInfoTypeGeoLocationLocalSiteXY();
+                        //si.geoLocation.localSiteXY[0].X = latLon.longitude;
+                        //si.geoLocation.localSiteXY[0].Y = latLon.latitude;
+                        //si.geoLocation.localSiteXY[0].ZSpecified = false;
+                        //si.geoLocation.localSiteXY[0].projectionInformation = si.geoLocation.geogLocation.srs;
+
                         si.metadataTimeSpecified = false;
-                        si.verticalDatum = "Unknown";
+                        //si.oid = Convert.ToString(dr["st_id"]);
+                        //si.note = new NoteType[1];
+                        //si.note[0] = new NoteType();
+                        //si.note[0].title = "my note";
+                        //si.note[0].type = "custom";
+                        //si.note[0].Value = "CHMI-D";
+                        si.verticalDatum = "MSL";
 
                         si.siteCode = new SiteInfoTypeSiteCode[1];
                         si.siteCode[0] = new SiteInfoTypeSiteCode();
                         si.siteCode[0].network = serviceCode;
-                        si.siteCode[0].siteID = Convert.ToInt32(dr["st_id"]);
+                        si.siteCode[0].siteID = Convert.ToInt32(dr["SiteID"]);
                         si.siteCode[0].siteIDSpecified = true;
-                        si.siteCode[0].Value = Convert.ToString(dr["st_id"]);
+                        si.siteCode[0].Value = Convert.ToString(dr["SiteCode"]);
 
-                        si.siteName = Convert.ToString(dr["st_name"]);
+                        si.siteName = Convert.ToString(dr["SiteName"]);
+
+                        // TODO Add Site Property (country, state, comments)
 
                         newSite.siteInfo = si;
                         siteList.Add(newSite);
@@ -363,6 +380,91 @@ namespace WaterOneFlow.odws
              s.generalCategory = s.variable.generalCategory;
             return s;
         }
+
+
+        public static VariableInfoType GetVariableInfoFromDb(string variableCode)
+        {
+            string cnn = GetConnectionString();
+            string serviceCode = ConfigurationManager.AppSettings["network"];
+
+            if (variableCode.IndexOf(serviceCode) == 0)
+            {
+                variableCode = variableCode.Substring(serviceCode.Length + 1);
+            }
+
+            List<VariableInfoType> variablesList = new List<VariableInfoType>();
+
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"select v.*, u.*, 
+tu.UnitsName AS UnitsName1, tu.UnitsAbbreviation as UnitsAbrev1, tu.UnitsType as UnitsType1 FROM dbo.variables v 
+inner join dbo.units u on v.VariableUnitsID = u.UnitsID
+inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID
+WHERE v.VariableCode = @variableCode";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@variableCode", variableCode));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    while (dr.Read())
+                    {
+                        VariableInfoType varInfo = new VariableInfoType();
+
+                        //time support and time unit (same for all variables here)
+                        varInfo.timeScale = new VariableInfoTypeTimeScale();
+                        varInfo.timeScale.isRegular = true;
+                        varInfo.timeScale.timeSpacingSpecified = false;
+                        varInfo.timeScale.timeSupport = 1.0f;
+                        varInfo.timeScale.timeSupportSpecified = true;
+                        varInfo.timeScale.unit = new UnitsType();
+                        varInfo.timeScale.unit.unitAbbreviation = (string)dr["UnitsAbrev1"];
+                        varInfo.timeScale.unit.unitCode = Convert.ToString(dr["TimeUnitsID"]);
+                        varInfo.timeScale.unit.unitID = (int)dr["TimeUnitsID"]; ;
+                        varInfo.timeScale.unit.unitName = (string)dr["UnitsName1"];
+                        varInfo.timeScale.unit.unitType = (string)dr["UnitsType1"];
+                        varInfo.valueType = (string)dr["ValueType"];
+
+                        varInfo.variableCode = new VariableInfoTypeVariableCode[1];
+                        varInfo.variableCode[0] = new VariableInfoTypeVariableCode();
+                        varInfo.variableCode[0].@default = true;
+                        varInfo.variableCode[0].defaultSpecified = true;
+                        varInfo.variableCode[0].Value = (string)dr["VariableCode"];
+                        varInfo.variableCode[0].vocabulary = ConfigurationManager.AppSettings["vocabulary"];
+                        varInfo.variableCode[0].variableID = (int)dr["VariableID"];
+
+                        varInfo.dataType = (string)dr["DataType"];
+                        varInfo.generalCategory = (string)dr["GeneralCategory"];
+                        varInfo.metadataTimeSpecified = false;
+                        varInfo.noDataValue = (double)dr["NoDataValue"];
+                        varInfo.noDataValueSpecified = true;
+                        varInfo.sampleMedium = (string)dr["SampleMedium"];
+                        varInfo.speciation = (string)dr["Speciation"];
+
+                        //variable unit
+                        varInfo.unit = new UnitsType();
+                        varInfo.unit.unitAbbreviation = (string)dr["UnitsAbbreviation"];
+                        varInfo.unit.unitCode = Convert.ToString(dr["VariableUnitsID"]);
+                        varInfo.unit.unitDescription = (string)dr["UnitsName"];
+                        varInfo.unit.unitID = (int)dr["VariableUnitsID"];
+                        varInfo.unit.unitIDSpecified = true;
+                        varInfo.unit.unitName = (string)dr["UnitsName"];
+                        varInfo.unit.unitType = (string)dr["UnitsType"];
+
+                        //variable name
+                        varInfo.variableName = (string)dr["VariableName"];
+
+                        variablesList.Add(varInfo);
+
+                    }
+                    conn.Close();
+                }
+            }
+            return variablesList[0];
+        }
+
 
         public static VariableInfoType[] GetVariablesFromDb()
         {
@@ -672,48 +774,74 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             }
         }
 
-        internal static VariableInfoType GetVariableInfoFromDb(string VariableParameter)
-        {
-            VariableInfoType varInfo = new VariableInfoType();
-            int var_id = VariableCodeToID(VariableParameter);
-            SetVariableProperties(var_id, varInfo);
 
-            return varInfo;
-        }
-
-        public static SiteInfoType GetSiteFromDb2(string siteId)
+         public static SiteInfoType GetSiteFromDb2(string siteCode)
         {
             string cnn = GetConnectionString();
             string serviceCode = ConfigurationManager.AppSettings["network"];
             SiteInfoType si = new SiteInfoType();
 
+            if (siteCode.StartsWith(serviceCode))
+            {
+                siteCode = siteCode.Substring(serviceCode.Length + 1);
+            }
+
             using (SqlConnection conn = new SqlConnection(cnn))
             {
                 using (SqlCommand cmd = new SqlCommand())
                 {
-                    string sqlSite = string.Format(Resources.SqlQueries.query_sitebyid2, siteId);
+                    string sqlSite = "SELECT * FROM dbo.Sites WHERE SiteCode=@siteCode";
 
                     cmd.CommandText = sqlSite;
                     cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@siteCode", siteCode));
                     conn.Open();
                     SqlDataReader dr = cmd.ExecuteReader();
 
                     dr.Read();
                     if (dr.HasRows)
-                    {       
+                    {
+                        if (dr["Elevation_m"] != DBNull.Value)
+                        {
+                            si.elevation_m = Math.Round(Convert.ToDouble(dr["Elevation_m"]), 1);
+                            si.elevation_mSpecified = true;
+                        }
+                        else
+                        {
+                            si.elevation_m = 0;
+                            si.elevation_mSpecified = true;
+                        }
                         si.geoLocation = new SiteInfoTypeGeoLocation();
+
                         LatLonPointType latLon = new LatLonPointType();
-                        latLon.latitude = Convert.ToDouble(dr["Lat"]);
-                        latLon.longitude = Convert.ToDouble(dr["lon"]);
+                        latLon.latitude = Math.Round(Convert.ToDouble(dr["Latitude"]), 4);
+                        latLon.longitude = Math.Round(Convert.ToDouble(dr["Longitude"]), 4);
                         latLon.srs = "EPSG:4326";
                         si.geoLocation.geogLocation = latLon;
+                        //si.geoLocation.localSiteXY = new SiteInfoTypeGeoLocationLocalSiteXY[1];
+                        //si.geoLocation.localSiteXY[0] = new SiteInfoTypeGeoLocationLocalSiteXY();
+                        //si.geoLocation.localSiteXY[0].X = latLon.longitude;
+                        //si.geoLocation.localSiteXY[0].Y = latLon.latitude;
+                        //si.geoLocation.localSiteXY[0].ZSpecified = false;
+                        //si.geoLocation.localSiteXY[0].projectionInformation = si.geoLocation.geogLocation.srs;
+
+                        si.metadataTimeSpecified = false;
+                        //si.oid = Convert.ToString(dr["st_id"]);
+                        //si.note = new NoteType[1];
+                        //si.note[0] = new NoteType();
+                        //si.note[0].title = "my note";
+                        //si.note[0].type = "custom";
+                        //si.note[0].Value = "CHMI-D";
+                        si.verticalDatum = "MSL";
+
                         si.siteCode = new SiteInfoTypeSiteCode[1];
                         si.siteCode[0] = new SiteInfoTypeSiteCode();
                         si.siteCode[0].network = serviceCode;
-                        si.siteCode[0].siteID = Convert.ToInt32(dr["st_id"]);
+                        si.siteCode[0].siteID = Convert.ToInt32(dr["SiteID"]);
                         si.siteCode[0].siteIDSpecified = true;
-                        si.siteCode[0].Value = Convert.ToString(dr["st_id"]);
-                        si.siteName = Convert.ToString(dr["st_name"]);
+                        si.siteCode[0].Value = Convert.ToString(dr["SiteCode"]);
+
+                        si.siteName = Convert.ToString(dr["SiteName"]);
                     }
                 }
             }
@@ -729,7 +857,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             //to add the catalog
             if (includeSeriesCatalog)
             {
-                List<int> variableIdList = GetVariablesForSite(Convert.ToInt32(siteId));
+                List<int> variableIdList = GetVariablesForSite(Convert.ToInt32(newSite.siteInfo.siteCode[0].siteID));
                 int numVariables = variableIdList.Count;
                 
                 newSite.seriesCatalog = new seriesCatalogType[1];
@@ -762,10 +890,11 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 using (SqlCommand cmd = new SqlCommand())
                 {
-                    string sql = "SELECT var_id FROM plaveninycz.StationsVariables WHERE st_id=" + siteId + "AND var_id in (1, 4, 5, 16)";
+                    string sql = "SELECT VariableID FROM dbo.SeriesCatalog WHERE SiteID=@siteID";
 
                     cmd.CommandText = sql;
                     cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@siteID", siteId));
                     conn.Open();
                     SqlDataReader dr = cmd.ExecuteReader();
 
@@ -773,7 +902,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     {
                         if (dr.HasRows)
                         {
-                            int varId = Convert.ToInt32(dr["var_id"]);
+                            int varId = Convert.ToInt32(dr["VariableID"]);
                             if (!variableIdList.Contains(varId))
                                 variableIdList.Add(varId);
                         }
