@@ -297,87 +297,145 @@ namespace WaterOneFlow.odws
             }
         }
 
-        public static seriesCatalogTypeSeries GetSeriesCatalogFromDb(int siteId, int variableId)
+        public static seriesCatalogTypeSeries GetSeriesCatalogFromDb(int siteId, string variableCode)
         {
+            VariableInfoType v = GetVariableInfoFromDb(variableCode);
+
             seriesCatalogTypeSeries s = new seriesCatalogTypeSeries();
             string connStr = GetConnectionString();
 
-            s.generalCategory = "Climate";
-            s.valueType = "Field Observation";
-
             //method
-            s.method = GetMethodForVariable(variableId);           
+            s.method = GetMethodFromDb(0);
 
             //qc level
-            s.qualityControlLevel = new QualityControlLevelType();
-            s.qualityControlLevel.definition = "raw data";
-            s.qualityControlLevel.explanation = "raw data";
-            s.qualityControlLevel.qualityControlLevelCode = "1";
-            s.qualityControlLevel.qualityControlLevelID = 1;
-            s.qualityControlLevel.qualityControlLevelIDSpecified = true;
+            s.qualityControlLevel = GetQualityControlFromDb(1);
 
             //source
-            s.source = GetSourceForSite(siteId);
-   
-            //table name
-            //foldername
-            string variableFolder = "prutok";
-            switch (variableId)
+            s.source = GetSourceFromDb();
+
+            //value count, begin time, end time, check if values exist
+            string cnn = GetConnectionString();
+            using (SqlConnection conn = new SqlConnection(cnn))
             {
-                case 1:
-                    variableFolder = "srazky";
-                    break;
-                case 2:
-                    variableFolder = "srazky";
-                    break;
-                case 4:
-                    variableFolder = "vodstav";
-                    break;
-                case 5:
-                    variableFolder = "prutok";
-                    break;
-                case 8:
-                    variableFolder = "snih";
-                    break;
-                case 16:
-                    variableFolder = "teplota";
-                    break;
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT BeginDateTime, EndDateTime FROM dbo.SeriesCatalog 
+                                    WHERE SiteID = @SiteID AND VariableCode = @VariableCode";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@SiteID", siteId));
+                    cmd.Parameters.Add(new SqlParameter("@VariableCode", variableCode));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+
+                    s.variableTimeInterval = new TimeIntervalType();
+                    s.variableTimeInterval.beginDateTime = Convert.ToDateTime(dr["BeginDateTime"]);
+                    s.variableTimeInterval.beginDateTimeUTC = Convert.ToDateTime(dr["BeginDateTime"]); ;
+                    s.variableTimeInterval.beginDateTimeUTCSpecified = false;
+
+                    s.variableTimeInterval.endDateTime = Convert.ToDateTime(dr["EndDateTime"]);
+                    s.variableTimeInterval.endDateTimeUTC = Convert.ToDateTime(dr["EndDateTime"]);
+                    s.variableTimeInterval.endDateTimeUTCSpecified = false;
+
+                    double totalDays = (s.variableTimeInterval.endDateTime.Subtract(s.variableTimeInterval.beginDateTime)).TotalDays;
+                    s.valueCount = new seriesCatalogTypeSeriesValueCount();
+                    s.valueCount.Value = (int)(Math.Round(totalDays)) + 1;
+
+                }
             }
-
-            //value count, begin time, end time
-            string binFileName = BinaryFileHelper.GetBinaryFileName(siteId, variableFolder, "h");
-            DateRange beginEndTime = BinaryFileHelper.BinaryFileDateRange(binFileName, "h");
-            if (beginEndTime.Start == null || beginEndTime.End == null)
-            {
-                return null;
-            }
-
-            s.variableTimeInterval = new TimeIntervalType();
-            s.variableTimeInterval.beginDateTime = beginEndTime.Start;
-            s.variableTimeInterval.beginDateTimeUTC = s.variableTimeInterval.beginDateTime.AddHours(-1);
-            s.variableTimeInterval.beginDateTimeUTCSpecified = true;
-
-            s.variableTimeInterval.endDateTime = beginEndTime.End;
-            s.variableTimeInterval.endDateTimeUTC = s.variableTimeInterval.endDateTime.AddHours(-1);
-            s.variableTimeInterval.endDateTimeUTCSpecified = true;
-
-            double totalHours = (s.variableTimeInterval.endDateTime.Subtract(s.variableTimeInterval.beginDateTime)).TotalHours;
-            s.valueCount = new seriesCatalogTypeSeriesValueCount();
-            s.valueCount.Value = (int)(Math.Round(totalHours));
-
-            //if no values --> series doesn't exist
-            if (s.valueCount.Value == 0)
-            {
-                return null;
-            }
+            
 
             //variable
-             s.variable = GetVariableInfoFromDb(VariableIDToCode(variableId));
+             s.variable = v;
 
             //data type, sample medium
-             s.dataType = s.variable.dataType;
-             s.sampleMedium = s.variable.sampleMedium;
-             s.generalCategory = s.variable.generalCategory;
+            s.dataType = s.variable.dataType;
+            s.valueType = v.valueType;
+            s.sampleMedium = s.variable.sampleMedium;
+            s.generalCategory = s.variable.generalCategory;
+            return s;
+        }
+
+        public static MethodType GetMethodFromDb(int methodID)
+        {
+            string cnn = GetConnectionString();
+            MethodType m = new MethodType();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT * FROM dbo.Methods WHERE MethodID = @MethodID";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@MethodID", methodID));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+                    m.methodCode = methodID.ToString();
+                    m.methodID = methodID;
+                    m.methodDescription = Convert.ToString(dr["MethodDescription"]);
+                    m.methodLink = Convert.ToString(dr["MethodLink"]);
+                }
+            }
+            return m;
+        }
+
+        public static QualityControlLevelType GetQualityControlFromDb(int qcID)
+        {
+            string cnn = GetConnectionString();
+            QualityControlLevelType q = new QualityControlLevelType();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT * FROM dbo.QualityControlLevels WHERE QualityControlLevelID = @qcID";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@qcID", qcID));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+                    q.qualityControlLevelID = Convert.ToInt32(dr["QualityControlLevelID"]);
+                    q.qualityControlLevelCode = Convert.ToString(dr["QualityControlLevelID"]);
+                    q.definition = Convert.ToString(dr["Definition"]);
+                    q.explanation = Convert.ToString(dr["Explanation"]);
+                }
+            }
+            return q;
+        }
+
+        public static SourceType GetSourceFromDb()
+        {
+            string cnn = GetConnectionString();
+            SourceType s = new SourceType();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT * FROM dbo.Sources";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+                    s.sourceID = Convert.ToInt32(dr["SourceID"]);
+                    s.sourceCode = Convert.ToString(dr["SourceID"]);
+                    s.sourceDescription = Convert.ToString(dr["SourceDescription"]);
+                    s.organization = Convert.ToString(dr["Organization"]);
+                    s.citation = Convert.ToString(dr["Citation"]);
+                    s.sourceLink = new string[] { Convert.ToString(dr["SourceLink"]) };
+
+                    ContactInformationType contactInfo = new ContactInformationType();
+                    contactInfo.address = new string[] { Convert.ToString(dr["Address"]) };
+                    contactInfo.contactName = Convert.ToString(dr["ContactName"]);
+                    contactInfo.email = new string[] { Convert.ToString(dr["Email"]) };
+                    contactInfo.phone = new string[] { Convert.ToString(dr["Phone"]) };
+
+                    s.contactInformation = new ContactInformationType[] { contactInfo };
+
+                }
+            }
             return s;
         }
 
@@ -857,8 +915,9 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             //to add the catalog
             if (includeSeriesCatalog)
             {
-                List<int> variableIdList = GetVariablesForSite(Convert.ToInt32(newSite.siteInfo.siteCode[0].siteID));
-                int numVariables = variableIdList.Count;
+                //List<int> variableIdList = GetVariablesForSite(Convert.ToInt32(newSite.siteInfo.siteCode[0].siteID));
+                List<string> variableCodesList = GetVariableCodesForSite(Convert.ToInt32(newSite.siteInfo.siteCode[0].siteID));
+                int numVariables = variableCodesList.Count;
                 
                 newSite.seriesCatalog = new seriesCatalogType[1];
                 newSite.seriesCatalog[0] = new seriesCatalogType();
@@ -867,7 +926,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 
                 for (int i = 0; i < numVariables; i++)
                 {
-                    seriesCatalogTypeSeries cat = GetSeriesCatalogFromDb(Convert.ToInt32(siteId), variableIdList[i]);
+                    int siteID = newSite.siteInfo.siteCode[0].siteID;
+                    seriesCatalogTypeSeries cat = GetSeriesCatalogFromDb(siteID, variableCodesList[i]);
                     if (cat != null)
                     {
                         seriesCatalogList.Add(cat);
@@ -910,6 +970,38 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 }
             }
             return variableIdList;
+        }
+
+        private static List<string> GetVariableCodesForSite(int siteId)
+        {
+            string cnn = GetConnectionString();
+            string serviceCode = ConfigurationManager.AppSettings["network"];
+            List<string> variableCodeList = new List<string>();
+
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = "SELECT VariableCode FROM dbo.SeriesCatalog WHERE SiteID=@siteID";
+
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@siteID", siteId));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    while (dr.Read())
+                    {
+                        if (dr.HasRows)
+                        {
+                            string varCode = Convert.ToString(dr["VariableCode"]);
+                            if (!variableCodeList.Contains(varCode))
+                                variableCodeList.Add(varCode);
+                        }
+                    }
+                }
+            }
+            return variableCodeList;
         }
 
         internal static MethodType GetMethodForVariable(int variableId) 
