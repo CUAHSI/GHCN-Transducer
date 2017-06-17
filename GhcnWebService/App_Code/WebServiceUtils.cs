@@ -10,6 +10,8 @@ using WaterOneFlowImpl.v1_1;
 using WaterOneFlowImpl;
 using System.Data;
 using WaterOneFlowImpl.geom;
+using System.Net;
+using System.IO;
 
 namespace WaterOneFlow.odws
 {
@@ -1004,62 +1006,23 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             return variableCodeList;
         }
 
-        internal static MethodType GetMethodForVariable(int variableId) 
-        {
-            MethodType m = new MethodType();
-            switch (variableId)
-            {
-                case 8:
-                    m.methodCode = "1";
-                    m.methodID = 1;
-                    m.methodDescription = "Snow measured at 6:00Z on open ground";
-                    m.methodLink = "hydro.chmi.cz/hpps";
-                    break;
-                case 1:
-                    m.methodCode = "2";
-                    m.methodID = 2;
-                    m.methodDescription = "Precipitation measured by tipping-bucket raingauge and aggregated to hourly";
-                    m.methodLink = "hydro.chmi.cz/hpps";
-                    break;
-                case 4:
-                    m.methodCode = "5";
-                    m.methodID = 5;
-                    m.methodDescription = "Water level measured by pressure sensor";
-                    m.methodLink = "hydro.chmi.cz/hpps";
-                    break;
-                case 5:
-                    m.methodCode = "4";
-                    m.methodID = 4;
-                    m.methodDescription = "Water level measured by pressure sensor. Discharge computed from water level using rating curve";
-                    m.methodLink = "hydro.chmi.cz/hpps";
-                    break;
-                case 16:
-                    m.methodCode = "3";
-                    m.methodID = 3;
-                    m.methodDescription = "Temperature sensor in 2 meters on automated meteorological station";
-                    m.methodLink = "hydro.chmi.cz/hpps";
-                    break;
-                default:
-                    m.methodCode = "3";
-                    m.methodID = 3;
-                    m.methodDescription = "Temperature sensor in 2 meters on automated meteorological station";
-                    m.methodLink = "hydro.chmi.cz/hpps";
-                    break;
-            }
-            m.methodCode = "0";
-            return m;
-        }
+        
 
         /// <summary>
-        /// Get the values, from the Db
+        /// Get the values, from the online .dly file
         /// </summary>
-        /// <param name="siteId">site id (local database id)</param>
+        /// <param name="siteCode">site code (local database id)</param>
         /// <param name="variableId">variable id (local database id)</param>
         /// <param name="startDateTime"></param>
         /// <param name="endDateTime"></param>
         /// <returns></returns>
-        internal static TsValuesSingleVariableType GetValuesFromDb(string siteId, string variableCode, DateTime startDateTime, DateTime endDateTime)
+        internal static TsValuesSingleVariableType GetValuesFromDb(string siteCode, string variableCode, DateTime startDateTime, DateTime endDateTime)
         {
+            //default methodID and qcID
+            int methodID = 0;
+            int qcID = 1;
+            int sourceID = 1;
+            
             //numeric variable id
             int varId = VariableCodeToID(variableCode);
             
@@ -1074,69 +1037,103 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
             //method
             s.method = new MethodType[1];
-            s.method[0] = GetMethodForVariable(varId);
-            string timeStep = "hour";
+            s.method[0] = GetMethodFromDb(0);
+
+            //variable
+            VariableInfoType v = GetVariableInfoFromDb(variableCode);
 
             //time units
-            s.units = new UnitsType();
-            s.units.unitAbbreviation = "hr";
-            s.units.unitCode = "103";
-            s.units.unitID = 104;
-            s.units.unitName = "hour";
-            s.units.unitType = "Time";
-            timeStep = "hour";
-
-            //method
-            s.method[0] = GetMethodForVariable(varId);
+            s.units = v.timeScale.unit;
 
             //qc level
             s.qualityControlLevel = new QualityControlLevelType[1];
-            s.qualityControlLevel[0] = new QualityControlLevelType();
-            s.qualityControlLevel[0].definition = "raw data";
-            s.qualityControlLevel[0].explanation = "raw data";
-            s.qualityControlLevel[0].qualityControlLevelCode = "1";
-            s.qualityControlLevel[0].qualityControlLevelID = 1;
+            s.qualityControlLevel[0] = GetQualityControlFromDb(qcID);
             s.qualityControlLevel[0].qualityControlLevelIDSpecified = true;
 
             //source
-            //TODO: read the correct source
             s.source = new SourceType[1];
-            s.source[0] = GetSourceForSite(Convert.ToInt32(siteId));
-            //s.source[0].citation = "CHMI";
-            //s.source[0].organization = "CHMI";
-            //s.source[0].sourceCode = "1";
-            //s.source[0].sourceDescription = " measured by CHMI professional stations";
-            //s.source[0].sourceID = 1;
-            //s.source[0].sourceIDSpecified = true;
+            s.source[0] = GetSourceFromDb();
 
-            //values: get from database...
-            string binFileName = BinaryFileHelper.GetBinaryFileName(Convert.ToInt32(siteId), variableCode.ToLower(), "h");
-            BinaryFileData dataValues = BinaryFileHelper.ReadBinaryFileHourly(binFileName, startDateTime, endDateTime, true);
-            
-            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
-            int N = dataValues.Data.Length;
-            DateTime startValueDate = dataValues.BeginDateTime;
-            for (int i = 0; i < N; i++)
+            //values: get from GHCN .dly file
+            string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
+
+            //text file column positions
+            TextFileColumn yearPos = new TextFileColumn(12, 15);
+            TextFileColumn monthPos = new TextFileColumn(16, 17);
+            TextFileColumn varcodePos = new TextFileColumn(18, 21);
+
+            int[] valueCols = new int[31];
+            int valueChars = 5;
+            for (int i = 0; i < 31; i++)
             {
-                ValueSingleVariable v = new ValueSingleVariable();
-                v.censorCode = "nc";
-                v.dateTime = startValueDate.AddHours(i);
-                v.dateTimeUTC = v.dateTime.AddHours(-1);
-                v.dateTimeUTCSpecified = true;
-                //v.methodCode = s.method[0].methodCode;
-                //v.methodID = v.methodCode;
-                v.methodCode = "0";
-                v.offsetValueSpecified = false;
-                v.qualityControlLevelCode = "1";
-                v.sourceCode = "1";
-                //v.sourceID = "1";
-                v.timeOffset = "01:00";
-                v.Value = convertValue(dataValues.Data[i], varId);
-                valuesList.Add(v);
+                valueCols[i] = 21 + i * 8;
             }
+            int[] mflagCols = new int[31];
+            for (int i = 0; i < 31; i++)
+            {
+                mflagCols[i] = 26 + i * 8;
+            }
+            int[] qflagCols = new int[31];
+            for (int i = 0; i < 31; i++)
+            {
+                qflagCols[i] = 27 + i * 8;
+            }
+            int[] sflagCols = new int[31];
+            for (int i = 0; i < 31; i++)
+            {
+                sflagCols[i] = 28 + i * 8;
+            }
+            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
 
+            var client = new WebClient();
+            using (var stream = client.OpenRead(dlyFileUrl))
+            using (var reader = new StreamReader(stream))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string varCode = line.Substring(varcodePos.Start, varcodePos.Length);
+
+                    // next continue only if varCode is same as in the query..
+                    if (varCode == variableCode)
+                    {
+                        int year = Convert.ToInt32(line.Substring(yearPos.Start, yearPos.Length));
+                        int month = Convert.ToInt32(line.Substring(monthPos.Start, monthPos.Length));
+
+                        // for each value in month: add the value
+                        int daysInMonth = DateTime.DaysInMonth(year, month);
+                        DateTime firstDayInMonth = new DateTime(year, month, 1);
+                        for (int d = 0; d < daysInMonth; d++)
+                        {
+                            DateTime obsDate = firstDayInMonth.AddDays(d);
+
+                            // continue if date is between startTime, endTime
+                            if (obsDate >= startDateTime && obsDate <= endDateTime)
+                            {
+                                ValueSingleVariable val = new ValueSingleVariable();
+                                val.censorCode = "nc";
+                           
+                                val.dateTime = firstDayInMonth.AddDays(d);
+                                val.dateTimeUTC = val.dateTime;
+                                //val.timeOffset = "00:00";
+                                //val.timeOffsetSpecified = false;
+                                val.methodCode = methodID.ToString();
+                                val.offsetValueSpecified = false;
+                                val.qualityControlLevelCode = qcID.ToString();
+                                val.sourceCode = sourceID.ToString();
+
+                                val.Value = Convert.ToDecimal(line.Substring(valueCols[d], valueChars)) / 10.0M;
+
+                                // qualifiers..
+                                
+
+                                valuesList.Add(val);
+                            }
+                        }
+                    }
+                }
+            }
             s.value = valuesList.ToArray();
-
             return s;
         }
 

@@ -576,30 +576,44 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
         public void UpdateSites()
         {
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            int i = 0;
             using (SqlConnection connection = new SqlConnection(connString))
             {
+                Dictionary<string, long> siteLookup = GetSiteLookup(connection);
+
                 foreach (GhcnSite site in _sites)
                 {
-                    SaveOrUpdateSite(site, connection);
+                    SaveOrUpdateSite(site, siteLookup, connection);
+                    i++;
+                    if (i % 1000 == 0)
+                    {
+                        Console.WriteLine("SaveOrUpdateSite " + Convert.ToString(i));
+                    }
                 }
             }
         }
 
-        public void SaveOrUpdateSite(GhcnSite site, SqlConnection connection)
+        private Dictionary<string, long> GetSiteLookup(SqlConnection connection)
         {
-            //string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-            //using (SqlConnection connection = new SqlConnection(connString))
-            //{
-            object siteIdResult = null;
-            using (SqlCommand cmd = new SqlCommand("SELECT SiteID FROM Sites WHERE SiteCode = @code", connection))
+            Dictionary<string, long> lookup = new Dictionary<string, long>();
+            using (SqlCommand cmd = new SqlCommand("SELECT SiteCode, SiteID FROM dbo.Sites", connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@code", site.SiteCode));
                 connection.Open();
-                siteIdResult = cmd.ExecuteScalar();
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while(r.Read())
+                    {
+                        lookup.Add(Convert.ToString(r["SiteCode"]), Convert.ToInt64(r["SiteID"]));
+                    }
+                }
                 connection.Close();
             }
+            return lookup;
+        }
 
-            if (siteIdResult != null)
+        public void SaveOrUpdateSite(GhcnSite site, Dictionary<string, long> lookup, SqlConnection connection)
+        {
+            if (lookup.ContainsKey(site.SiteCode))
             {
                 //update the site
                 //site.SiteID = Convert.ToInt64(siteIdResult);

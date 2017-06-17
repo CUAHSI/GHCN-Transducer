@@ -89,6 +89,8 @@ namespace MetadataHarvester
 
         public List<GhcnSeries> ReadSeriesFromInventory()
         {
+            Console.WriteLine("Reading Series from GHCN file ghcnd-inventory.txt ...");
+
             List<GhcnSeries> seriesList = new List<GhcnSeries>();
             Dictionary<string, TextFileColumn> colPos = new Dictionary<string,TextFileColumn>();
             colPos.Add("sitecode", new TextFileColumn(1, 11));
@@ -135,12 +137,18 @@ namespace MetadataHarvester
                     }
                 }
             }
+            Console.WriteLine(String.Format("found {0} series", seriesList.Count));
             return seriesList;
         }
 
-        private void SaveSeries(GhcnSeries series, SqlConnection connection)
+        private void SaveOrUpdateSeries(GhcnSeries series, Dictionary<Tuple<int, long>, long> lookup, SqlConnection connection)
         {
-            string sql = @"INSERT INTO dbo.SeriesCatalog(
+            Tuple<int, long> seriesKey = new Tuple<int, long>(series.VariableID, series.SiteID);
+
+            if (!lookup.ContainsKey(seriesKey))
+            {
+
+                string sql = @"INSERT INTO dbo.SeriesCatalog(
                                 SiteID, 
                                 SiteCode, 
                                 SiteName,
@@ -158,21 +166,87 @@ namespace MetadataHarvester
                                 @BeginDateTime, 
                                 @EndDateTime, 
                                 @ValueCount)";
-            using (SqlCommand cmd = new SqlCommand(sql, connection))
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        cmd.Parameters.Add(new SqlParameter("@SiteID", series.SiteID));
+                        cmd.Parameters.Add(new SqlParameter("@SiteCode", series.SiteCode));
+                        cmd.Parameters.Add(new SqlParameter("@SiteName", series.SiteName));
+                        cmd.Parameters.Add(new SqlParameter("@VariableID", series.VariableID));
+                        cmd.Parameters.Add(new SqlParameter("@VariableCode", series.VariableCode));
+                        cmd.Parameters.Add(new SqlParameter("@BeginDateTime", series.BeginDateTime));
+                        cmd.Parameters.Add(new SqlParameter("@EndDateTime", series.EndDateTime));
+                        cmd.Parameters.Add(new SqlParameter("@ValueCount", series.ValueCount));
+                        cmd.ExecuteNonQuery();
+                        connection.Close();
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("Error inserting series SiteID=" + series.SiteID.ToString() + "VariableID=" + series.VariableID.ToString() +  " " + ex.Message);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+            else
             {
-                connection.Open();
-                cmd.Parameters.Add(new SqlParameter("@SiteID", series.SiteID));
-                cmd.Parameters.Add(new SqlParameter("@SiteCode", series.SiteCode));
-                cmd.Parameters.Add(new SqlParameter("@SiteName", series.SiteName));
-                cmd.Parameters.Add(new SqlParameter("@VariableID", series.VariableID));
-                cmd.Parameters.Add(new SqlParameter("@VariableCode", series.VariableCode));
-                cmd.Parameters.Add(new SqlParameter("@BeginDateTime", series.BeginDateTime));
-                cmd.Parameters.Add(new SqlParameter("@EndDateTime", series.EndDateTime));
-                cmd.Parameters.Add(new SqlParameter("@ValueCount", series.ValueCount));
-                cmd.ExecuteNonQuery();
-                connection.Close();
+                long seriesID = lookup[seriesKey];
+
+                string sql = @"UPDATE dbo.SeriesCatalog SET
+                                BeginDateTime = @BeginDateTime, 
+                                EndDateTime = @EndDateTime,
+                                ValueCount = @ValueCount
+                            WHERE
+                                SeriesID = @SeriesID";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        cmd.Parameters.Add(new SqlParameter("@BeginDateTime", series.BeginDateTime));
+                        cmd.Parameters.Add(new SqlParameter("@EndDateTime", series.EndDateTime));
+                        cmd.Parameters.Add(new SqlParameter("@ValueCount", series.ValueCount));
+                        cmd.Parameters.Add(new SqlParameter("@SeriesID", seriesID));
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("Error updating series ID=" + seriesID.ToString() + " " + ex.Message);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
             }
         }
+
+
+        private Dictionary<Tuple<int, long>, long> GetSeriesLookup(SqlConnection connection)
+        {
+            // lookup (VariableID, SiteID => SeriesID)
+            Dictionary<Tuple<int, long>, long> lookup = new Dictionary<Tuple<int, long>, long>();
+
+            using (SqlCommand cmd = new SqlCommand("SELECT VariableID, SiteID, SeriesID FROM dbo.SeriesCatalog", connection))
+            {
+                connection.Open();
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        var item = new Tuple<int, long>(Convert.ToInt32(r["VariableID"]), Convert.ToInt64(r["SiteID"]));
+                        lookup.Add(item, Convert.ToInt64(r["SeriesID"]));
+                    }
+                }
+                connection.Close();
+            }
+            return lookup;
+        }
+
 
         public void UpdateSeriesCatalog()
         {
@@ -180,11 +254,23 @@ namespace MetadataHarvester
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            int n = seriesList.Count;
+            int i = 0;
+
             using (SqlConnection connection = new SqlConnection(connString))
             {
+                // series catalog lookup for better speed..
+                Dictionary<Tuple<int, long>, long> lookup = GetSeriesLookup(connection);
+
+
                 foreach (GhcnSeries series in seriesList)
                 {
-                    SaveSeries(series, connection);
+                    SaveOrUpdateSeries(series, lookup, connection);
+                    i++;
+                    if (i % 1000 == 0)
+                    {
+                        Console.WriteLine("SaveOrUpdateSeries " + Convert.ToString(i));
+                    }
                 }
             }
         }

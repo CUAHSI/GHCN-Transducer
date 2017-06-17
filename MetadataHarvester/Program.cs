@@ -11,17 +11,20 @@ namespace MetadataHarvester
         static void Main(string[] args)
         {
             SiteHarvester h = new SiteHarvester();
+
+            // (1) updating variables and sources
             h.UpdateVariables();
             h.UpdateSources();
 
-            SeriesCatalogManager seriesManager = new SeriesCatalogManager();
-            seriesManager.UpdateSeriesCatalog();
-
-            // read countries from the gncnd-countries.txt file
+            // (2) updating sites
             h.ReadCountries();
             h.ReadStates();
             h.ReadStations();
             h.UpdateSites();
+
+            // (3) updating the series catalog..
+            SeriesCatalogManager seriesManager = new SeriesCatalogManager();
+            seriesManager.UpdateSeriesCatalog();
         }
     }
 }
