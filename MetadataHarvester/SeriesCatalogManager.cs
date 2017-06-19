@@ -248,6 +248,88 @@ namespace MetadataHarvester
         }
 
 
+        public void UpdateSeriesCatalog_fast()
+        {
+            List<GhcnSeries> seriesList = ReadSeriesFromInventory();
+            Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
+
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                // delete old entries from series catalog
+                string sql = "TRUNCATE TABLE dbo.SeriesCatalog";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine("deleted old series from SeriesCatalog");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("error deleting old series from SeriesCatalog");
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+
+                int batchSize = 500;
+                int numBatches = (seriesList.Count / batchSize) + 1;
+                for(int b = 0; b < numBatches; b++)
+                {
+                    // prepare for bulk insert
+                    DataTable bulkTable = new DataTable();
+                    bulkTable.Columns.Add("SiteID", typeof(long));
+                    bulkTable.Columns.Add("VariableID", typeof(int));
+                    bulkTable.Columns.Add("SiteCode", typeof(string));
+                    bulkTable.Columns.Add("VariableCode", typeof(string));
+                    bulkTable.Columns.Add("MethodID", typeof(int));
+                    bulkTable.Columns.Add("SourceID", typeof(int));
+                    bulkTable.Columns.Add("QualityControlLevelID", typeof(int));
+                    bulkTable.Columns.Add("BeginDateTime", typeof(DateTime));
+                    bulkTable.Columns.Add("EndDateTime", typeof(DateTime));
+                    bulkTable.Columns.Add("ValueCount", typeof(int));
+
+                    int batchStart = b * batchSize;
+                    int batchEnd = batchStart + batchSize;
+                    if (batchEnd >= seriesList.Count)
+                    {
+                        batchEnd = seriesList.Count; 
+                    }
+                    for (int i = batchStart; i < batchEnd; i++)
+                    {
+                        var row = bulkTable.NewRow();
+                        row["SiteID"] = seriesList[i].SiteID;
+                        row["VariableID"] = seriesList[i].VariableID;
+                        row["SiteCode"] = seriesList[i].SiteCode;
+                        row["VariableCode"] = seriesList[i].VariableCode;
+                        row["MethodID"] = 0;
+                        row["SourceID"] = 1;
+                        row["QualityControlLevelID"] = 1;
+                        row["BeginDateTime"] = seriesList[i].BeginDateTime;
+                        row["EndDateTime"] = seriesList[i].EndDateTime;
+                        row["ValueCount"] = seriesList[i].ValueCount;
+                        bulkTable.Rows.Add(row);
+                    }
+                    SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
+                    bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
+                    connection.Open();
+                    bulkCopy.WriteToServer(bulkTable);
+                    connection.Close();
+                    Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
+                }
+
+                
+                    
+                // series catalog lookup for better speed..
+                // Dictionary<Tuple<int, long>, long> lookup = GetSeriesLookup(connection);
+            }
+        }
+
+
         public void UpdateSeriesCatalog()
         {
             List<GhcnSeries> seriesList = ReadSeriesFromInventory();

@@ -1054,6 +1054,11 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             s.source = new SourceType[1];
             s.source[0] = GetSourceFromDb();
 
+            //qualifiers
+            s.qualifier = new QualifierType[3];
+            s.qualifier[0] = new QualifierType();
+            //s.qualifier[0].
+
             //values: get from GHCN .dly file
             string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
 
@@ -1125,7 +1130,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                                 val.Value = Convert.ToDecimal(line.Substring(valueCols[d], valueChars)) / 10.0M;
 
                                 // qualifiers..
-                                
+                                val.qualifiers = "";
 
                                 valuesList.Add(val);
                             }

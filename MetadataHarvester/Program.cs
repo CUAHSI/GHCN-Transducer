@@ -24,7 +24,7 @@ namespace MetadataHarvester
 
             // (3) updating the series catalog..
             SeriesCatalogManager seriesManager = new SeriesCatalogManager();
-            seriesManager.UpdateSeriesCatalog();
+            seriesManager.UpdateSeriesCatalog_fast();
         }
     }
 }
