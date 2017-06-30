@@ -321,11 +321,6 @@ namespace MetadataHarvester
                     connection.Close();
                     Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
                 }
-
-                
-                    
-                // series catalog lookup for better speed..
-                // Dictionary<Tuple<int, long>, long> lookup = GetSeriesLookup(connection);
             }
         }
 

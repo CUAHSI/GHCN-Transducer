@@ -10,21 +10,21 @@ namespace MetadataHarvester
     {
         static void Main(string[] args)
         {
-            SiteHarvester h = new SiteHarvester();
-
             // (1) updating variables and sources
-            h.UpdateVariables();
-            h.UpdateSources();
+            var varM = new VariableManager();
+            varM.UpdateVariables();
 
-            // (2) updating sites
-            h.ReadCountries();
-            h.ReadStates();
-            h.ReadStations();
-            h.UpdateSites();
+            // (2) updating sources
+            var srcM = new SourceManager();
+            srcM.UpdateSources();
 
-            // (3) updating the series catalog..
-            SeriesCatalogManager seriesManager = new SeriesCatalogManager();
-            seriesManager.UpdateSeriesCatalog_fast();
+            // (3) updating sites
+            var siteM = new SiteManager();
+            siteM.UpdateSites();
+
+            // (4) updating the series catalog
+            SeriesCatalogManager seriesM = new SeriesCatalogManager();
+            seriesM.UpdateSeriesCatalog_fast();
         }
     }
 }

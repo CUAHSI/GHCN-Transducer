@@ -49,10 +49,13 @@
     <Compile Include="GhcnSite.cs" />
     <Compile Include="GhcnSource.cs" />
     <Compile Include="GhcnVariable.cs" />
+    <Compile Include="LogWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SeriesCatalogManager.cs" />
-    <Compile Include="SiteHarvester.cs" />
+    <Compile Include="VariableManager.cs" />
+    <Compile Include="SiteManager.cs" />
+    <Compile Include="SourceManager.cs" />
     <Compile Include="TextFileColumn.cs" />
   </ItemGroup>
   <ItemGroup>
