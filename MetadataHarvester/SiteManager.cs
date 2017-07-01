@@ -305,6 +305,60 @@ namespace MetadataHarvester
             }
         }
 
+        public void DeleteOldSites(int siteCount, SqlConnection connection)
+        {
+            string sqlDelete = "DELETE FROM dbo.Sites WHERE SiteID < @id";
+
+            int i = 0;
+            int batchSize = 500;
+            while (i <= siteCount)
+            {
+                using (SqlCommand cmd = new SqlCommand(sqlDelete, connection))
+                {
+                    i = i + batchSize;
+                    try
+                    {
+                        connection.Open();
+                        cmd.Parameters.Add(new SqlParameter("@id", i));
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine("deleting old sites ... " + i.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = "error deleting old sites " + i.ToString() + " " + ex.Message;
+                        Console.WriteLine(msg);
+                        LogWriter.LogWrite(msg);
+                        return;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+            string sqlReset = @"DBCC CHECKIDENT('dbo.Sites', RESEED, 0);";
+            using (SqlCommand cmd = new SqlCommand(sqlReset, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("reset id of Sites Table");
+
+                }
+                catch (Exception ex)
+                {
+                    var msg = "error deleting old Sites table: " + ex.Message;
+                    Console.WriteLine(msg);
+                    LogWriter.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+        }
 
         public void UpdateSites_fast()
         {
@@ -344,30 +398,13 @@ namespace MetadataHarvester
                     }
 
                     // delete old entries from "sites" table
-                    string sqlDeleteSites = "TRUNCATE TABLE dbo.Sites";
-                    using (SqlCommand cmd = new SqlCommand(sqlDeleteSites, connection))
-                    {
-                        try
-                        {
-                            connection.Open();
-                            cmd.ExecuteNonQuery();
-                            Console.WriteLine("deleted old sites from Sites table");
-                        }
-                        catch (Exception ex)
-                        {
-                            var msg = "error deleting old sites from Sites table: " + ex.Message;
-                            Console.WriteLine(msg);
-                            LogWriter.LogWrite(msg);
-                            return;
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
-                    }
+                    // using batch delete 
+                    DeleteOldSites(sitesList.Count, connection);
+                    
 
                     // to be adjusted
                     int batchSize = 500;
+                    long siteID = 0L;
 
                     int numBatches = (sitesList.Count / batchSize) + 1;
                     for (int b = 0; b < numBatches; b++)
@@ -375,16 +412,22 @@ namespace MetadataHarvester
                         // prepare for bulk insert
                         DataTable bulkTable = new DataTable();
 
+                        bulkTable.Columns.Add("SiteID", typeof(long));
                         bulkTable.Columns.Add("SiteCode", typeof(string));
                         bulkTable.Columns.Add("SiteName", typeof(string));
-                        bulkTable.Columns.Add("Latitude", typeof(double));
-                        bulkTable.Columns.Add("Longitude", typeof(double));
-                        bulkTable.Columns.Add("Elevation_m", typeof(double));
-                        bulkTable.Columns.Add("County", typeof(string));
-                        bulkTable.Columns.Add("State", typeof(string));
-                        bulkTable.Columns.Add("SiteType", typeof(string));
-                        bulkTable.Columns.Add("VerticalDatum", typeof(string));
+                        bulkTable.Columns.Add("Latitude", typeof(float));
+                        bulkTable.Columns.Add("Longitude", typeof(float));
                         bulkTable.Columns.Add("LatLongDatumID", typeof(int));
+                        bulkTable.Columns.Add("Elevation_m", typeof(float));
+                        bulkTable.Columns.Add("VerticalDatum", typeof(string));
+                        bulkTable.Columns.Add("LocalX", typeof(float));
+                        bulkTable.Columns.Add("LocalY", typeof(float));
+                        bulkTable.Columns.Add("LocalProjectionID", typeof(int));
+                        bulkTable.Columns.Add("PosAccuracy_m", typeof(float));
+                        bulkTable.Columns.Add("State", typeof(string));
+                        bulkTable.Columns.Add("County", typeof(string));
+                        bulkTable.Columns.Add("Comments", typeof(string));
+                        bulkTable.Columns.Add("SiteType", typeof(string));
 
                         int batchStart = b * batchSize;
                         int batchEnd = batchStart + batchSize;
@@ -394,16 +437,24 @@ namespace MetadataHarvester
                         }
                         for (int i = batchStart; i < batchEnd; i++)
                         {
+                            siteID = siteID + 1;
                             var row = bulkTable.NewRow();
+                            row["SiteID"] = siteID;
                             row["SiteCode"] = sitesList[i].SiteCode;
                             row["SiteName"] = sitesList[i].SiteName;
                             row["Latitude"] = sitesList[i].Latitude;
                             row["Longitude"] = sitesList[i].Longitude;
+                            row["LatLongDatumID"] = 3; // WGS1984
                             row["Elevation_m"] = sitesList[i].Elevation;
-                            row["State"] = sitesList[i].State;
-                            row["SiteType"] = "Atmosphere";
                             row["VerticalDatum"] = "Unknown";
-                            row["LatLongDatumID"] = 3;
+                            row["LocalX"] = 0.0f;
+                            row["LocalY"] = 0.0f;
+                            row["LocalProjectionID"] = DBNull.Value;
+                            row["PosAccuracy_m"] = 0.0f;
+                            row["State"] = sitesList[i].State;
+                            row["County"] = sitesList[i].Country;
+                            row["Comments"] = "no comment";
+                            row["SiteType"] = "Atmosphere";
                             bulkTable.Rows.Add(row);
                         }
                         SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);

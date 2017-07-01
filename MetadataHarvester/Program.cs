@@ -20,7 +20,7 @@ namespace MetadataHarvester
 
             // (3) updating sites
             var siteM = new SiteManager();
-            siteM.UpdateSites();
+            //siteM.UpdateSites_fast();
 
             // (4) updating the series catalog
             SeriesCatalogManager seriesM = new SeriesCatalogManager();

@@ -10,19 +10,18 @@ namespace MetadataHarvester
 {
     class SeriesCatalogManager
     {
-        private Dictionary<string, GhcnSite> _siteLookup;
 
         private Dictionary<string, GhcnVariable> _variableLookup;
 
         public SeriesCatalogManager()
         {
             // initialize the site and variable lookup
-            _siteLookup = getSiteLookup();
+            
             _variableLookup = getVariableLookup();
 
         }
 
-        private Dictionary<string, GhcnSite> getSiteLookup()
+        private Dictionary<string, GhcnSite> GetSiteLookup()
         {
             Dictionary<string, GhcnSite> lookup = new Dictionary<string, GhcnSite>();
 
@@ -63,7 +62,7 @@ namespace MetadataHarvester
 
             using (SqlConnection connection = new SqlConnection(connString))
             {
-                string sql = "SELECT VariableID, VariableCode, VariableName FROM dbo.Variables";
+                string sql = "SELECT VariableID, VariableCode, VariableName, VariableUnitsID, SampleMedium, DataType FROM dbo.Variables";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
                     cmd.Connection.Open();
@@ -77,6 +76,9 @@ namespace MetadataHarvester
                             VariableID = reader.GetInt32(0),
                             VariableCode = code,
                             VariableName = reader.GetString(2),
+                            VariableUnitsID = reader.GetInt32(3),
+                            SampleMedium = reader.GetString(4),
+                            DataType = reader.GetString(5)
                         };
                         lookup.Add(code, variable);
                     }
@@ -87,7 +89,7 @@ namespace MetadataHarvester
             return lookup;
         }
 
-        public List<GhcnSeries> ReadSeriesFromInventory()
+        public List<GhcnSeries> ReadSeriesFromInventory(Dictionary<string, GhcnSite> siteLookup)
         {
             Console.WriteLine("Reading Series from GHCN file ghcnd-inventory.txt ...");
 
@@ -121,13 +123,13 @@ namespace MetadataHarvester
                     int valueCount = (int)((endDateTime - beginDateTime).TotalDays);
 
                     // only add series for the GHCN core variables (SNWD, PRCP, TMAX, TMIN, TAVG)
-                    if (_variableLookup.ContainsKey(varCode) && _siteLookup.ContainsKey(siteCode))
+                    if (_variableLookup.ContainsKey(varCode) && siteLookup.ContainsKey(siteCode))
                     {
                         seriesList.Add(new GhcnSeries
                         {
                             SiteCode = siteCode,
-                            SiteID = _siteLookup[siteCode].SiteID,
-                            SiteName = _siteLookup[siteCode].SiteName,
+                            SiteID = siteLookup[siteCode].SiteID,
+                            SiteName = siteLookup[siteCode].SiteName,
                             VariableCode = varCode,
                             VariableID = _variableLookup[varCode].VariableID,
                             BeginDateTime = beginDateTime,
@@ -250,7 +252,9 @@ namespace MetadataHarvester
 
         public void UpdateSeriesCatalog_fast()
         {
-            List<GhcnSeries> seriesList = ReadSeriesFromInventory();
+            var siteLookup = GetSiteLookup();
+
+            List<GhcnSeries> seriesList = ReadSeriesFromInventory(siteLookup);
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -269,6 +273,7 @@ namespace MetadataHarvester
                     catch (Exception ex)
                     {
                         Console.WriteLine("error deleting old series from SeriesCatalog");
+                        return;
                     }
                     finally
                     {
@@ -278,48 +283,102 @@ namespace MetadataHarvester
 
                 int batchSize = 500;
                 int numBatches = (seriesList.Count / batchSize) + 1;
-                for(int b = 0; b < numBatches; b++)
-                {
-                    // prepare for bulk insert
-                    DataTable bulkTable = new DataTable();
-                    bulkTable.Columns.Add("SiteID", typeof(long));
-                    bulkTable.Columns.Add("VariableID", typeof(int));
-                    bulkTable.Columns.Add("SiteCode", typeof(string));
-                    bulkTable.Columns.Add("VariableCode", typeof(string));
-                    bulkTable.Columns.Add("MethodID", typeof(int));
-                    bulkTable.Columns.Add("SourceID", typeof(int));
-                    bulkTable.Columns.Add("QualityControlLevelID", typeof(int));
-                    bulkTable.Columns.Add("BeginDateTime", typeof(DateTime));
-                    bulkTable.Columns.Add("EndDateTime", typeof(DateTime));
-                    bulkTable.Columns.Add("ValueCount", typeof(int));
+                long seriesID = 0L;
 
-                    int batchStart = b * batchSize;
-                    int batchEnd = batchStart + batchSize;
-                    if (batchEnd >= seriesList.Count)
+                try
+                {
+                    for (int b = 0; b < numBatches; b++)
                     {
-                        batchEnd = seriesList.Count; 
+                        // prepare for bulk insert
+                        DataTable bulkTable = new DataTable();
+                        bulkTable.Columns.Add("SeriesID", typeof(long));
+                        bulkTable.Columns.Add("SiteID", typeof(long));
+                        bulkTable.Columns.Add("SiteCode", typeof(string));
+                        bulkTable.Columns.Add("SiteName", typeof(string));
+                        bulkTable.Columns.Add("SiteType", typeof(string));
+                        bulkTable.Columns.Add("VariableID", typeof(int));
+                        bulkTable.Columns.Add("VariableCode", typeof(string));
+                        bulkTable.Columns.Add("VariableName", typeof(string));
+                        bulkTable.Columns.Add("Speciation", typeof(string));
+                        bulkTable.Columns.Add("VariableUnitsID", typeof(int));
+                        bulkTable.Columns.Add("VariableUnitsName", typeof(string));
+                        bulkTable.Columns.Add("SampleMedium", typeof(string));
+                        bulkTable.Columns.Add("ValueType", typeof(string));
+                        bulkTable.Columns.Add("TimeSupport", typeof(float));
+                        bulkTable.Columns.Add("TimeUnitsID", typeof(int));
+                        bulkTable.Columns.Add("TimeUnitsName", typeof(string));
+                        bulkTable.Columns.Add("DataType", typeof(string));
+                        bulkTable.Columns.Add("GeneralCategory", typeof(string));
+                        bulkTable.Columns.Add("MethodID", typeof(int));
+                        bulkTable.Columns.Add("MethodDescription", typeof(string));
+                        bulkTable.Columns.Add("SourceID", typeof(int));
+                        bulkTable.Columns.Add("Organization", typeof(string));
+                        bulkTable.Columns.Add("SourceDescription", typeof(string));
+                        bulkTable.Columns.Add("Citation", typeof(string));
+                        bulkTable.Columns.Add("QualityControlLevelID", typeof(int));
+                        bulkTable.Columns.Add("QualityControlLevelCode", typeof(string));
+                        bulkTable.Columns.Add("BeginDateTime", typeof(DateTime));
+                        bulkTable.Columns.Add("EndDateTime", typeof(DateTime));
+                        bulkTable.Columns.Add("BeginDateTimeUTC", typeof(DateTime));
+                        bulkTable.Columns.Add("EndDateTimeUTC", typeof(DateTime));
+                        bulkTable.Columns.Add("ValueCount", typeof(int));
+
+                        int batchStart = b * batchSize;
+                        int batchEnd = batchStart + batchSize;
+                        if (batchEnd >= seriesList.Count)
+                        {
+                            batchEnd = seriesList.Count;
+                        }
+                        for (int i = batchStart; i < batchEnd; i++)
+                        {
+                            var row = bulkTable.NewRow();
+                            seriesID = seriesID + 1;
+                            GhcnVariable v = _variableLookup[seriesList[i].VariableCode];
+                            row["SeriesID"] = seriesID;
+                            row["SiteID"] = seriesList[i].SiteID;
+                            row["SiteCode"] = seriesList[i].SiteCode;
+                            row["SiteName"] = seriesList[i].SiteName;
+                            row["SiteType"] = "Atmosphere";
+                            row["VariableID"] = seriesList[i].VariableID;
+                            row["VariableCode"] = v.VariableCode;
+                            row["VariableName"] = v.VariableName;
+                            row["Speciation"] = v.Speciation;
+                            row["VariableUnitsID"] = v.VariableUnitsID;
+                            row["VariableUnitsName"] = "Centimeter"; // todo get from DB!!
+                            row["SampleMedium"] = v.SampleMedium;
+                            row["ValueType"] = v.ValueType;
+                            row["TimeSupport"] = v.TimeSupport;
+                            row["TimeUnitsID"] = v.TimeUnitsID;
+                            row["TimeUnitsName"] = "Day"; // todo get from DB!!
+                            row["DataType"] = v.DataType;
+                            row["GeneralCategory"] = v.GeneralCategory;
+                            row["MethodID"] = 0;
+                            row["MethodDescription"] = "Unknown"; // todo get from DB !!
+                            row["SourceID"] = 1;
+                            row["Organization"] = "Unknown"; // toto get from DB
+                            row["SourceDescription"] = "Unknown"; // todo get from DB !!
+                            row["Citation"] = "Unknown"; // todo get from DB 
+                            row["QualityControlLevelID"] = 1;
+                            row["QualityControlLevelCode"] = "1";
+                            row["BeginDateTime"] = seriesList[i].BeginDateTime;
+                            row["EndDateTime"] = seriesList[i].EndDateTime;
+                            row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
+                            row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
+                            row["ValueCount"] = seriesList[i].ValueCount;
+                            bulkTable.Rows.Add(row);
+                        }
+                        SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
+                        bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
+                        connection.Open();
+                        bulkCopy.WriteToServer(bulkTable);
+                        connection.Close();
+                        Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
                     }
-                    for (int i = batchStart; i < batchEnd; i++)
-                    {
-                        var row = bulkTable.NewRow();
-                        row["SiteID"] = seriesList[i].SiteID;
-                        row["VariableID"] = seriesList[i].VariableID;
-                        row["SiteCode"] = seriesList[i].SiteCode;
-                        row["VariableCode"] = seriesList[i].VariableCode;
-                        row["MethodID"] = 0;
-                        row["SourceID"] = 1;
-                        row["QualityControlLevelID"] = 1;
-                        row["BeginDateTime"] = seriesList[i].BeginDateTime;
-                        row["EndDateTime"] = seriesList[i].EndDateTime;
-                        row["ValueCount"] = seriesList[i].ValueCount;
-                        bulkTable.Rows.Add(row);
-                    }
-                    SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
-                    bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
-                    connection.Open();
-                    bulkCopy.WriteToServer(bulkTable);
-                    connection.Close();
-                    Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
+                    LogWriter.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
+                }
+                catch(Exception ex)
+                {
+                    LogWriter.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
                 }
             }
         }
@@ -327,7 +386,8 @@ namespace MetadataHarvester
 
         public void UpdateSeriesCatalog()
         {
-            List<GhcnSeries> seriesList = ReadSeriesFromInventory();
+            var siteLookup = GetSiteLookup();
+            List<GhcnSeries> seriesList = ReadSeriesFromInventory(siteLookup);
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
