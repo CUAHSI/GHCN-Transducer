@@ -323,7 +323,7 @@ namespace WaterOneFlow.odws
                 string variableId = Variable.Substring(Variable.LastIndexOf(":") + 1);
 
                 //get startDateTime, endDateTime
-                DateTime startDateTime = new DateTime(2000, 1, 1);
+                DateTime startDateTime = new DateTime(1700, 1, 1);
                 DateTime endDateTime = DateTime.Now;
 
                 if (StartDate != String.Empty)
