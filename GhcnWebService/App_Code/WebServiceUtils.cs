@@ -442,6 +442,34 @@ namespace WaterOneFlow.odws
         }
 
 
+        public static Dictionary<string, QualifierType> GetQualifiersFromDb()
+        {
+            string cnn = GetConnectionString();
+            Dictionary<string, QualifierType> qualifierLookup = new Dictionary<string, QualifierType>();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT * FROM dbo.Qualifiers";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    while (dr.Read())
+                    {
+                        var q = new QualifierType();
+                        q.qualifierID = Convert.ToInt32(dr["QualifierID"]);
+                        q.qualifierCode = Convert.ToString(dr["QualifierCode"]);
+                        q.qualifierDescription = Convert.ToString(dr["QualifierDescription"]);
+                        qualifierLookup.Add(q.qualifierCode, q);
+                    }
+                }
+            }
+            return qualifierLookup;
+        }
+
+
         public static VariableInfoType GetVariableInfoFromDb(string variableCode)
         {
             string cnn = GetConnectionString();
@@ -1057,7 +1085,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             //qualifiers
             s.qualifier = new QualifierType[3];
             s.qualifier[0] = new QualifierType();
-            //s.qualifier[0].
+            Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
+            var usedQualifiers = new Dictionary<string, QualifierType>();
 
             //values: get from GHCN .dly file
             string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
@@ -1073,7 +1102,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 valueCols[i] = 21 + i * 8;
             }
-            int[] mflagCols = new int[31];
+            var mflagCols = new int[31];
             for (int i = 0; i < 31; i++)
             {
                 mflagCols[i] = 26 + i * 8;
@@ -1089,6 +1118,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 sflagCols[i] = 28 + i * 8;
             }
             List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
+            
 
             var client = new WebClient();
             using (var stream = client.OpenRead(dlyFileUrl))
@@ -1127,11 +1157,49 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                                 val.qualityControlLevelCode = qcID.ToString();
                                 val.sourceCode = sourceID.ToString();
 
-                                val.Value = Convert.ToDecimal(line.Substring(valueCols[d], valueChars)) / 10.0M;
+                                var originalVal = Convert.ToDecimal(line.Substring(valueCols[d], valueChars));
 
-                                // qualifiers..
-                                val.qualifiers = "";
+                                if (originalVal < -9998)
+                                {
+                                    val.Value = originalVal;
+                                }
+                                else
+                                {
+                                    val.Value = Convert.ToDecimal(line.Substring(valueCols[d], valueChars)) / 10.0M;
+                                }
 
+                                // qualifiers: each value can have between zero and three qualifiers
+                                var qualifiers = "";
+                                var mFlag = line.Substring(mflagCols[d], 1).Trim();
+                                var qFlag = line.Substring(qflagCols[d], 1).Trim();
+                                var sFlag = line.Substring(sflagCols[d], 1).Trim();
+
+                                mFlag = (mFlag == String.Empty) ? "_" : mFlag;
+                                qFlag = (qFlag == String.Empty) ? "_" : qFlag;
+                                if (sFlag == String.Empty)
+                                {
+                                    sFlag = "__";
+                                }
+                                else
+                                {
+                                    if (Char.IsLower(sFlag.ToCharArray()[0]))
+                                    {
+                                        sFlag = sFlag + "2";
+                                    }
+                                    else
+                                    {
+                                        sFlag = sFlag + "1";
+                                    }
+                                }
+
+                                qualifiers = mFlag + qFlag + sFlag;
+
+                                if (!usedQualifiers.ContainsKey(qualifiers))
+                                {
+                                    usedQualifiers.Add(qualifiers, new QualifierType());
+                                }
+                                
+                                val.qualifiers = qualifiers;
                                 valuesList.Add(val);
                             }
                         }
@@ -1139,6 +1207,26 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 }
             }
             s.value = valuesList.ToArray();
+
+            // generate qualifier descriptions from combined qualifiers
+            var qualList = new List<QualifierType>();
+            foreach (var usedQual in usedQualifiers)
+            {
+                var usedCode = usedQual.Key;
+                var usedMFlag = "m" + usedCode.Substring(0, 1);
+                var usedQFlag = "q" + usedCode.Substring(1, 1);
+                var usedSFlag = "s" + usedCode.Substring(2, 2);
+
+                var mDesc = allQualifiers.ContainsKey(usedMFlag) ? allQualifiers[usedMFlag].qualifierDescription + ", ": "";
+                var qDesc = allQualifiers.ContainsKey(usedQFlag) ? allQualifiers[usedQFlag].qualifierDescription + ", ": "";
+                var sDesc = allQualifiers.ContainsKey(usedSFlag) ? allQualifiers[usedSFlag].qualifierDescription : "unknown source";
+
+                var newQ = new QualifierType();
+                newQ.qualifierCode = usedCode;
+                newQ.qualifierDescription = mDesc + qDesc + sDesc;
+                qualList.Add(newQ);
+            }
+            s.qualifier = qualList.ToArray();
             return s;
         }
 
