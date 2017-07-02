@@ -10,15 +10,15 @@ namespace MetadataHarvester
 {
     class SeriesCatalogManager
     {
-
+        private LogWriter _log;
         private Dictionary<string, GhcnVariable> _variableLookup;
+        
 
-        public SeriesCatalogManager()
+        public SeriesCatalogManager(LogWriter log)
         {
-            // initialize the site and variable lookup
-            
+            // initialize the logger and the variable lookup
+            _log = log;
             _variableLookup = getVariableLookup();
-
         }
 
         private Dictionary<string, GhcnSite> GetSiteLookup()
@@ -57,34 +57,41 @@ namespace MetadataHarvester
         private Dictionary<string, GhcnVariable> getVariableLookup()
         {
             Dictionary<string, GhcnVariable> lookup = new Dictionary<string, GhcnVariable>();
-
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
 
-            using (SqlConnection connection = new SqlConnection(connString))
+            try
             {
-                string sql = "SELECT VariableID, VariableCode, VariableName, VariableUnitsID, SampleMedium, DataType FROM dbo.Variables";
-                using (SqlCommand cmd = new SqlCommand(sql, connection))
-                {
-                    cmd.Connection.Open();
 
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    string sql = "SELECT VariableID, VariableCode, VariableName, VariableUnitsID, SampleMedium, DataType FROM dbo.Variables";
+                    using (SqlCommand cmd = new SqlCommand(sql, connection))
                     {
-                        string code = reader.GetString(1);
-                        GhcnVariable variable = new GhcnVariable
+                        cmd.Connection.Open();
+
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
                         {
-                            VariableID = reader.GetInt32(0),
-                            VariableCode = code,
-                            VariableName = reader.GetString(2),
-                            VariableUnitsID = reader.GetInt32(3),
-                            SampleMedium = reader.GetString(4),
-                            DataType = reader.GetString(5)
-                        };
-                        lookup.Add(code, variable);
+                            string code = reader.GetString(1);
+                            GhcnVariable variable = new GhcnVariable
+                            {
+                                VariableID = reader.GetInt32(0),
+                                VariableCode = code,
+                                VariableName = reader.GetString(2),
+                                VariableUnitsID = reader.GetInt32(3),
+                                SampleMedium = reader.GetString(4),
+                                DataType = reader.GetString(5)
+                            };
+                            lookup.Add(code, variable);
+                        }
+                        reader.Close();
+                        cmd.Connection.Close();
                     }
-                    reader.Close();
-                    cmd.Connection.Close();
                 }
+            }
+            catch(Exception ex)
+            {
+                _log.LogWrite("SeriesCatalogManager ERROR in GetVariableLookup: " + ex.Message);
             }
             return lookup;
         }
@@ -92,7 +99,7 @@ namespace MetadataHarvester
         public List<GhcnSeries> ReadSeriesFromInventory(Dictionary<string, GhcnSite> siteLookup)
         {
             Console.WriteLine("Reading Series from GHCN file ghcnd-inventory.txt ...");
-
+            
             List<GhcnSeries> seriesList = new List<GhcnSeries>();
             Dictionary<string, TextFileColumn> colPos = new Dictionary<string,TextFileColumn>();
             colPos.Add("sitecode", new TextFileColumn(1, 11));
@@ -101,45 +108,55 @@ namespace MetadataHarvester
             colPos.Add("lastyear", new TextFileColumn(42, 45));
 
             string url = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-inventory.txt";
+            _log.LogWrite("Reading Series from url: " + url);
 
-            var client = new WebClient();
-            using (var stream = client.OpenRead(url))
-            using (var reader = new StreamReader(stream))
+            try
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+
+                var client = new WebClient();
+                using (var stream = client.OpenRead(url))
+                using (var reader = new StreamReader(stream))
                 {
-                    string siteCode = line.Substring(colPos["sitecode"].Start, colPos["sitecode"].Length);
-                    string varCode = line.Substring(colPos["varcode"].Start, colPos["varcode"].Length);
-                    int firstYear = Convert.ToInt32(line.Substring(colPos["firstyear"].Start, colPos["firstyear"].Length));
-                    int lastYear = Convert.ToInt32(line.Substring(colPos["lastyear"].Start, colPos["lastyear"].Length));
-
-                    DateTime beginDateTime = new DateTime(firstYear, 1, 1);
-                    DateTime endDateTime = new DateTime(lastYear, 12, 31);
-                    if (lastYear == DateTime.Now.Year)
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        endDateTime = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)).AddDays(-1);
-                    }
-                    int valueCount = (int)((endDateTime - beginDateTime).TotalDays);
+                        string siteCode = line.Substring(colPos["sitecode"].Start, colPos["sitecode"].Length);
+                        string varCode = line.Substring(colPos["varcode"].Start, colPos["varcode"].Length);
+                        int firstYear = Convert.ToInt32(line.Substring(colPos["firstyear"].Start, colPos["firstyear"].Length));
+                        int lastYear = Convert.ToInt32(line.Substring(colPos["lastyear"].Start, colPos["lastyear"].Length));
 
-                    // only add series for the GHCN core variables (SNWD, PRCP, TMAX, TMIN, TAVG)
-                    if (_variableLookup.ContainsKey(varCode) && siteLookup.ContainsKey(siteCode))
-                    {
-                        seriesList.Add(new GhcnSeries
+                        DateTime beginDateTime = new DateTime(firstYear, 1, 1);
+                        DateTime endDateTime = new DateTime(lastYear, 12, 31);
+                        if (lastYear == DateTime.Now.Year)
                         {
-                            SiteCode = siteCode,
-                            SiteID = siteLookup[siteCode].SiteID,
-                            SiteName = siteLookup[siteCode].SiteName,
-                            VariableCode = varCode,
-                            VariableID = _variableLookup[varCode].VariableID,
-                            BeginDateTime = beginDateTime,
-                            EndDateTime = endDateTime,
-                            ValueCount = valueCount
-                        });
+                            endDateTime = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)).AddDays(-1);
+                        }
+                        int valueCount = (int)((endDateTime - beginDateTime).TotalDays);
+
+                        // only add series for the GHCN core variables (SNWD, PRCP, TMAX, TMIN, TAVG)
+                        if (_variableLookup.ContainsKey(varCode) && siteLookup.ContainsKey(siteCode))
+                        {
+                            seriesList.Add(new GhcnSeries
+                            {
+                                SiteCode = siteCode,
+                                SiteID = siteLookup[siteCode].SiteID,
+                                SiteName = siteLookup[siteCode].SiteName,
+                                VariableCode = varCode,
+                                VariableID = _variableLookup[varCode].VariableID,
+                                BeginDateTime = beginDateTime,
+                                EndDateTime = endDateTime,
+                                ValueCount = valueCount
+                            });
+                        }
                     }
                 }
+                Console.WriteLine(String.Format("found {0} series", seriesList.Count));
+                _log.LogWrite(String.Format("found {0} series", seriesList.Count));
             }
-            Console.WriteLine(String.Format("found {0} series", seriesList.Count));
+            catch(Exception ex)
+            {
+                _log.LogWrite("UpdateSeriesCatalog ERROR reading series from web: " + ex.Message);
+            }
             return seriesList;
         }
 
@@ -273,6 +290,7 @@ namespace MetadataHarvester
                     catch (Exception ex)
                     {
                         Console.WriteLine("error deleting old series from SeriesCatalog");
+                        _log.LogWrite("UpdateSeriesCatalog: error deleting old series from SeriesCatalog");
                         return;
                     }
                     finally
@@ -374,11 +392,12 @@ namespace MetadataHarvester
                         connection.Close();
                         Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
                     }
-                    LogWriter.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
+                    Console.WriteLine("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
+                    _log.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
                 }
                 catch(Exception ex)
                 {
-                    LogWriter.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
+                    _log.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
                 }
             }
         }

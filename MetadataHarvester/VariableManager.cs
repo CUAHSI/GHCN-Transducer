@@ -17,6 +17,13 @@ namespace MetadataHarvester
     /// </summary>
     class VariableManager
     {
+        private LogWriter _log;
+
+        public VariableManager(LogWriter log)
+        {
+            _log = log;
+        }
+
         public void UpdateVariables()
         {
             try
@@ -76,19 +83,16 @@ namespace MetadataHarvester
                         object variableID = SaveOrUpdateVariable(variable, connection);
                     }
                 }
-                LogWriter.LogWrite("UpdateVariables OK: " + variables.Count.ToString() + " variables.");
+                _log.LogWrite("UpdateVariables OK: " + variables.Count.ToString() + " variables.");
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("UpdateVariables ERROR: " + ex.Message);
+                _log.LogWrite("UpdateVariables ERROR: " + ex.Message);
             }
         }
 
         private object SaveOrUpdateVariable(GhcnVariable variable, SqlConnection connection)
         {
-            //string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-            //using (SqlConnection connection = new SqlConnection(connString))
-            //{
             object variableIDResult = null;
             using (SqlCommand cmd = new SqlCommand("SELECT VariableID FROM Variables WHERE VariableCode = @code", connection))
             {

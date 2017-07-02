@@ -9,21 +9,22 @@ namespace MetadataHarvester
     /// Helper class for writing messages to log file
     /// see example at https://stackoverflow.com/questions/20185015/how-to-write-log-file-in-c
     /// </summary>
-    public static class LogWriter
+    public class LogWriter
     {
-        //private string m_exePath = string.Empty;
+        private string _logFile = string.Empty;
 
-        //public LogWriter(string logMessage)
-        //{
-        //    LogWrite(logMessage);
-        //}
+        public LogWriter()
+        {
+            var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            _logFile = exePath + "\\log_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
+        }
 
-        public static void LogWrite(string logMessage)
+        public void LogWrite(string logMessage)
         {
             var m_exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             try
             {
-                using (StreamWriter w = File.AppendText(m_exePath + "\\" + "log.txt"))
+                using (StreamWriter w = File.AppendText(_logFile))
                 {
                     Log(logMessage, w);
                 }

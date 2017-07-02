@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GhcnISOMetadata.cs" />
+    <Compile Include="GhcnQualifier.cs" />
     <Compile Include="GhcnSeries.cs" />
     <Compile Include="GhcnSite.cs" />
     <Compile Include="GhcnSource.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="LogWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QualifierManager.cs" />
     <Compile Include="SeriesCatalogManager.cs" />
     <Compile Include="VariableManager.cs" />
     <Compile Include="SiteManager.cs" />

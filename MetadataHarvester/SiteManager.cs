@@ -17,6 +17,13 @@ namespace MetadataHarvester
     /// </summary>
     class SiteManager
     {
+        private LogWriter _log;
+
+        public SiteManager(LogWriter log)
+        {
+            _log = log;
+        }
+        
         /// <summary>
         /// Read the lookup of countries (country code -- country name)
         /// </summary>
@@ -26,7 +33,7 @@ namespace MetadataHarvester
             var countries = new Dictionary<string, string>();
             string countriesFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-countries.txt";
 
-            LogWriter.LogWrite("ReadCountries from URL " + countriesFileUrl);
+            _log.LogWrite("ReadCountries from URL " + countriesFileUrl);
 
             try
             {
@@ -42,11 +49,11 @@ namespace MetadataHarvester
                         countries.Add(code, name);
                     }
                 }
-                LogWriter.LogWrite(String.Format("Found {0} countries.", countries.Count));
+                _log.LogWrite(String.Format("Found {0} countries.", countries.Count));
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("ReadCountries ERROR: " + ex.Message);
+                _log.LogWrite("ReadCountries ERROR: " + ex.Message);
             }
             return countries;
         }
@@ -59,7 +66,7 @@ namespace MetadataHarvester
             var states = new Dictionary<string, string>();
             string statesFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-states.txt";
 
-            LogWriter.LogWrite("Read States from URL " + statesFileUrl);
+            _log.LogWrite("Read States from URL " + statesFileUrl);
 
             try
             {
@@ -75,12 +82,12 @@ namespace MetadataHarvester
                         string name = line.Substring(line.IndexOf(" ") + 1);
                         states.Add(code, name);
                     }
-                    LogWriter.LogWrite(String.Format("Found {0} states.", states.Count));
+                    _log.LogWrite(String.Format("Found {0} states.", states.Count));
                 }
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("ReadStates ERROR: " + ex.Message);
+                _log.LogWrite("ReadStates ERROR: " + ex.Message);
             }
             return states;
         }
@@ -93,7 +100,7 @@ namespace MetadataHarvester
             string sitesUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt";
 
             Console.WriteLine("Reading Sites from URL: " + sitesUrl);
-            LogWriter.LogWrite("Reading sites from URL: " + sitesUrl);
+            _log.LogWrite("Reading sites from URL: " + sitesUrl);
 
             // positions of columns in the ghcnd-stations file
             Dictionary<string, TextFileColumn> colPos = new Dictionary<string, TextFileColumn>();
@@ -176,11 +183,11 @@ namespace MetadataHarvester
                     }
                 }
                 Console.WriteLine(String.Format("found {0} sites", siteList.Count));
-                LogWriter.LogWrite(String.Format("found {0} sites", siteList.Count));
+                _log.LogWrite(String.Format("found {0} sites", siteList.Count));
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("ReadSites ERROR: " + ex.Message);
+                _log.LogWrite("ReadSites ERROR: " + ex.Message);
             }
             return siteList;
         }
@@ -196,7 +203,7 @@ namespace MetadataHarvester
             List<GhcnSite> sitesList = ReadSitesFromWeb();
 
             Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
-            LogWriter.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
+            _log.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
 
             try
             {
@@ -232,7 +239,7 @@ namespace MetadataHarvester
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("UpdateSites ERROR: " + ex.Message);
+                _log.LogWrite("UpdateSites ERROR: " + ex.Message);
             }
         }
 
@@ -327,7 +334,7 @@ namespace MetadataHarvester
                     {
                         var msg = "error deleting old sites " + i.ToString() + " " + ex.Message;
                         Console.WriteLine(msg);
-                        LogWriter.LogWrite(msg);
+                        _log.LogWrite(msg);
                         return;
                     }
                     finally
@@ -350,7 +357,7 @@ namespace MetadataHarvester
                 {
                     var msg = "error deleting old Sites table: " + ex.Message;
                     Console.WriteLine(msg);
-                    LogWriter.LogWrite(msg);
+                    _log.LogWrite(msg);
                     return;
                 }
                 finally
@@ -365,7 +372,7 @@ namespace MetadataHarvester
             List<GhcnSite> sitesList = ReadSitesFromWeb();
 
             Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
-            LogWriter.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
+            _log.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
 
             try
             {
@@ -382,13 +389,13 @@ namespace MetadataHarvester
                             connection.Open();
                             cmd.ExecuteNonQuery();
                             Console.WriteLine("deleted old series from SeriesCatalog");
-                            LogWriter.LogWrite("deleted old series from SeriesCatalog");
+                            _log.LogWrite("deleted old series from SeriesCatalog");
                         }
                         catch (Exception ex)
                         {
                             var msg = "error deleting old SeriesCatalog table: " + ex.Message;
                             Console.WriteLine(msg);
-                            LogWriter.LogWrite(msg);
+                            _log.LogWrite(msg);
                             return;
                         }
                         finally
@@ -465,11 +472,11 @@ namespace MetadataHarvester
                         Console.WriteLine("Sites inserted row " + batchEnd.ToString());
                     }
                 }
-                LogWriter.LogWrite("UpdateSites: " + sitesList.Count.ToString() + " sites updated.");
+                _log.LogWrite("UpdateSites: " + sitesList.Count.ToString() + " sites updated.");
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("UpdateSites ERROR: " + ex.Message);
+                _log.LogWrite("UpdateSites ERROR: " + ex.Message);
             }
         }
     }

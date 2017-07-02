@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MetadataHarvester
 {
@@ -14,6 +10,13 @@ namespace MetadataHarvester
     /// </summary>
     class SourceManager
     {
+        private LogWriter _log;
+        
+        public SourceManager(LogWriter log)
+        {
+            _log = log;
+        }
+
         public void UpdateSources()
         {
             try
@@ -45,12 +48,12 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
                 {
                     int sourceID = SaveOrUpdateSource(source, connection);
                 }
-                LogWriter.LogWrite("UpdateSources OK");
+                _log.LogWrite("UpdateSources OK");
 
             }
             catch(Exception ex)
             {
-                LogWriter.LogWrite("UpdateSources ERROR: " + ex.Message);
+                _log.LogWrite("UpdateSources ERROR: " + ex.Message);
             }
         }
 
@@ -68,7 +71,7 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
 
             if (sourceIDResult != null)
             {
-                //update the variable
+                //update the source
                 source.SourceID = Convert.ToInt32(sourceIDResult);
                 string sql = @"UPDATE dbo.Sources SET 
                                 SourceDescription = @desc, 
@@ -105,7 +108,7 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
             }
             else
             {
-                //save the variable
+                //save the source
                 string sql = @"INSERT INTO Sources (
                                 Organization,
                                 SourceDescription, 
