@@ -89,15 +89,15 @@
                       &nbsp;&nbsp;<br />
                   </li>
               </ul>
-              Example Inputs can be found here:<br />
-              <ul>
+              <!-- Example Inputs can be found here:<br />-->
+              <!--<ul>
                   <li>
                       <asp:HyperLink ID="HyperLink2" runat="server" NavigateUrl="~/Examples_1_1.aspx" >Examples for 1_1</asp:HyperLink>
                   </li>
                   <!--<li>
                       <asp:HyperLink ID="Example_1_0" runat="server" NavigateUrl="~/Examples_1_0.aspx">Examples for 1_0</asp:HyperLink>
                   </li>-->
-              </ul>
+              <!--</ul>-->
               </div>
           <div class="intro">
               &nbsp;</div>
@@ -135,9 +135,9 @@
              <asp:HyperLink  ID="HyperLink1" runat="server" NavigateUrl="<%$ AppSettings:serviceDescriptionPage %>"
    Text=" <%$  AppSettings:serviceDescriptionPage %>"></asp:HyperLink>
       </li>
-           <li><a href="DatabaseTest.aspx">
+           <!--<li><a href="DatabaseTest.aspx">
         Database Test Page</a><br />
-           </li>
+           </li>-->
           </ul>
         <h2>
         Configured Properties:</h2>
