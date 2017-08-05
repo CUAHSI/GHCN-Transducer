@@ -23,15 +23,11 @@ namespace CoCoHarvester
 
             // (4) updating sites
             var siteM = new SiteManager(logger);
-            var ghcnSites = siteM.ReadSitesFromGhcn();
-            var cocoSites = siteM.ReadSitesFromWeb();
-
-            //siteM.UpdateSites();
-            //siteM.UpdateSites_fast();
+            siteM.UpdateSites_fast();
 
             // (5) updating the series catalog
-            //SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-            //seriesM.UpdateSeriesCatalog_fast();
+            SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
+            seriesM.UpdateSeriesCatalog_fast();
         }
     }
 }

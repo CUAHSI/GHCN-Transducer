@@ -98,8 +98,6 @@ namespace CoCoHarvester
 
         public List<GhcnSeries> ReadSeriesFromInventory(Dictionary<string, CoCoSite> siteLookup)
         {
-            Console.WriteLine("Reading Series from GHCN file ghcnd-inventory.txt ...");
-            
             List<GhcnSeries> seriesList = new List<GhcnSeries>();
             Dictionary<string, TextFileColumn> colPos = new Dictionary<string,TextFileColumn>();
             colPos.Add("sitecode", new TextFileColumn(1, 11));
@@ -108,11 +106,11 @@ namespace CoCoHarvester
             colPos.Add("lastyear", new TextFileColumn(42, 45));
 
             string url = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-inventory.txt";
+            Console.WriteLine("Reading CoCoRaHS Series from url: " + url);
             _log.LogWrite("Reading Series from url: " + url);
 
             try
             {
-
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))

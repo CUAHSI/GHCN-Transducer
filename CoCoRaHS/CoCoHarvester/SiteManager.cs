@@ -160,8 +160,8 @@ namespace CoCoHarvester
 
             string sitesUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt";
 
-            Console.WriteLine("Reading Sites from URL: " + sitesUrl);
-            _log.LogWrite("Reading sites from URL: " + sitesUrl);
+            Console.WriteLine("Reading CoCoRaHS Sites from URL: " + sitesUrl);
+            //_log.LogWrite("Reading sites CoCoRaHS Sites from URL: " + sitesUrl);
 
             // positions of columns in the ghcnd-stations file
             Dictionary<string, TextFileColumn> colPos = new Dictionary<string, TextFileColumn>();
@@ -223,6 +223,7 @@ namespace CoCoHarvester
                             wmoID = Convert.ToInt32(wmo);
                         }
 
+                        // networkCode == 1 means that it is a CoCoRaHS site
                         if (networkCode == "1")
                         {
                             CoCoSite site = new CoCoSite
@@ -507,7 +508,7 @@ namespace CoCoHarvester
 
         public void UpdateSites_fast()
         {
-            var sitesList = ReadSitesFromWeb();
+            var sitesList = ReadSitesFromGhcn();
 
             Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
             _log.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
