@@ -8813,3 +8813,4 @@ Exception rethrown at [0]:
    at System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
    at log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
    at log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net: XmlHierarchyConfigurator: Configuration update mode [Merge].

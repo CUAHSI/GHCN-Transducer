@@ -453,11 +453,37 @@ namespace CoCoHarvester
 
         public void DeleteOldSites(int siteCount, SqlConnection connection)
         {
+            string sqlCount = "SELECT COUNT(*) FROM dbo.Sites";
+            int actualSiteCount = siteCount;
+            using (var cmd = new SqlCommand(sqlCount, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var result = cmd.ExecuteScalar();
+                    actualSiteCount = Convert.ToInt32(result);
+                    Console.WriteLine("number of old sites to delete " + result.ToString());
+                }
+                catch (Exception ex)
+                {
+                    var msg = "finding site count " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
             string sqlDelete = "DELETE FROM dbo.Sites WHERE SiteID < @id";
 
+            // it is necessary to delete old sites with smaller batches because
+            // deleting all sites in one command results in transaction log exception
             int i = 0;
             int batchSize = 500;
-            while (i <= siteCount)
+            while (i <= actualSiteCount)
             {
                 using (SqlCommand cmd = new SqlCommand(sqlDelete, connection))
                 {
