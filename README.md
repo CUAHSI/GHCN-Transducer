@@ -1,5 +1,12 @@
 # GHCN-Transducer
-Transducer to enable integrate GHCN data into thr CUAHSI catalog
+Transducers to enable integrating GHCN, CoCoRaHS, SCAN and SNOTEL data into the CUAHSI catalog
+
+The code is organized as follows:
+- odm: contains an empty odm MSSQL database and script to create the DB
+- CoCoRaHS: Transducer for CoCoRaHS web service
+- GHCN: Transducer for GHCN-Daily (Global Historical Climatology Network - Daily data
+- SCAN: Transducer for SCAN data
+- SNOTEL: Transducer for SNOTEL data
 
 The transducer contains two parts:
 - GHCN-Harvester.exe: this executable program updates metadata about available sites, variables and time series
