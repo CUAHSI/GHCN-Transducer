@@ -1,4 +1,6 @@
-﻿namespace MetadataHarvester
+﻿using System;
+
+namespace GhcnHarvester
 {
     class Program
     {

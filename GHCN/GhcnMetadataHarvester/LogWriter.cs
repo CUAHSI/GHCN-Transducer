@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace MetadataHarvester
+namespace GhcnHarvester
 {
 
     /// <summary>

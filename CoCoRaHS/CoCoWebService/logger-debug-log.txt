@@ -8814,3 +8814,760 @@ Exception rethrown at [0]:
    at log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
    at log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
 log4net: XmlHierarchyConfigurator: Configuration update mode [Merge].
+log4net: XmlHierarchyConfigurator: Configuration update mode [Merge].
+log4net: XmlHierarchyConfigurator: Logger [root] Level string is [DEBUG].
+log4net: XmlHierarchyConfigurator: Logger [root] level set to [name="DEBUG",value=30000].
+log4net: XmlHierarchyConfigurator: Loading Appender [EventLogAppender] type: [log4net.Appender.EventLogAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMin] to Level value [ERROR]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMax] to Level value [FATAL]
+log4net: XmlHierarchyConfigurator: Setting Collection Property [AddFilter] to object [log4net.Filter.LevelRangeFilter]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%property{NDC}] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [property] Option [NDC] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net:ERROR XmlHierarchyConfigurator: Could not create Appender [EventLogAppender] of type [log4net.Appender.EventLogAppender]. Reported error follows.
+System.Security.SecurityException: Zdroj nebyl nalezen, ale některé nebo všechny protokoly událostí nelze prohledat. Nepřístupné protokoly: Security.
+   v System.Diagnostics.EventLog.FindSourceRegistration(String source, String machineName, Boolean readOnly, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source, String machineName, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source)
+   v log4net.Appender.EventLogAppender.ActivateOptions()
+   v log4net.Repository.Hierarchy.XmlHierarchyConfigurator.ParseAppender(XmlElement appenderElement)
+Zóna sestavení, u něhož došlo k chybě:
+MyComputer
+log4net:ERROR XmlHierarchyConfigurator: Appender named [EventLogAppender] not found.
+log4net: XmlHierarchyConfigurator: Loading Appender [LogFileAppender] type: [log4net.Appender.FileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\webapp-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\webapp-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [LogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [LogFileAppender] to logger [root].
+log4net: XmlHierarchyConfigurator: Loading Appender [HttpTraceAppender] type: [log4net.Appender.AspNetTraceAppender]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: XmlHierarchyConfigurator: Created Appender [HttpTraceAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [HttpTraceAppender] to logger [root].
+log4net:ERROR XmlHierarchyConfigurator: No appender named [WebServiceDBAppender] could be found.
+log4net:ERROR XmlHierarchyConfigurator: Appender named [WebServiceDBAppender] not found.
+log4net: XmlHierarchyConfigurator: Retrieving an instance of log4net.Repository.Logger for logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Setting [QueryLog] additivity to [True].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] Level string is [INFO].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] level set to [name="INFO",value=40000].
+log4net: XmlHierarchyConfigurator: Loading Appender [QueryLogFileAppender] type: [log4net.Appender.RollingFileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\query-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [MaxSizeRollBackups] to Int32 value [-1]
+log4net: XmlHierarchyConfigurator: Setting Property [MaximumFileSize] to String value [5MB]
+log4net: XmlHierarchyConfigurator: Setting Property [RollingStyle] to RollingMode value [Date]
+log4net: XmlHierarchyConfigurator: Setting Property [DatePattern] to String value [yyyyMM]
+log4net: XmlHierarchyConfigurator: Setting Property [StaticLogFileName] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: RollingFileAppender: Type = [0], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [1], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [2], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [3], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [4], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [5], r0 = [197001], r1 = [197002]
+log4net: RollingFileAppender: Searched for existing files in [E:\github\GHCN-Transducer\CoCoRaHS\logs]
+log4net: RollingFileAppender: curSizeRollBackups starts at [0]
+log4net: RollingFileAppender: [201708] vs. [201708]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\query-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [QueryLogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [QueryLogFileAppender] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Loading Appender [SDSCQueryLog] type: [log4net.Appender.RemotingAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [Sink] to String value [tcp://river.sdsc.edu:8085/LoggingSink]
+log4net: XmlHierarchyConfigurator: Setting Property [Lossy] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [BufferSize] to Int32 value [200]
+log4net: XmlHierarchyConfigurator: Setting Property [OnlyFixPartialEventData] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [Threshold] to Level value [INFO]
+log4net: XmlHierarchyConfigurator: Setting Property [Evaluator] to object [log4net.Core.LevelEvaluator]
+log4net: XmlHierarchyConfigurator: Created Appender [SDSCQueryLog]
+log4net: XmlHierarchyConfigurator: Adding appender named [SDSCQueryLog] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Hierarchy Threshold []
+log4net: XmlConfigurator: configuring repository [log4net-default-repository] using .config file section
+log4net: XmlConfigurator: Application config file is [E:\github\GHCN-Transducer\CoCoRaHS\CoCoWebService\web.config]
+log4net:ERROR XmlConfigurator: Failed to find configuration section 'log4net' in the application's .config file. Check your .config file for the <log4net> and <configSections> elements. The configuration section should look like: <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net" />
+log4net: AppenderSkeleton: Finalizing appender named [EventLogAppender].
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net: Hierarchy: Shutdown called on Hierarchy [log4net-default-repository]
+log4net: XmlHierarchyConfigurator: Configuration update mode [Merge].
+log4net: XmlHierarchyConfigurator: Logger [root] Level string is [DEBUG].
+log4net: XmlHierarchyConfigurator: Logger [root] level set to [name="DEBUG",value=30000].
+log4net: XmlHierarchyConfigurator: Loading Appender [EventLogAppender] type: [log4net.Appender.EventLogAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMin] to Level value [ERROR]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMax] to Level value [FATAL]
+log4net: XmlHierarchyConfigurator: Setting Collection Property [AddFilter] to object [log4net.Filter.LevelRangeFilter]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%property{NDC}] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [property] Option [NDC] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net:ERROR XmlHierarchyConfigurator: Could not create Appender [EventLogAppender] of type [log4net.Appender.EventLogAppender]. Reported error follows.
+System.Security.SecurityException: Zdroj nebyl nalezen, ale některé nebo všechny protokoly událostí nelze prohledat. Nepřístupné protokoly: Security.
+   v System.Diagnostics.EventLog.FindSourceRegistration(String source, String machineName, Boolean readOnly, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source, String machineName, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source)
+   v log4net.Appender.EventLogAppender.ActivateOptions()
+   v log4net.Repository.Hierarchy.XmlHierarchyConfigurator.ParseAppender(XmlElement appenderElement)
+Zóna sestavení, u něhož došlo k chybě:
+MyComputer
+log4net:ERROR XmlHierarchyConfigurator: Appender named [EventLogAppender] not found.
+log4net: XmlHierarchyConfigurator: Loading Appender [LogFileAppender] type: [log4net.Appender.FileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\webapp-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\webapp-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [LogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [LogFileAppender] to logger [root].
+log4net: XmlHierarchyConfigurator: Loading Appender [HttpTraceAppender] type: [log4net.Appender.AspNetTraceAppender]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: XmlHierarchyConfigurator: Created Appender [HttpTraceAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [HttpTraceAppender] to logger [root].
+log4net:ERROR XmlHierarchyConfigurator: No appender named [WebServiceDBAppender] could be found.
+log4net:ERROR XmlHierarchyConfigurator: Appender named [WebServiceDBAppender] not found.
+log4net: XmlHierarchyConfigurator: Retrieving an instance of log4net.Repository.Logger for logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Setting [QueryLog] additivity to [True].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] Level string is [INFO].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] level set to [name="INFO",value=40000].
+log4net: XmlHierarchyConfigurator: Loading Appender [QueryLogFileAppender] type: [log4net.Appender.RollingFileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\query-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [MaxSizeRollBackups] to Int32 value [-1]
+log4net: XmlHierarchyConfigurator: Setting Property [MaximumFileSize] to String value [5MB]
+log4net: XmlHierarchyConfigurator: Setting Property [RollingStyle] to RollingMode value [Date]
+log4net: XmlHierarchyConfigurator: Setting Property [DatePattern] to String value [yyyyMM]
+log4net: XmlHierarchyConfigurator: Setting Property [StaticLogFileName] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: RollingFileAppender: Type = [0], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [1], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [2], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [3], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [4], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [5], r0 = [197001], r1 = [197002]
+log4net: RollingFileAppender: Searched for existing files in [E:\github\GHCN-Transducer\CoCoRaHS\logs]
+log4net: RollingFileAppender: curSizeRollBackups starts at [0]
+log4net: RollingFileAppender: [201708] vs. [201708]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\query-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [QueryLogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [QueryLogFileAppender] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Loading Appender [SDSCQueryLog] type: [log4net.Appender.RemotingAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [Sink] to String value [tcp://river.sdsc.edu:8085/LoggingSink]
+log4net: XmlHierarchyConfigurator: Setting Property [Lossy] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [BufferSize] to Int32 value [200]
+log4net: XmlHierarchyConfigurator: Setting Property [OnlyFixPartialEventData] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [Threshold] to Level value [INFO]
+log4net: XmlHierarchyConfigurator: Setting Property [Evaluator] to object [log4net.Core.LevelEvaluator]
+log4net: XmlHierarchyConfigurator: Created Appender [SDSCQueryLog]
+log4net: XmlHierarchyConfigurator: Adding appender named [SDSCQueryLog] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Hierarchy Threshold []
+log4net: XmlConfigurator: configuring repository [log4net-default-repository] using .config file section
+log4net: XmlConfigurator: Application config file is [E:\github\GHCN-Transducer\CoCoRaHS\CoCoWebService\web.config]
+log4net:ERROR XmlConfigurator: Failed to find configuration section 'log4net' in the application's .config file. Check your .config file for the <log4net> and <configSections> elements. The configuration section should look like: <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net" />
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net: Hierarchy: Shutdown called on Hierarchy [log4net-default-repository]
+log4net: AppenderSkeleton: Finalizing appender named [EventLogAppender].
+log4net: XmlHierarchyConfigurator: Configuration update mode [Merge].
+log4net: XmlHierarchyConfigurator: Logger [root] Level string is [DEBUG].
+log4net: XmlHierarchyConfigurator: Logger [root] level set to [name="DEBUG",value=30000].
+log4net: XmlHierarchyConfigurator: Loading Appender [EventLogAppender] type: [log4net.Appender.EventLogAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMin] to Level value [ERROR]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMax] to Level value [FATAL]
+log4net: XmlHierarchyConfigurator: Setting Collection Property [AddFilter] to object [log4net.Filter.LevelRangeFilter]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%property{NDC}] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [property] Option [NDC] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net:ERROR XmlHierarchyConfigurator: Could not create Appender [EventLogAppender] of type [log4net.Appender.EventLogAppender]. Reported error follows.
+System.Security.SecurityException: Zdroj nebyl nalezen, ale některé nebo všechny protokoly událostí nelze prohledat. Nepřístupné protokoly: Security.
+   v System.Diagnostics.EventLog.FindSourceRegistration(String source, String machineName, Boolean readOnly, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source, String machineName, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source)
+   v log4net.Appender.EventLogAppender.ActivateOptions()
+   v log4net.Repository.Hierarchy.XmlHierarchyConfigurator.ParseAppender(XmlElement appenderElement)
+Zóna sestavení, u něhož došlo k chybě:
+MyComputer
+log4net:ERROR XmlHierarchyConfigurator: Appender named [EventLogAppender] not found.
+log4net: XmlHierarchyConfigurator: Loading Appender [LogFileAppender] type: [log4net.Appender.FileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\webapp-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\webapp-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [LogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [LogFileAppender] to logger [root].
+log4net: XmlHierarchyConfigurator: Loading Appender [HttpTraceAppender] type: [log4net.Appender.AspNetTraceAppender]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: XmlHierarchyConfigurator: Created Appender [HttpTraceAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [HttpTraceAppender] to logger [root].
+log4net:ERROR XmlHierarchyConfigurator: No appender named [WebServiceDBAppender] could be found.
+log4net:ERROR XmlHierarchyConfigurator: Appender named [WebServiceDBAppender] not found.
+log4net: XmlHierarchyConfigurator: Retrieving an instance of log4net.Repository.Logger for logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Setting [QueryLog] additivity to [True].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] Level string is [INFO].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] level set to [name="INFO",value=40000].
+log4net: XmlHierarchyConfigurator: Loading Appender [QueryLogFileAppender] type: [log4net.Appender.RollingFileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\query-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [MaxSizeRollBackups] to Int32 value [-1]
+log4net: XmlHierarchyConfigurator: Setting Property [MaximumFileSize] to String value [5MB]
+log4net: XmlHierarchyConfigurator: Setting Property [RollingStyle] to RollingMode value [Date]
+log4net: XmlHierarchyConfigurator: Setting Property [DatePattern] to String value [yyyyMM]
+log4net: XmlHierarchyConfigurator: Setting Property [StaticLogFileName] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: RollingFileAppender: Type = [0], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [1], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [2], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [3], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [4], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [5], r0 = [197001], r1 = [197002]
+log4net: RollingFileAppender: Searched for existing files in [E:\github\GHCN-Transducer\CoCoRaHS\logs]
+log4net: RollingFileAppender: curSizeRollBackups starts at [0]
+log4net: RollingFileAppender: [201708] vs. [201708]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\query-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [QueryLogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [QueryLogFileAppender] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Loading Appender [SDSCQueryLog] type: [log4net.Appender.RemotingAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [Sink] to String value [tcp://river.sdsc.edu:8085/LoggingSink]
+log4net: XmlHierarchyConfigurator: Setting Property [Lossy] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [BufferSize] to Int32 value [200]
+log4net: XmlHierarchyConfigurator: Setting Property [OnlyFixPartialEventData] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [Threshold] to Level value [INFO]
+log4net: XmlHierarchyConfigurator: Setting Property [Evaluator] to object [log4net.Core.LevelEvaluator]
+log4net: XmlHierarchyConfigurator: Created Appender [SDSCQueryLog]
+log4net: XmlHierarchyConfigurator: Adding appender named [SDSCQueryLog] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Hierarchy Threshold []
+log4net: XmlConfigurator: configuring repository [log4net-default-repository] using .config file section
+log4net: XmlConfigurator: Application config file is [E:\github\GHCN-Transducer\CoCoRaHS\CoCoWebService\web.config]
+log4net:ERROR XmlConfigurator: Failed to find configuration section 'log4net' in the application's .config file. Check your .config file for the <log4net> and <configSections> elements. The configuration section should look like: <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net" />
+log4net: AppenderSkeleton: Finalizing appender named [EventLogAppender].
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net: Hierarchy: Shutdown called on Hierarchy [log4net-default-repository]
+log4net: XmlHierarchyConfigurator: Configuration update mode [Merge].
+log4net: XmlHierarchyConfigurator: Logger [root] Level string is [DEBUG].
+log4net: XmlHierarchyConfigurator: Logger [root] level set to [name="DEBUG",value=30000].
+log4net: XmlHierarchyConfigurator: Loading Appender [EventLogAppender] type: [log4net.Appender.EventLogAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMin] to Level value [ERROR]
+log4net: XmlHierarchyConfigurator: Setting Property [LevelMax] to Level value [FATAL]
+log4net: XmlHierarchyConfigurator: Setting Collection Property [AddFilter] to object [log4net.Filter.LevelRangeFilter]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%property{NDC}] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [property] Option [NDC] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net:ERROR XmlHierarchyConfigurator: Could not create Appender [EventLogAppender] of type [log4net.Appender.EventLogAppender]. Reported error follows.
+System.Security.SecurityException: Zdroj nebyl nalezen, ale některé nebo všechny protokoly událostí nelze prohledat. Nepřístupné protokoly: Security.
+   v System.Diagnostics.EventLog.FindSourceRegistration(String source, String machineName, Boolean readOnly, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source, String machineName, Boolean wantToCreate)
+   v System.Diagnostics.EventLog.SourceExists(String source)
+   v log4net.Appender.EventLogAppender.ActivateOptions()
+   v log4net.Repository.Hierarchy.XmlHierarchyConfigurator.ParseAppender(XmlElement appenderElement)
+Zóna sestavení, u něhož došlo k chybě:
+MyComputer
+log4net:ERROR XmlHierarchyConfigurator: Appender named [EventLogAppender] not found.
+log4net: XmlHierarchyConfigurator: Loading Appender [LogFileAppender] type: [log4net.Appender.FileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\webapp-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\webapp-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [LogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [LogFileAppender] to logger [root].
+log4net: XmlHierarchyConfigurator: Loading Appender [HttpTraceAppender] type: [log4net.Appender.AspNetTraceAppender]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date [%thread] %-5level %logger [%ndc] - %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [thread] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [level] Option [] Format [min=5,max=2147483647,leftAlign=True]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [logger] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [ndc] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [] - ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: XmlHierarchyConfigurator: Created Appender [HttpTraceAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [HttpTraceAppender] to logger [root].
+log4net:ERROR XmlHierarchyConfigurator: No appender named [WebServiceDBAppender] could be found.
+log4net:ERROR XmlHierarchyConfigurator: Appender named [WebServiceDBAppender] not found.
+log4net: XmlHierarchyConfigurator: Retrieving an instance of log4net.Repository.Logger for logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Setting [QueryLog] additivity to [True].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] Level string is [INFO].
+log4net: XmlHierarchyConfigurator: Logger [QueryLog] level set to [name="INFO",value=40000].
+log4net: XmlHierarchyConfigurator: Loading Appender [QueryLogFileAppender] type: [log4net.Appender.RollingFileAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [File] to String value [..\logs\\query-log.txt]
+log4net: XmlHierarchyConfigurator: Setting Property [AppendToFile] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [MaxSizeRollBackups] to Int32 value [-1]
+log4net: XmlHierarchyConfigurator: Setting Property [MaximumFileSize] to String value [5MB]
+log4net: XmlHierarchyConfigurator: Setting Property [RollingStyle] to RollingMode value [Date]
+log4net: XmlHierarchyConfigurator: Setting Property [DatePattern] to String value [yyyyMM]
+log4net: XmlHierarchyConfigurator: Setting Property [StaticLogFileName] to Boolean value [True]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [ConversionPattern] to String value [%date %message%newline]
+log4net: PatternParser: Converter [date] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [literal] Option [ ] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [message] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: PatternParser: Converter [newline] Option [] Format [min=-1,max=2147483647,leftAlign=False]
+log4net: XmlHierarchyConfigurator: Setting Property [Layout] to object [log4net.Layout.PatternLayout]
+log4net: RollingFileAppender: Type = [0], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [1], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [2], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [3], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [4], r0 = [197001], r1 = [197001]
+log4net: RollingFileAppender: Type = [5], r0 = [197001], r1 = [197002]
+log4net: RollingFileAppender: Searched for existing files in [E:\github\GHCN-Transducer\CoCoRaHS\logs]
+log4net: RollingFileAppender: curSizeRollBackups starts at [0]
+log4net: RollingFileAppender: [201708] vs. [201708]
+log4net: FileAppender: Opening file for writing [E:\github\GHCN-Transducer\CoCoRaHS\logs\query-log.txt] append [True]
+log4net: XmlHierarchyConfigurator: Created Appender [QueryLogFileAppender]
+log4net: XmlHierarchyConfigurator: Adding appender named [QueryLogFileAppender] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Loading Appender [SDSCQueryLog] type: [log4net.Appender.RemotingAppender]
+log4net: XmlHierarchyConfigurator: Setting Property [Sink] to String value [tcp://river.sdsc.edu:8085/LoggingSink]
+log4net: XmlHierarchyConfigurator: Setting Property [Lossy] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [BufferSize] to Int32 value [200]
+log4net: XmlHierarchyConfigurator: Setting Property [OnlyFixPartialEventData] to Boolean value [True]
+log4net: XmlHierarchyConfigurator: Setting Property [Threshold] to Level value [INFO]
+log4net: XmlHierarchyConfigurator: Setting Property [Evaluator] to object [log4net.Core.LevelEvaluator]
+log4net: XmlHierarchyConfigurator: Created Appender [SDSCQueryLog]
+log4net: XmlHierarchyConfigurator: Adding appender named [SDSCQueryLog] to logger [QueryLog].
+log4net: XmlHierarchyConfigurator: Hierarchy Threshold []
+log4net: XmlConfigurator: configuring repository [log4net-default-repository] using .config file section
+log4net: XmlConfigurator: Application config file is [E:\github\GHCN-Transducer\CoCoRaHS\CoCoWebService\web.config]
+log4net:ERROR XmlConfigurator: Failed to find configuration section 'log4net' in the application's .config file. Check your .config file for the <log4net> and <configSections> elements. The configuration section should look like: <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net" />
+log4net: AppenderSkeleton: Finalizing appender named [EventLogAppender].
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)
+log4net:ERROR [RemotingAppender] Failed in SendBufferCallback
+System.Net.Sockets.SocketException (0x80004005): Pokus o připojení selhal, protože připojená strana v časovém intervalu řádně neodpověděla, nebo vytvořené připojení selhalo, protože neodpověděl připojený hostitel 132.249.69.104:8085
+
+Server stack trace: 
+   v System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   v System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket(EndPoint ipEndPoint)
+   v System.Runtime.Remoting.Channels.RemoteConnection.CreateNewSocket()
+   v System.Runtime.Remoting.Channels.RemoteConnection.GetSocket()
+   v System.Runtime.Remoting.Channels.SocketCache.GetSocket(String machinePortAndSid, Boolean openNew)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.SendRequestWithRetry(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream)
+   v System.Runtime.Remoting.Channels.Tcp.TcpClientTransportSink.ProcessMessage(IMessage msg, ITransportHeaders requestHeaders, Stream requestStream, ITransportHeaders& responseHeaders, Stream& responseStream)
+   v System.Runtime.Remoting.Channels.BinaryClientFormatterSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   v System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   v System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   v log4net.Appender.RemotingAppender.IRemoteLoggingSink.LogEvents(LoggingEvent[] events)
+   v log4net.Appender.RemotingAppender.SendBufferCallback(Object state)

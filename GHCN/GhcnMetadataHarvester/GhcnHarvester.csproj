@@ -7,8 +7,8 @@
     <ProjectGuid>{BADC8814-6893-4259-9AAD-4D39A56F4B93}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MetadataHarvester</RootNamespace>
-    <AssemblyName>MetadataHarvester</AssemblyName>
+    <RootNamespace>GhcnHarvester</RootNamespace>
+    <AssemblyName>GhcnHarvester</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -62,7 +62,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ConnectionStrings.config" />
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1109,18 +1109,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 mflagCols[i] = 26 + i * 8;
             }
-            int[] qflagCols = new int[31];
-            for (int i = 0; i < 31; i++)
-            {
-                qflagCols[i] = 27 + i * 8;
-            }
-            int[] sflagCols = new int[31];
-            for (int i = 0; i < 31; i++)
-            {
-                sflagCols[i] = 28 + i * 8;
-            }
-            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
             
+            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();           
 
             var client = new WebClient();
             using (var stream = client.OpenRead(dlyFileUrl))
@@ -1173,28 +1163,10 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                                 // qualifiers: each value can have between zero and three qualifiers
                                 var qualifiers = "";
                                 var mFlag = line.Substring(mflagCols[d], 1).Trim();
-                                var qFlag = line.Substring(qflagCols[d], 1).Trim();
-                                var sFlag = line.Substring(sflagCols[d], 1).Trim();
 
                                 mFlag = (mFlag == String.Empty) ? "_" : mFlag;
-                                qFlag = (qFlag == String.Empty) ? "_" : qFlag;
-                                if (sFlag == String.Empty)
-                                {
-                                    sFlag = "__";
-                                }
-                                else
-                                {
-                                    if (Char.IsLower(sFlag.ToCharArray()[0]))
-                                    {
-                                        sFlag = sFlag + "2";
-                                    }
-                                    else
-                                    {
-                                        sFlag = sFlag + "1";
-                                    }
-                                }
 
-                                qualifiers = mFlag + qFlag + sFlag;
+                                qualifiers = "m" + mFlag;
 
                                 if (!usedQualifiers.ContainsKey(qualifiers))
                                 {
@@ -1215,17 +1187,12 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             foreach (var usedQual in usedQualifiers)
             {
                 var usedCode = usedQual.Key;
-                var usedMFlag = "m" + usedCode.Substring(0, 1);
-                var usedQFlag = "q" + usedCode.Substring(1, 1);
-                var usedSFlag = "s" + usedCode.Substring(2, 2);
 
-                var mDesc = allQualifiers.ContainsKey(usedMFlag) ? allQualifiers[usedMFlag].qualifierDescription + ", ": "";
-                var qDesc = allQualifiers.ContainsKey(usedQFlag) ? allQualifiers[usedQFlag].qualifierDescription + ", ": "";
-                var sDesc = allQualifiers.ContainsKey(usedSFlag) ? allQualifiers[usedSFlag].qualifierDescription : "unknown source";
+                var usedDesc = allQualifiers.ContainsKey(usedCode) ? allQualifiers[usedCode].qualifierDescription : "Unknown";
 
                 var newQ = new QualifierType();
                 newQ.qualifierCode = usedCode;
-                newQ.qualifierDescription = mDesc + qDesc + sDesc;
+                newQ.qualifierDescription = usedDesc;
                 qualList.Add(newQ);
             }
             s.qualifier = qualList.ToArray();

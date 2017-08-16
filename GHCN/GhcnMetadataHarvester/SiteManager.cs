@@ -5,12 +5,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MetadataHarvester
+namespace GhcnHarvester
 {
     /// <summary>
     /// responsible for updating the sites in ODM

@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Net;
 
-namespace MetadataHarvester
+namespace GhcnHarvester
 {
     class SeriesCatalogManager
     {

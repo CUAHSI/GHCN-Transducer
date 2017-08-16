@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace MetadataHarvester
+namespace GhcnHarvester
 {
     /// <summary>
     /// Responsible for updating the Sources / ISOMetadata tables in ODM DB

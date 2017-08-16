@@ -18,8 +18,8 @@ namespace CoCoHarvester
             srcM.UpdateSources();
 
             // (3) updating qualifiers
-            //var qualM = new QualifierManager(logger);
-            //qualM.UpdateQualifiers();
+            var qualM = new QualifierManager(logger);
+            qualM.UpdateQualifiers();
 
             // (4) updating sites
             var siteM = new SiteManager(logger);

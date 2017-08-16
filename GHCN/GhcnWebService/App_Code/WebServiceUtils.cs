@@ -145,9 +145,6 @@ namespace WaterOneFlow.odws
                 {
                     string sqlSites = "SELECT * FROM dbo.Sites WHERE Latitude >= @lat1 AND Latitude <= @lat2 AND Longitude >= @lon1 AND Longitude <= @lon2";
                     
-                    //sqlSites = "SELECT plaveninycz.Stations.st_id, st_name, altitude, location_id, lat, lon FROM plaveninycz.Stations INNER JOIN StationsVariables stv ON Stations.st_id = stv.st_id " +                  
-                    //"WHERE var_id in (1, 4, 5, 16) AND lat IS NOT NULL";
-                    
                     cmd.CommandText = sqlSites;
                     cmd.Connection = conn;
 
@@ -1090,7 +1087,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
             var usedQualifiers = new Dictionary<string, QualifierType>();
 
-            //values: get from GHCN .dly file
+            //values: get from.dly files
             string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
 
             //text file column positions
@@ -1178,24 +1175,16 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
                                 mFlag = (mFlag == String.Empty) ? "_" : mFlag;
                                 qFlag = (qFlag == String.Empty) ? "_" : qFlag;
-                                if (sFlag == String.Empty)
+                                sFlag = (sFlag == String.Empty) ? "_" : sFlag;
+
+                                // to better distinguish lowercase and uppercase SFLAG qualifier
+                                if (Char.IsLower(sFlag.ToCharArray()[0]))
                                 {
-                                    sFlag = "__";
-                                }
-                                else
-                                {
-                                    if (Char.IsLower(sFlag.ToCharArray()[0]))
-                                    {
-                                        sFlag = sFlag + "2";
-                                    }
-                                    else
-                                    {
-                                        sFlag = sFlag + "1";
-                                    }
+                                    sFlag = sFlag + "1";
                                 }
 
-                                qualifiers = mFlag + qFlag + sFlag;
-
+                                qualifiers = "m" + mFlag + "q" + qFlag + "s" + sFlag;
+                                
                                 if (!usedQualifiers.ContainsKey(qualifiers))
                                 {
                                     usedQualifiers.Add(qualifiers, new QualifierType());
@@ -1215,17 +1204,12 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             foreach (var usedQual in usedQualifiers)
             {
                 var usedCode = usedQual.Key;
-                var usedMFlag = "m" + usedCode.Substring(0, 1);
-                var usedQFlag = "q" + usedCode.Substring(1, 1);
-                var usedSFlag = "s" + usedCode.Substring(2, 2);
 
-                var mDesc = allQualifiers.ContainsKey(usedMFlag) ? allQualifiers[usedMFlag].qualifierDescription + ", ": "";
-                var qDesc = allQualifiers.ContainsKey(usedQFlag) ? allQualifiers[usedQFlag].qualifierDescription + ", ": "";
-                var sDesc = allQualifiers.ContainsKey(usedSFlag) ? allQualifiers[usedSFlag].qualifierDescription : "unknown source";
+                var usedDesc = allQualifiers.ContainsKey(usedCode) ? allQualifiers[usedCode].qualifierDescription : "Unknown";
 
                 var newQ = new QualifierType();
                 newQ.qualifierCode = usedCode;
-                newQ.qualifierDescription = mDesc + qDesc + sDesc;
+                newQ.qualifierDescription = usedDesc;
                 qualList.Add(newQ);
             }
             s.qualifier = qualList.ToArray();
