@@ -39,7 +39,8 @@ namespace MetadataHarvester
 Menne, Matthew J., Imke Durre, Bryant Korzeniewski, Shelley McNeal, Kristy Thomas, Xungang Yin, Steven Anthony, Ron Ray, Russell S. Vose, Byron E.Gleason, and Tamara G. Houston (2012): 
 Global Historical Climatology Network - Daily (GHCN-Daily), Version 3. [indicate subset used]. 
 NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
-                    MetadataID = metadataID
+                    MetadataID = metadataID,
+                    SourceCode = "NOAH-GHCN"
                 };
 
 
@@ -84,7 +85,8 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
                                 State = @state,
                                 ZipCode = @zipcode,
                                 Citation = @citation,
-                                MetadataID = @metadataid
+                                MetadataID = @metadataid,
+                                SourceCode =@sourcecode
                                WHERE Organization = @org";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -101,6 +103,7 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
                     cmd.Parameters.Add(new SqlParameter("@zipcode", source.ZipCode));
                     cmd.Parameters.Add(new SqlParameter("@citation", source.Citation));
                     cmd.Parameters.Add(new SqlParameter("@metadataid", source.MetadataID));
+                    cmd.Parameters.Add(new SqlParameter("@sourcecode", source.SourceCode));
                     cmd.ExecuteNonQuery();
                     connection.Close();
 
@@ -121,7 +124,8 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
                                 State,
                                 ZipCode,
                                 Citation,
-                                MetadataID)
+                                MetadataID,
+                                SourceCode)
                               VALUES (
                                 @org,
                                 @desc, 
@@ -134,7 +138,8 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
                                 @state,
                                 @zipcode,
                                 @citation,
-                                @metadataid)";
+                                @metadataid,
+                                @sourcecode)";
 
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -151,7 +156,7 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
                     cmd.Parameters.Add(new SqlParameter("@zipcode", source.ZipCode));
                     cmd.Parameters.Add(new SqlParameter("@citation", source.Citation));
                     cmd.Parameters.Add(new SqlParameter("@metadataid", source.MetadataID));
-
+                    cmd.Parameters.Add(new SqlParameter("@sourcecode", source.SourceCode));
                     // to get the inserted variable id
                     SqlParameter param = new SqlParameter("@SourceID", SqlDbType.Int);
                     param.Direction = ParameterDirection.Output;
