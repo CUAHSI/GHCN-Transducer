@@ -1,0 +1,9 @@
+URLs of SCAN AWDB web service
+-----------------------------
+
+Web Service test page:
+----------------------
+https://wcc.sc.egov.usda.gov/awdbWebService/webservice/testwebservice.jsf?webserviceName=/awdbWebService
+
+Web Service root URL:
+https://wcc.sc.egov.usda.gov/awdbWebService/services

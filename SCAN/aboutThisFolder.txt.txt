@@ -1,1 +1,0 @@
-future location of SCAN metadata harvester and web service
