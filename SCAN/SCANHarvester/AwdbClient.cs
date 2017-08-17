@@ -18,6 +18,32 @@ namespace SCANHarvester
             _serviceUrl = "https://wcc.sc.egov.usda.gov/awdbWebService/services";
         }
 
+        public void GetSitesAuto()
+        {
+            // !!! necessary to prevent the "Bad Gateway" error
+            System.Net.ServicePointManager.Expect100Continue = false;
+
+            Awdb.AwdbWebServiceClient wsc = new Awdb.AwdbWebServiceClient();
+            var stationIds = new string[] { };
+            var stateCds = new string[] { };
+            var networkCds = new string[] { "SCAN" };
+            var hucs = new string[] { };
+            var countyNames = new string[] { };
+            var minLatitude = -90;
+            var maxLatitude = 90;
+            var minLongitude = -180;
+            var maxLongitude = 180;
+            var minElevation = -100000;
+            var maxElevation = 100000;
+            var elementCds = new string[] { };
+            var ordinals = new int[] { };
+            var heightDepths = new Awdb.heightDepth[] { };
+            var logicalAnd = true;
+
+            string[] stationTriplets = wsc.getStations(stationIds, stateCds, networkCds, hucs, countyNames, minLatitude, maxLatitude, minLongitude, maxLongitude, minElevation, maxElevation, elementCds, ordinals, heightDepths, logicalAnd);
+            var stationCount = stationTriplets.Length;
+        }
+
         public void GetSites()
         {
             // necessary to prevent the "Bad Gateway" error

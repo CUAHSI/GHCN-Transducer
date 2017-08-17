@@ -334,6 +334,8 @@ namespace SCANHarvester
         {
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
             List<Site> sitesList = ReadSitesFromWebAsync();
+            var client = new AwdbClient();
+            client.GetSitesAuto();
            
 
             Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
