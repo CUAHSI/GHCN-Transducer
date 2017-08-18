@@ -45,12 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GhcnISOMetadata.cs" />
-    <Compile Include="GhcnQualifier.cs" />
-    <Compile Include="GhcnSeries.cs" />
-    <Compile Include="CoCoSite.cs" />
-    <Compile Include="CoCoSource.cs" />
-    <Compile Include="CoCoVariable.cs" />
+    <Compile Include="ISOMetadata.cs" />
+    <Compile Include="Qualifier.cs" />
+    <Compile Include="Series.cs" />
+    <Compile Include="Site.cs" />
+    <Compile Include="Source.cs" />
+    <Compile Include="Variable.cs" />
     <Compile Include="LogWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

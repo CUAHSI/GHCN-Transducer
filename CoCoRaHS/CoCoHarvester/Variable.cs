@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CoCoHarvester
 {
-    class CoCoVariable
+    class Variable
     {
         public int VariableID { get; set; }
         public string VariableCode { get; set; }

@@ -23,7 +23,7 @@ namespace CoCoHarvester
             {
 
                 int metadataID = SaveOrUpdateMetadata();
-                CoCoSource source = new CoCoSource
+                Source source = new Source
                 {
                     Organization = "Community Collaborative Rain, Hail and Snow Network",
                     SourceDescription = "Community Collaborative Rain, Hail and Snow Network",
@@ -56,7 +56,7 @@ namespace CoCoHarvester
         }
 
 
-        private int SaveOrUpdateSource(CoCoSource source, SqlConnection connection)
+        private int SaveOrUpdateSource(Source source, SqlConnection connection)
         {
             object sourceIDResult = null;
             using (SqlCommand cmd = new SqlCommand("SELECT SourceID FROM Sources WHERE Organization = @organization", connection))
@@ -181,7 +181,7 @@ namespace CoCoHarvester
         private int SaveOrUpdateMetadata()
         {
             object metadataIDResult;
-            var metadata = new CoCoISOMetadata
+            var metadata = new ISOMetadata
             {
                 TopicCategory = "climatology/meteorology/atmosphere",
                 Title = "Community Collaborative Rain, Hail and Snow Network",

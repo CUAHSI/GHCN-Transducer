@@ -23,8 +23,8 @@ namespace CoCoHarvester
             try
             {
 
-                List<CoCoVariable> variables = new List<CoCoVariable>();
-                variables.Add(new CoCoVariable
+                List<Variable> variables = new List<Variable>();
+                variables.Add(new Variable
                 {
                     VariableCode = "SNWD",
                     VariableName = "Snow depth",
@@ -33,7 +33,7 @@ namespace CoCoHarvester
                     DataType = "Continuous"
                 });
 
-                variables.Add(new CoCoVariable
+                variables.Add(new Variable
                 {
                     VariableCode = "PRCP",
                     VariableName = "Precipitation",
@@ -42,7 +42,7 @@ namespace CoCoHarvester
                     DataType = "Incremental"
                 });
 
-                variables.Add(new CoCoVariable
+                variables.Add(new Variable
                 {
                     VariableCode = "SNOW",
                     VariableName = "Snow depth",
@@ -51,7 +51,7 @@ namespace CoCoHarvester
                     DataType = "Incremental"
                 });
 
-                variables.Add(new CoCoVariable
+                variables.Add(new Variable
                 {
                     VariableCode = "WESF",
                     VariableName = "Snow water equivalent",
@@ -60,7 +60,7 @@ namespace CoCoHarvester
                     DataType = "Incremental"
                 });
 
-                variables.Add(new CoCoVariable
+                variables.Add(new Variable
                 {
                     VariableCode = "WESD",
                     VariableName = "Snow water equivalent",
@@ -72,7 +72,7 @@ namespace CoCoHarvester
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    foreach (CoCoVariable variable in variables)
+                    foreach (Variable variable in variables)
                     {
                         object variableID = SaveOrUpdateVariable(variable, connection);
                     }
@@ -85,7 +85,7 @@ namespace CoCoHarvester
             }
         }
 
-        private object SaveOrUpdateVariable(CoCoVariable variable, SqlConnection connection)
+        private object SaveOrUpdateVariable(Variable variable, SqlConnection connection)
         {
             object variableIDResult = null;
             using (SqlCommand cmd = new SqlCommand("SELECT VariableID FROM Variables WHERE VariableCode = @code", connection))

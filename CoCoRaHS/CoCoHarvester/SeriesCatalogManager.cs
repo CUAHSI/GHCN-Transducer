@@ -11,7 +11,7 @@ namespace CoCoHarvester
     class SeriesCatalogManager
     {
         private LogWriter _log;
-        private Dictionary<string, CoCoVariable> _variableLookup;
+        private Dictionary<string, Variable> _variableLookup;
         
 
         public SeriesCatalogManager(LogWriter log)
@@ -21,9 +21,71 @@ namespace CoCoHarvester
             _variableLookup = getVariableLookup();
         }
 
-        private Dictionary<string, CoCoSite> GetSiteLookup()
+        /// <summary>
+        /// Get Source details from the ODM
+        /// For CoCoRaHS we have only one source
+        /// </summary>
+        /// <returns>SiteCode - GhcnSite object lookup dictionary</returns>
+        private Source GetSource()
         {
-            var lookup = new Dictionary<string, CoCoSite>();
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            var source = new Source();
+
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                string sql = "SELECT TOP 1 SourceID, SourceCode, Organization, SourceDescription, Citation FROM dbo.Sources";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Connection.Open();
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        string code = reader.GetString(1);
+                        source = new Source
+                        {
+                            SourceID = reader.GetInt32(0),
+                            SourceCode = reader.GetString(1),
+                            Organization = reader.GetString(2),
+                            SourceDescription = reader.GetString(3),
+                            Citation = reader.GetString(4)
+                        };
+                    }
+                    reader.Close();
+                    cmd.Connection.Close();
+                }
+            }
+            return source;
+        }
+
+        /// <summary>
+        /// find the method description from the ODM (for inserting into SeriesCatalog)
+        /// </summary>
+        /// <returns></returns>
+        private string GetMethodDescription()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            string methodDesc = "Unknown";
+
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                string sql = "SELECT TOP 1 MethodDescription FROM dbo.Methods";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Connection.Open();
+
+                    var resultObj = cmd.ExecuteScalar();
+                    methodDesc = Convert.ToString(resultObj);
+
+                    cmd.Connection.Close();
+                }
+            }
+            return methodDesc;
+        }
+
+        private Dictionary<string, Site> GetSiteLookup()
+        {
+            var lookup = new Dictionary<string, Site>();
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
 
@@ -38,7 +100,7 @@ namespace CoCoHarvester
                     while (reader.Read())
                     {
                         string code = reader.GetString(1);
-                        var site = new CoCoSite
+                        var site = new Site
                         {
                             SiteID = reader.GetInt32(0),
                             SiteCode = code,
@@ -54,9 +116,9 @@ namespace CoCoHarvester
         }
 
 
-        private Dictionary<string, CoCoVariable> getVariableLookup()
+        private Dictionary<string, Variable> getVariableLookup()
         {
-            Dictionary<string, CoCoVariable> lookup = new Dictionary<string, CoCoVariable>();
+            Dictionary<string, Variable> lookup = new Dictionary<string, Variable>();
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
 
             try
@@ -73,7 +135,7 @@ namespace CoCoHarvester
                         while (reader.Read())
                         {
                             string code = reader.GetString(1);
-                            var variable = new CoCoVariable
+                            var variable = new Variable
                             {
                                 VariableID = reader.GetInt32(0),
                                 VariableCode = code,
@@ -96,9 +158,9 @@ namespace CoCoHarvester
             return lookup;
         }
 
-        public List<GhcnSeries> ReadSeriesFromInventory(Dictionary<string, CoCoSite> siteLookup)
+        public List<Series> ReadSeriesFromInventory(Dictionary<string, Site> siteLookup)
         {
-            List<GhcnSeries> seriesList = new List<GhcnSeries>();
+            List<Series> seriesList = new List<Series>();
             Dictionary<string, TextFileColumn> colPos = new Dictionary<string,TextFileColumn>();
             colPos.Add("sitecode", new TextFileColumn(1, 11));
             colPos.Add("varcode", new TextFileColumn(32, 35));
@@ -134,7 +196,7 @@ namespace CoCoHarvester
                         // only add series for the CoCoRaHS sites and core variables (SNWD, PRCP, SNOW, WESF, WESD)
                         if (_variableLookup.ContainsKey(varCode) && siteLookup.ContainsKey(siteCode))
                         {
-                            seriesList.Add(new GhcnSeries
+                            seriesList.Add(new Series
                             {
                                 SiteCode = siteCode,
                                 SiteID = siteLookup[siteCode].SiteID,
@@ -158,7 +220,7 @@ namespace CoCoHarvester
             return seriesList;
         }
 
-        private void SaveOrUpdateSeries(GhcnSeries series, Dictionary<Tuple<int, long>, long> lookup, SqlConnection connection)
+        private void SaveOrUpdateSeries(Series series, Dictionary<Tuple<int, long>, long> lookup, SqlConnection connection)
         {
             Tuple<int, long> seriesKey = new Tuple<int, long>(series.VariableID, series.SiteID);
 
@@ -268,8 +330,10 @@ namespace CoCoHarvester
         public void UpdateSeriesCatalog_fast()
         {
             var siteLookup = GetSiteLookup();
+            var source = GetSource();
+            string methodDescription = GetMethodDescription();
 
-            List<GhcnSeries> seriesList = ReadSeriesFromInventory(siteLookup);
+            List<Series> seriesList = ReadSeriesFromInventory(siteLookup);
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -349,7 +413,7 @@ namespace CoCoHarvester
                         {
                             var row = bulkTable.NewRow();
                             seriesID = seriesID + 1;
-                            CoCoVariable v = _variableLookup[seriesList[i].VariableCode];
+                            Variable v = _variableLookup[seriesList[i].VariableCode];
                             row["SeriesID"] = seriesID;
                             row["SiteID"] = seriesList[i].SiteID;
                             row["SiteCode"] = seriesList[i].SiteCode;
@@ -369,11 +433,11 @@ namespace CoCoHarvester
                             row["DataType"] = v.DataType;
                             row["GeneralCategory"] = v.GeneralCategory;
                             row["MethodID"] = 0;
-                            row["MethodDescription"] = "Unknown"; // todo get from DB !!
+                            row["MethodDescription"] = methodDescription;
                             row["SourceID"] = 1;
-                            row["Organization"] = "Unknown"; // toto get from DB
-                            row["SourceDescription"] = "Unknown"; // todo get from DB !!
-                            row["Citation"] = "Unknown"; // todo get from DB 
+                            row["Organization"] = source.Organization;
+                            row["SourceDescription"] = source.SourceDescription;
+                            row["Citation"] = source.Citation;
                             row["QualityControlLevelID"] = 1;
                             row["QualityControlLevelCode"] = "1";
                             row["BeginDateTime"] = seriesList[i].BeginDateTime;
@@ -404,7 +468,7 @@ namespace CoCoHarvester
         public void UpdateSeriesCatalog()
         {
             var siteLookup = GetSiteLookup();
-            List<GhcnSeries> seriesList = ReadSeriesFromInventory(siteLookup);
+            List<Series> seriesList = ReadSeriesFromInventory(siteLookup);
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -417,7 +481,7 @@ namespace CoCoHarvester
                 Dictionary<Tuple<int, long>, long> lookup = GetSeriesLookup(connection);
 
 
-                foreach (GhcnSeries series in seriesList)
+                foreach (Series series in seriesList)
                 {
                     SaveOrUpdateSeries(series, lookup, connection);
                     i++;

@@ -22,22 +22,22 @@ namespace CoCoHarvester
         {
             try
             {
-                var q = new List<GhcnQualifier>();
-                q.Add(new GhcnQualifier("m_", "no measurement information applicable"));
-                q.Add(new GhcnQualifier("mB", "precipitation total formed from two 12 - hour totals"));
-                q.Add(new GhcnQualifier("mD", "precipitation total formed from four six-hour totals"));
-                q.Add(new GhcnQualifier("mH", "represents highest or lowest hourly temperature(TMAX or TMIN) or the average of hourly values (TAVG)"));
-                q.Add(new GhcnQualifier("mK", "converted from knots"));
-                q.Add(new GhcnQualifier("mL", "temperature appears to be lagged with respect to reported hour of observation"));
-                q.Add(new GhcnQualifier("mO", "converted from oktas"));
-                q.Add(new GhcnQualifier("mP", "identified as 'missing presumed zero' in DSI 3200 and 3206"));
-                q.Add(new GhcnQualifier("mT", "trace of precipitation, snowfall, or snow depth"));
-                q.Add(new GhcnQualifier("mW", "converted from 16 - point WBAN code(for wind direction)"));
+                var q = new List<Qualifier>();
+                q.Add(new Qualifier("m_", "no measurement information applicable"));
+                q.Add(new Qualifier("mB", "precipitation total formed from two 12 - hour totals"));
+                q.Add(new Qualifier("mD", "precipitation total formed from four six-hour totals"));
+                q.Add(new Qualifier("mH", "represents highest or lowest hourly temperature(TMAX or TMIN) or the average of hourly values (TAVG)"));
+                q.Add(new Qualifier("mK", "converted from knots"));
+                q.Add(new Qualifier("mL", "temperature appears to be lagged with respect to reported hour of observation"));
+                q.Add(new Qualifier("mO", "converted from oktas"));
+                q.Add(new Qualifier("mP", "identified as 'missing presumed zero' in DSI 3200 and 3206"));
+                q.Add(new Qualifier("mT", "trace of precipitation, snowfall, or snow depth"));
+                q.Add(new Qualifier("mW", "converted from 16 - point WBAN code(for wind direction)"));
 
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    foreach (GhcnQualifier qualifier in q)
+                    foreach (Qualifier qualifier in q)
                     {
                         object qualID = SaveOrUpdateQualifier(qualifier, connection);
                     }
@@ -51,7 +51,7 @@ namespace CoCoHarvester
         }
 
 
-        private object SaveOrUpdateQualifier(GhcnQualifier qualifier, SqlConnection connection)
+        private object SaveOrUpdateQualifier(Qualifier qualifier, SqlConnection connection)
         {
             object qualifierIDResult = null;
             using (SqlCommand cmd = new SqlCommand("SELECT QualifierID FROM dbo.Qualifiers WHERE QualifierCode = @code", connection))

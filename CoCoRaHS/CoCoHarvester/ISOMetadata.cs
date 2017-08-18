@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CoCoHarvester
 {
-    class CoCoISOMetadata
+    class ISOMetadata
     {
         public int MetadataID { get; set; }
         public string TopicCategory { get; set; }

@@ -93,11 +93,11 @@ namespace CoCoHarvester
             return states;
         }
 
-        public List<CoCoSite> ReadSitesFromWeb()
+        public List<Site> ReadSitesFromWeb()
         {
             var countries = ReadCountriesFromWeb();
             var states = ReadStatesFromWeb();
-            var siteList = new List<CoCoSite>();
+            var siteList = new List<Site>();
 
             string sitesUrl = "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?format=csv&state=";
 
@@ -124,7 +124,7 @@ namespace CoCoHarvester
                             // Read current line fields, pointer moves to the next line.
                             string[] fields = csvParser.ReadFields();
 
-                            CoCoSite site = new CoCoSite
+                            Site site = new Site
                             {
                                 SiteCode = fields[0],
                                 SiteName = fields[1],
@@ -153,7 +153,7 @@ namespace CoCoHarvester
         /// Reading additional CoCoRaHS sites from the ghcnd-stations registry
         /// </summary>
         /// <returns></returns>
-        public List<CoCoSite> ReadSitesFromGhcn()
+        public List<Site> ReadSitesFromGhcn()
         {
             var countries = ReadCountriesFromWeb();
             var states = ReadStatesFromWeb();
@@ -179,7 +179,7 @@ namespace CoCoHarvester
             colPos.Add("firstyear", new TextFileColumn(37, 40));
             colPos.Add("lastyear", new TextFileColumn(42, 45));
 
-            List<CoCoSite> siteList = new List<CoCoSite>();
+            List<Site> siteList = new List<Site>();
 
             try
             {
@@ -226,7 +226,7 @@ namespace CoCoHarvester
                         // networkCode == 1 means that it is a CoCoRaHS site
                         if (networkCode == "1")
                         {
-                            CoCoSite site = new CoCoSite
+                            Site site = new Site
                             {
                                 SiteCode = code,
                                 SiteName = name,
@@ -254,7 +254,7 @@ namespace CoCoHarvester
 
 
 
-        public int ReadSeriesFromWeb(CoCoSite site)
+        public int ReadSeriesFromWeb(Site site)
         {
             var seriesUrl = String.Format("http://data.cocorahs.org/cocorahs/export/exportreports.aspx?ReportType=Daily&dtf=1&Format=csv&Station={0}&ReportDateType=timestamp&Date=1/1/2000&TimesInGMT=False", site.SiteCode);
 
@@ -330,7 +330,7 @@ namespace CoCoHarvester
         public void UpdateSites()
         {
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-            List<CoCoSite> sitesList = ReadSitesFromWeb();
+            List<Site> sitesList = ReadSitesFromWeb();
            
 
             Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
@@ -345,7 +345,7 @@ namespace CoCoHarvester
             {
                 Dictionary<string, long> siteLookup = GetSiteLookup(connection);
 
-                foreach (CoCoSite site in sitesList)
+                foreach (Site site in sitesList)
                 {
                     i++;
 
@@ -405,7 +405,7 @@ namespace CoCoHarvester
         /// <param name="lookup">lookup table</param>
         /// <param name="connection">the db connection</param>
         /// <returns>true if site is added, false if site is updated</returns>
-        public bool SaveOrUpdateSite(CoCoSite site, Dictionary<string, long> lookup, SqlConnection connection)
+        public bool SaveOrUpdateSite(Site site, Dictionary<string, long> lookup, SqlConnection connection)
         {
             if (lookup.ContainsKey(site.SiteCode))
             {

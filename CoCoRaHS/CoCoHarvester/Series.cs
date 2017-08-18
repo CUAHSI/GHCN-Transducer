@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CoCoHarvester
 {
-    class GhcnSeries
+    class Series
     {
         // the method is always id=0 ("method not specified")
         public int MethodID { get { return 0; } }

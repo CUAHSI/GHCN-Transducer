@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CoCoHarvester
 {
-    class GhcnQualifier
+    class Qualifier
     {
-        public GhcnQualifier(string code, string description)
+        public Qualifier(string code, string description)
         {
             QualifierCode = code;
             QualifierDescription = description;
