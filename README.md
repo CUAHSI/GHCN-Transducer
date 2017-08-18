@@ -6,6 +6,6 @@ The code is organized as follows:
 - [GHCN](GHCN/README.md): Transducer for GHCN-Daily (Global Historical Climatology Network - Daily) data
 - [SCAN](SCAN/README.md): Transducer for SCAN (Soil Climate Analysis Network) data
 - SNOTEL: Transducer for SNOTEL data
-- odm: contains an empty odm MSSQL database and script to create the DB
+- [odm](odm): contains an empty ODM 1.1.1 MSSQL database and a script to create the DB
 
 For installation and setup please read instructions in each sub-folder.

@@ -17,5 +17,6 @@ namespace GhcnHarvester
         public string ZipCode { get; set; }
         public string Citation { get; set; }
         public int MetadataID { get; set; }
+        public string SourceCode { get; set; }
     }
 }
