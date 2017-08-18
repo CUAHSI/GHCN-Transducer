@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
@@ -16,11 +17,35 @@ namespace GhcnHarvester
     {
         private LogWriter _log;
 
+        // set _use_cocorahs to false if you want to exclude CoCoRaHS sites from the metadata ODM database 
+        private bool _use_cocorahs = true;
+
+        // set _use_snotel to false if you want to exclude SNOTEL sites from the metadata ODM database 
+        private bool _use_snotel = true;
+
         public SiteManager(LogWriter log)
         {
             _log = log;
+
+            // reading specialized configuration settings
+            var settings = ConfigurationManager.GetSection("customAppSettingsGroup/customAppSettings") as NameValueCollection;
+
+            if (settings != null)
+            {
+                foreach (string key in settings.AllKeys)
+                {
+                    if (key.ToLower() == "use_cocorahs")
+                    {
+                        _use_cocorahs = Convert.ToBoolean(settings[key]);
+                    }
+                    if (key.ToLower() == "use_snotel")
+                    {
+                        _use_snotel = Convert.ToBoolean(settings[key]);
+                    }
+                }
+            }
         }
-        
+
         /// <summary>
         /// Read the lookup of countries (country code -- country name)
         /// </summary>
@@ -208,29 +233,40 @@ namespace GhcnHarvester
                 int i = 0;
                 int added = 0;
                 int updated = 0;
+                int skipped = 0;
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
                     Dictionary<string, long> siteLookup = GetSiteLookup(connection);
 
                     foreach (GhcnSite site in sitesList)
                     {
-                        if (!site.CoCoRaHS && !site.Snotel)
+                        // check setting for CoCoRaHS and SNOTEL sites
+                        if (site.CoCoRaHS && !_use_cocorahs)
                         {
-                            bool insertUpdateResult = SaveOrUpdateSite(site, siteLookup, connection);
-                            if (insertUpdateResult)
-                            {
-                                added++;
-                            }
-                            else
-                            {
-                                updated++;
-                            }
-                            i++;
-                            if (i % 1000 == 0)
-                            {
-                                Console.WriteLine("SaveOrUpdateSite " + Convert.ToString(i));
-                            }
+                            skipped++;
+                            continue;
                         }
+                        if (site.Snotel && !_use_snotel)
+                        {
+                            skipped++;
+                            continue;
+                        }
+                        
+                        bool insertUpdateResult = SaveOrUpdateSite(site, siteLookup, connection);
+                        if (insertUpdateResult)
+                        {
+                            added++;
+                        }
+                        else
+                        {
+                            updated++;
+                        }
+                        i++;
+                        if (i % 1000 == 0)
+                        {
+                            Console.WriteLine("SaveOrUpdateSite " + Convert.ToString(i));
+                        }
+                        
                     }
                 }
             }
@@ -309,11 +345,11 @@ namespace GhcnHarvester
             }
         }
 
-        public void DeleteOldSites(int siteCount, SqlConnection connection)
+        public void DeleteOldSites(SqlConnection connection)
         {
             // find the actual site count from database table
             string sqlCount = "SELECT COUNT(*) FROM dbo.Sites";
-            int actualSiteCount = siteCount;
+            int actualSiteCount = 1000000;
             using (var cmd = new SqlCommand(sqlCount, connection))
             {
                 try
@@ -393,8 +429,29 @@ namespace GhcnHarvester
         {
             List<GhcnSite> sitesList = ReadSitesFromWeb();
 
-            Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
-            _log.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
+            List<GhcnSite> filteredSites = new List<GhcnSite>();
+
+            // filtering out CoCoRaHS and SNOTEL sites if specified in the settings
+            Console.WriteLine("use_cocorahs setting = " + _use_cocorahs.ToString());
+            Console.WriteLine("use_snotel setting = " + _use_snotel.ToString());
+            _log.LogWrite("use_cocorahs setting = " + _use_cocorahs.ToString());
+            _log.LogWrite("use_snotel setting = " + _use_snotel.ToString());
+
+            foreach (GhcnSite site in sitesList)
+            {
+                if (site.CoCoRaHS && !_use_cocorahs)
+                {
+                    continue;
+                }
+                if (site.Snotel && !_use_snotel)
+                {
+                    continue;
+                }
+                filteredSites.Add(site);
+            }
+
+            Console.WriteLine("Using " + filteredSites.Count.ToString() + " out of " + sitesList.Count.ToString() + " sites ...");
+            _log.LogWrite("Using " + filteredSites.Count.ToString() + " out of " + sitesList.Count.ToString() + " sites ...");
 
             try
             {
@@ -426,16 +483,15 @@ namespace GhcnHarvester
                         }
                     }
 
-                    // delete old entries from "sites" table
-                    // using batch delete 
-                    DeleteOldSites(sitesList.Count, connection);
+                    // delete old entries from "sites" table using batch delete 
+                    DeleteOldSites(connection);
                     
 
                     // to be adjusted
                     int batchSize = 500;
                     long siteID = 0L;
 
-                    int numBatches = (sitesList.Count / batchSize) + 1;
+                    int numBatches = (filteredSites.Count / batchSize) + 1;
                     for (int b = 0; b < numBatches; b++)
                     {
                         // prepare for bulk insert
@@ -460,28 +516,28 @@ namespace GhcnHarvester
 
                         int batchStart = b * batchSize;
                         int batchEnd = batchStart + batchSize;
-                        if (batchEnd >= sitesList.Count)
+                        if (batchEnd >= filteredSites.Count)
                         {
-                            batchEnd = sitesList.Count;
+                            batchEnd = filteredSites.Count;
                         }
                         for (int i = batchStart; i < batchEnd; i++)
                         {
                             siteID = siteID + 1;
                             var row = bulkTable.NewRow();
                             row["SiteID"] = siteID;
-                            row["SiteCode"] = sitesList[i].SiteCode;
-                            row["SiteName"] = sitesList[i].SiteName;
-                            row["Latitude"] = sitesList[i].Latitude;
-                            row["Longitude"] = sitesList[i].Longitude;
+                            row["SiteCode"] = filteredSites[i].SiteCode;
+                            row["SiteName"] = filteredSites[i].SiteName;
+                            row["Latitude"] = filteredSites[i].Latitude;
+                            row["Longitude"] = filteredSites[i].Longitude;
                             row["LatLongDatumID"] = 3; // WGS1984
-                            row["Elevation_m"] = sitesList[i].Elevation;
+                            row["Elevation_m"] = filteredSites[i].Elevation;
                             row["VerticalDatum"] = "Unknown";
                             row["LocalX"] = 0.0f;
                             row["LocalY"] = 0.0f;
                             row["LocalProjectionID"] = DBNull.Value;
                             row["PosAccuracy_m"] = 0.0f;
-                            row["State"] = sitesList[i].State;
-                            row["County"] = sitesList[i].Country;
+                            row["State"] = filteredSites[i].State;
+                            row["County"] = filteredSites[i].Country;
                             row["Comments"] = "no comment";
                             row["SiteType"] = "Atmosphere";
                             bulkTable.Rows.Add(row);
@@ -494,7 +550,7 @@ namespace GhcnHarvester
                         Console.WriteLine("Sites inserted row " + batchEnd.ToString());
                     }
                 }
-                _log.LogWrite("UpdateSites: " + sitesList.Count.ToString() + " sites updated.");
+                _log.LogWrite("UpdateSites: " + filteredSites.Count.ToString() + " sites updated.");
             }
             catch(Exception ex)
             {
