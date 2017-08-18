@@ -36,7 +36,8 @@ namespace CoCoHarvester
                     State = "",
                     ZipCode = "",
                     Citation = @"Community Collaborative Rain, Hail and Snow Network (www.cocorahs.org)",
-                    MetadataID = metadataID
+                    MetadataID = metadataID,
+                    SourceCode = "CoCoRaHS"
                 };
 
 
@@ -81,7 +82,8 @@ namespace CoCoHarvester
                                 State = @state,
                                 ZipCode = @zipcode,
                                 Citation = @citation,
-                                MetadataID = @metadataid
+                                MetadataID = @metadataid,
+                                SourceCode = @sourcecode
                                WHERE Organization = @org";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -98,6 +100,7 @@ namespace CoCoHarvester
                     cmd.Parameters.Add(new SqlParameter("@zipcode", source.ZipCode));
                     cmd.Parameters.Add(new SqlParameter("@citation", source.Citation));
                     cmd.Parameters.Add(new SqlParameter("@metadataid", source.MetadataID));
+                    cmd.Parameters.Add(new SqlParameter("@sourcecode", source.SourceCode));
                     cmd.ExecuteNonQuery();
                     connection.Close();
 
@@ -118,7 +121,8 @@ namespace CoCoHarvester
                                 State,
                                 ZipCode,
                                 Citation,
-                                MetadataID)
+                                MetadataID,
+                                SourceCode)
                               VALUES (
                                 @org,
                                 @desc, 
@@ -131,7 +135,8 @@ namespace CoCoHarvester
                                 @state,
                                 @zipcode,
                                 @citation,
-                                @metadataid)";
+                                @metadataid,
+                                @sourcecode)";
 
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -148,6 +153,7 @@ namespace CoCoHarvester
                     cmd.Parameters.Add(new SqlParameter("@zipcode", source.ZipCode));
                     cmd.Parameters.Add(new SqlParameter("@citation", source.Citation));
                     cmd.Parameters.Add(new SqlParameter("@metadataid", source.MetadataID));
+                    cmd.Parameters.Add(new SqlParameter("@sourcecode", source.SourceCode));
 
                     // to get the inserted variable id
                     SqlParameter param = new SqlParameter("@SourceID", SqlDbType.Int);

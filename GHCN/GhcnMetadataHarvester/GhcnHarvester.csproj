@@ -95,7 +95,6 @@
     <Compile Include="TextFileColumn.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ConnectionStrings.config" />
     <None Include="App.config" />
     <None Include="Properties\app.manifest" />
   </ItemGroup>

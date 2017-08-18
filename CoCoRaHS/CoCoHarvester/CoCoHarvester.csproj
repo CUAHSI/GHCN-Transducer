@@ -62,7 +62,6 @@
     <Compile Include="TextFileColumn.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ConnectionStrings.config" />
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

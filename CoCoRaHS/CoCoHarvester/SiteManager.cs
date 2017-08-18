@@ -451,10 +451,10 @@ namespace CoCoHarvester
             }
         }
 
-        public void DeleteOldSites(int siteCount, SqlConnection connection)
+        public void DeleteOldSites(SqlConnection connection)
         {
             string sqlCount = "SELECT COUNT(*) FROM dbo.Sites";
-            int actualSiteCount = siteCount;
+            int actualSiteCount = 1000000;
             using (var cmd = new SqlCommand(sqlCount, connection))
             {
                 try
@@ -569,12 +569,10 @@ namespace CoCoHarvester
                         }
                     }
 
-                    // delete old entries from "sites" table
-                    // using batch delete 
-                    DeleteOldSites(sitesList.Count, connection);
-                    
+                    // delete old entries from "sites" table using batch delete 
+                    DeleteOldSites(connection);
 
-                    // to be adjusted
+                    // this parameter can be adjusted in case of server timeout
                     int batchSize = 500;
                     long siteID = 0L;
 

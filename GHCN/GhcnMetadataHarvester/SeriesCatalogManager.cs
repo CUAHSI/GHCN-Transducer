@@ -21,6 +21,10 @@ namespace GhcnHarvester
             _variableLookup = getVariableLookup();
         }
 
+        /// <summary>
+        /// Create a dictionary for looking up a GhcnSite object based on its site code
+        /// </summary>
+        /// <returns>SiteCode - GhcnSite object lookup dictionary</returns>
         private Dictionary<string, GhcnSite> GetSiteLookup()
         {
             Dictionary<string, GhcnSite> lookup = new Dictionary<string, GhcnSite>();
@@ -54,6 +58,73 @@ namespace GhcnHarvester
         }
 
 
+        /// <summary>
+        /// Get Source details from the ODM
+        /// For GHCN we have only one source
+        /// </summary>
+        /// <returns>SiteCode - GhcnSite object lookup dictionary</returns>
+        private GhcnSource GetSource()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            GhcnSource source = new GhcnSource();
+
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                string sql = "SELECT TOP 1 SourceID, SourceCode, Organization, SourceDescription, Citation FROM dbo.Sources";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Connection.Open();
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        string code = reader.GetString(1);
+                        source = new GhcnSource
+                        {
+                            SourceID = reader.GetInt32(0),
+                            SourceCode = reader.GetString(1),
+                            Organization = reader.GetString(2),
+                            SourceDescription = reader.GetString(3),
+                            Citation = reader.GetString(4)
+                        };
+                    }
+                    reader.Close();
+                    cmd.Connection.Close();
+                }
+            }
+            return source;
+        }
+
+        /// <summary>
+        /// find the method description from the ODM (for inserting into SeriesCatalog)
+        /// </summary>
+        /// <returns></returns>
+        private string GetMethodDescription()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            string methodDesc = "Unknown";
+
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                string sql = "SELECT TOP 1 MethodDescription FROM dbo.Methods";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Connection.Open();
+
+                    var resultObj = cmd.ExecuteScalar();
+                    methodDesc = Convert.ToString(resultObj);
+
+                    cmd.Connection.Close();
+                }
+            }
+            return methodDesc;
+        }
+
+
+        /// <summary>
+        /// Create a dictionary for looking up a GhcnVariable object based on its variable code
+        /// </summary>
+        /// <returns>Variable code - GhcnVariable object lookup dictionary</returns>
         private Dictionary<string, GhcnVariable> getVariableLookup()
         {
             Dictionary<string, GhcnVariable> lookup = new Dictionary<string, GhcnVariable>();
@@ -96,6 +167,11 @@ namespace GhcnHarvester
             return lookup;
         }
 
+        /// <summary>
+        /// Reads a list of time series (observed variable and period of record) from the online GHCND inventory
+        /// </summary>
+        /// <param name="siteLookup">Lookup dictionary to find site object by site code</param>
+        /// <returns>List of Series objects with info on Site, Variable, Start date and End date</returns>
         public List<GhcnSeries> ReadSeriesFromInventory(Dictionary<string, GhcnSite> siteLookup)
         {
             Console.WriteLine("Reading Series from GHCN file ghcnd-inventory.txt ...");
@@ -160,116 +236,15 @@ namespace GhcnHarvester
             return seriesList;
         }
 
-        private void SaveOrUpdateSeries(GhcnSeries series, Dictionary<Tuple<int, long>, long> lookup, SqlConnection connection)
-        {
-            Tuple<int, long> seriesKey = new Tuple<int, long>(series.VariableID, series.SiteID);
-
-            if (!lookup.ContainsKey(seriesKey))
-            {
-
-                string sql = @"INSERT INTO dbo.SeriesCatalog(
-                                SiteID, 
-                                SiteCode, 
-                                SiteName,
-                                VariableID, 
-                                VariableCode, 
-                                BeginDateTime, 
-                                EndDateTime,
-                                ValueCount)
-                            VALUES(
-                                @SiteID, 
-                                @SiteCode,
-                                @SiteName, 
-                                @VariableID, 
-                                @VariableCode, 
-                                @BeginDateTime, 
-                                @EndDateTime, 
-                                @ValueCount)";
-                using (SqlCommand cmd = new SqlCommand(sql, connection))
-                {
-                    try
-                    {
-                        connection.Open();
-                        cmd.Parameters.Add(new SqlParameter("@SiteID", series.SiteID));
-                        cmd.Parameters.Add(new SqlParameter("@SiteCode", series.SiteCode));
-                        cmd.Parameters.Add(new SqlParameter("@SiteName", series.SiteName));
-                        cmd.Parameters.Add(new SqlParameter("@VariableID", series.VariableID));
-                        cmd.Parameters.Add(new SqlParameter("@VariableCode", series.VariableCode));
-                        cmd.Parameters.Add(new SqlParameter("@BeginDateTime", series.BeginDateTime));
-                        cmd.Parameters.Add(new SqlParameter("@EndDateTime", series.EndDateTime));
-                        cmd.Parameters.Add(new SqlParameter("@ValueCount", series.ValueCount));
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
-                    }
-                    catch(Exception ex)
-                    {
-                        Console.WriteLine("Error inserting series SiteID=" + series.SiteID.ToString() + "VariableID=" + series.VariableID.ToString() +  " " + ex.Message);
-                    }
-                    finally
-                    {
-                        connection.Close();
-                    }
-                }
-            }
-            else
-            {
-                long seriesID = lookup[seriesKey];
-
-                string sql = @"UPDATE dbo.SeriesCatalog SET
-                                BeginDateTime = @BeginDateTime, 
-                                EndDateTime = @EndDateTime,
-                                ValueCount = @ValueCount
-                            WHERE
-                                SeriesID = @SeriesID";
-                using (SqlCommand cmd = new SqlCommand(sql, connection))
-                {
-                    try
-                    {
-                        connection.Open();
-                        cmd.Parameters.Add(new SqlParameter("@BeginDateTime", series.BeginDateTime));
-                        cmd.Parameters.Add(new SqlParameter("@EndDateTime", series.EndDateTime));
-                        cmd.Parameters.Add(new SqlParameter("@ValueCount", series.ValueCount));
-                        cmd.Parameters.Add(new SqlParameter("@SeriesID", seriesID));
-                        cmd.ExecuteNonQuery();
-                    }
-                    catch(Exception ex)
-                    {
-                        Console.WriteLine("Error updating series ID=" + seriesID.ToString() + " " + ex.Message);
-                    }
-                    finally
-                    {
-                        connection.Close();
-                    }
-                }
-            }
-        }
-
-
-        private Dictionary<Tuple<int, long>, long> GetSeriesLookup(SqlConnection connection)
-        {
-            // lookup (VariableID, SiteID => SeriesID)
-            Dictionary<Tuple<int, long>, long> lookup = new Dictionary<Tuple<int, long>, long>();
-
-            using (SqlCommand cmd = new SqlCommand("SELECT VariableID, SiteID, SeriesID FROM dbo.SeriesCatalog", connection))
-            {
-                connection.Open();
-                using (SqlDataReader r = cmd.ExecuteReader())
-                {
-                    while (r.Read())
-                    {
-                        var item = new Tuple<int, long>(Convert.ToInt32(r["VariableID"]), Convert.ToInt64(r["SiteID"]));
-                        lookup.Add(item, Convert.ToInt64(r["SeriesID"]));
-                    }
-                }
-                connection.Close();
-            }
-            return lookup;
-        }
-
-
+        /// <summary>
+        /// Update ODM SeriesCatalog using SQL bulk insert method
+        /// </summary>
         public void UpdateSeriesCatalog_fast()
         {
             var siteLookup = GetSiteLookup();
+
+            var source = GetSource();
+            string methodDescription = GetMethodDescription();
 
             List<GhcnSeries> seriesList = ReadSeriesFromInventory(siteLookup);
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
@@ -371,11 +346,11 @@ namespace GhcnHarvester
                             row["DataType"] = v.DataType;
                             row["GeneralCategory"] = v.GeneralCategory;
                             row["MethodID"] = 0;
-                            row["MethodDescription"] = "Unknown"; // todo get from DB !!
+                            row["MethodDescription"] = methodDescription;
                             row["SourceID"] = 1;
-                            row["Organization"] = "Unknown"; // toto get from DB
-                            row["SourceDescription"] = "Unknown"; // todo get from DB !!
-                            row["Citation"] = "Unknown"; // todo get from DB 
+                            row["Organization"] = source.Organization;
+                            row["SourceDescription"] = source.SourceDescription;
+                            row["Citation"] = source.Citation;
                             row["QualityControlLevelID"] = 1;
                             row["QualityControlLevelCode"] = "1";
                             row["BeginDateTime"] = seriesList[i].BeginDateTime;
@@ -401,35 +376,5 @@ namespace GhcnHarvester
                 }
             }
         }
-
-
-        public void UpdateSeriesCatalog()
-        {
-            var siteLookup = GetSiteLookup();
-            List<GhcnSeries> seriesList = ReadSeriesFromInventory(siteLookup);
-            Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
-
-            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-            int n = seriesList.Count;
-            int i = 0;
-
-            using (SqlConnection connection = new SqlConnection(connString))
-            {
-                // series catalog lookup for better speed..
-                Dictionary<Tuple<int, long>, long> lookup = GetSeriesLookup(connection);
-
-
-                foreach (GhcnSeries series in seriesList)
-                {
-                    SaveOrUpdateSeries(series, lookup, connection);
-                    i++;
-                    if (i % 1000 == 0)
-                    {
-                        Console.WriteLine("SaveOrUpdateSeries " + Convert.ToString(i));
-                    }
-                }
-            }
-        }
-
     }
 }
