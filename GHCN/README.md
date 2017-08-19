@@ -15,6 +15,7 @@ The transducer contains two parts:
 - the GHCN-Daily dataset includes selected sites from the CoCoRaHS and SNOTEL observation networks. By default the transducer is configured to show all GHCN-Daily sites including
 CoCoRaHS and SNOTEL. CUAHSI provides complete data from these networks using dedicated CoCoRaHS and SNOTEL web service transducers. To exclude CoCoRaHS and SNOTEL sites from
 the GHCN transducer, set the **use_cocorahs** and **use_snotel** to **false** in the *app.config* configuration file of GhcnHarvester.
+- **db_batch_size** This setting can be used to adjust the number of records sent to the ODM database server in one request by the GhcnHarvester when updating the *Sites* and *SeriesCatalog* table. The default value is 500 records.
 
 ## Setup Instructions for GHCN-Harvester
 1. Install an empty ODM 1.1.1 database on your Microsoft SQL Server. 
@@ -27,8 +28,9 @@ the GHCN transducer, set the **use_cocorahs** and **use_snotel** to **false** in
 6. While executing the GhcnHarvester.EXE connects to the GHCN website and populates the Variables, Sources, Qualifiers, Sites and SeriesCatalog tables in the ODM database. Progress report of the update including errors and exceptions is saved in a log file in the same directory as the EXE.
 
 ## Setup Instructions for GHCN-Service
-1. Setup and run GHCN-Harvester as described above
+1. Setup and run ChcnHarvester.EXE as described above
 2. Open the solution GhcnWebService.sln in Visual Studio
 3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
+- NOTE: For improved security we recommend setting up a separate MSSQL database user account with read-only data access permission to be used by GhcnWebService
 4. Build the solution
 5. Copy the whole content of the "GhcnWebService" folder to your a folder on IIS Web server where you want to publish the web service
