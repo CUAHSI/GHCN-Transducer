@@ -92,257 +92,19 @@ namespace SCANHarvester
             }
             return states;
         }
-
-        public List<Site> ReadSitesFromWebAsync()
-        {
-            //var countries = ReadCountriesFromWeb();
-            //var states = ReadStatesFromWeb();
-            var siteList = new List<Site>();
-
-            var ws = new AwdbClient();
-            ws.GetSites();
-
-            string sitesUrl = "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?format=csv&state=";
-
-            Console.WriteLine("Reading Sites from URL: " + sitesUrl);
-            _log.LogWrite("Reading sites from URL: " + sitesUrl);
-
-
-            try
-            {
-                var client = new WebClient();
-                using (var stream = client.OpenRead(sitesUrl))
-                {
-                    using (TextFieldParser csvParser = new TextFieldParser(stream))
-                    {
-                        csvParser.CommentTokens = new string[] { "#" };
-                        csvParser.SetDelimiters(new string[] { "," });
-                        csvParser.HasFieldsEnclosedInQuotes = true;
-
-                        // Skip the row with the column names
-                        csvParser.ReadLine();
-
-                        while (!csvParser.EndOfData)
-                        {
-                            // Read current line fields, pointer moves to the next line.
-                            string[] fields = csvParser.ReadFields();
-
-                            Site site = new Site
-                            {
-                                SiteCode = fields[0],
-                                SiteName = fields[1],
-                                StationType = fields[2],
-                                State = fields[3],
-                                County = fields[4],
-                                Latitude = Convert.ToSingle(fields[6]),
-                                Longitude = Convert.ToSingle(fields[7]),
-                                Elevation = Convert.ToSingle(fields[8]),
-                                IsActive = (fields[9] == "Reporting")
-                            };
-                            siteList.Add(site);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadSites ERROR: " + ex.Message);
-            }
-            return siteList;
-        }
-
-
-        /// <summary>
-        /// Reading additional CoCoRaHS sites from the ghcnd-stations registry
-        /// </summary>
-        /// <returns></returns>
-        public List<Site> ReadSitesFromGhcn()
-        {
-            var countries = ReadCountriesFromWeb();
-            var states = ReadStatesFromWeb();
-
-            string sitesUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt";
-
-            Console.WriteLine("Reading CoCoRaHS Sites from URL: " + sitesUrl);
-            //_log.LogWrite("Reading sites CoCoRaHS Sites from URL: " + sitesUrl);
-
-            // positions of columns in the ghcnd-stations file
-            Dictionary<string, TextFileColumn> colPos = new Dictionary<string, TextFileColumn>();
-            colPos.Add("code", new TextFileColumn(1, 11));
-            colPos.Add("lat", new TextFileColumn(13, 20));
-            colPos.Add("lon", new TextFileColumn(22, 30));
-            colPos.Add("elevation", new TextFileColumn(32, 37));
-            colPos.Add("state", new TextFileColumn(39, 40));
-            colPos.Add("name", new TextFileColumn(42, 71));
-            colPos.Add("gsnflag", new TextFileColumn(73, 75));
-            colPos.Add("hcnflag", new TextFileColumn(77, 79));
-            colPos.Add("wmo", new TextFileColumn(81, 85));
-            colPos.Add("sitecode", new TextFileColumn(1, 11));
-            colPos.Add("varcode", new TextFileColumn(32, 35));
-            colPos.Add("firstyear", new TextFileColumn(37, 40));
-            colPos.Add("lastyear", new TextFileColumn(42, 45));
-
-            List<Site> siteList = new List<Site>();
-
-            try
-            {
-                var client = new WebClient();
-                using (var stream = client.OpenRead(sitesUrl))
-                using (var reader = new StreamReader(stream))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        string code = line.Substring(colPos["code"].Start, colPos["code"].Length);
-                        string countryCode = code.Substring(0, 2);
-                        string countryName = countries[countryCode];
-                        string networkCode = code.Substring(2, 1);
-
-                        float lat = Convert.ToSingle(line.Substring(colPos["lat"].Start, colPos["lat"].Length), CultureInfo.InvariantCulture);
-                        float lon = Convert.ToSingle(line.Substring(colPos["lon"].Start, colPos["lon"].Length), CultureInfo.InvariantCulture);
-                        float elev = Convert.ToSingle(line.Substring(colPos["elevation"].Start, colPos["elevation"].Length), CultureInfo.InvariantCulture);
-                        string stateCode = (line.Substring(colPos["state"].Start, colPos["state"].Length)).Trim();
-
-                        string stateName = String.Empty;
-                        if (!string.IsNullOrEmpty(stateCode))
-                        {
-                            if (states.ContainsKey(stateCode))
-                            {
-                                stateName = states[stateCode];
-                            }
-                        }
-
-                        string name = line.Substring(colPos["name"].Start, colPos["name"].Length);
-                        string gsnflag = (line.Substring(colPos["gsnflag"].Start, colPos["gsnflag"].Length)).Trim();
-                        string hcnflag = (line.Substring(colPos["hcnflag"].Start, colPos["hcnflag"].Length)).Trim();
-                        string wmo = String.Empty;
-                        if (line.Length > colPos["wmo"].Start + colPos["wmo"].Length)
-                        {
-                            wmo = (line.Substring(colPos["wmo"].Start, colPos["wmo"].Length)).Trim();
-                        }
-                        int? wmoID = null;
-                        if (!string.IsNullOrEmpty(wmo))
-                        {
-                            wmoID = Convert.ToInt32(wmo);
-                        }
-
-                        // networkCode == 1 means that it is a CoCoRaHS site
-                        if (networkCode == "1")
-                        {
-                            Site site = new Site
-                            {
-                                SiteCode = code,
-                                SiteName = name,
-                                Latitude = lat,
-                                Longitude = lon,
-                                Elevation = elev,
-                                State = stateName
-                            };
-                            siteList.Add(site);
-                        }
-                    }
-                }
-                Console.WriteLine(String.Format("found {0} sites", siteList.Count));
-                _log.LogWrite(String.Format("found {0} sites", siteList.Count));
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadSites ERROR: " + ex.Message);
-            }
-            return siteList;
-        }
-
-
-
-
-
-
-        public int ReadSeriesFromWeb(Site site)
-        {
-            var seriesUrl = String.Format("http://data.cocorahs.org/cocorahs/export/exportreports.aspx?ReportType=Daily&dtf=1&Format=csv&Station={0}&ReportDateType=timestamp&Date=1/1/2000&TimesInGMT=False", site.SiteCode);
-
-            try
-            {
-                var client = new WebClient();
-
-                
-                using (var stream = client.OpenRead(seriesUrl))
-                {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        int n = 0;
-                        string secondLine = null;
-                        string lastLine = null;
-
-                        while (!reader.EndOfStream)
-                        {
-                            lastLine = reader.ReadLine();
-                            if (n == 1)
-                            {
-                                secondLine = lastLine;
-                            }
-                            n++;
-                        }
-
-
-                        // lastLine now contains the very last line from reader
-                        if (secondLine == null || lastLine == null || secondLine == lastLine)
-                        {
-                            return 0;
-                        }
-                        else
-                        {
-                            string[] secondLineFields = secondLine.Split(',');
-                            string[] lastLineFields = lastLine.Split(',');
-                            site.PrecipStart = Convert.ToDateTime(secondLineFields[0]);
-                            site.PrecipEnd = Convert.ToDateTime(lastLineFields[0]).AddDays(1);
-                            site.Comments = site.PrecipStart.ToString("yyyy-MM-dd") + ":" + site.PrecipEnd.ToString("yyyy-MM-dd");
-                            return 1;
-                        }
-                    }
-                }
-                
-                /*
-                var tempFile = System.IO.Path.GetTempFileName();
-                client.DownloadFile(seriesUrl, tempFile);
-                var firstLine = File.ReadLines(tempFile).First();
-                string secondLine = File.ReadLines(tempFile).ElementAtOrDefault(1);
-                var lastLine2 = File.ReadLines(tempFile).Last();
-                if (secondLine == null || secondLine == lastLine2)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return 1;
-                }
-                */
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadSites ERROR: " + ex.Message);
-                return 0;
-            }
-        }
-
-
-
+        
         /// <summary>
         /// Updates the sites in the ODM database
         /// </summary>
-        public void UpdateSites()
+        public void UpdateSites_old()
         {
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-            List<Site> sitesList = ReadSitesFromWebAsync();
-            var client = new AwdbClient();
-            client.GetSitesAuto();
+            
+            var client = new AwdbClient(_log);
+            List<Site> sitesList = client.GetStations();
            
-
-            Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
             _log.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
 
-            //try
-            //{
             int i = 0;
             int numActiveSites = 0;
 
@@ -354,19 +116,9 @@ namespace SCANHarvester
                 {
                     i++;
 
-                    if (i < 10000)
-                    {
-                        continue;
-                    }
-
                     try
                     {
-                        int siteIsActive = ReadSeriesFromWeb(site);
-                        if (siteIsActive > 0)
-                        {
-                            bool saveResult = SaveOrUpdateSite(site, siteLookup, connection);
-                            numActiveSites++;
-                        }
+                        bool saveResult = SaveOrUpdateSite(site, siteLookup, connection);
                     }
                     catch(Exception ex)
                     {
@@ -374,15 +126,10 @@ namespace SCANHarvester
                     }
                     if (i % 1000 == 0)
                     {
-                        Console.WriteLine("SaveOrUpdateSite " + Convert.ToString(numActiveSites) + " / " + Convert.ToString(i));
+                        _log.LogWrite("SaveOrUpdateSite " + Convert.ToString(numActiveSites) + " / " + Convert.ToString(i));
                     }
                 }
             }
-            //}
-            //catch(Exception ex)
-            //{
-            //    _log.LogWrite("UpdateSites ERROR: " + ex.Message);
-            //}
         }
 
         private Dictionary<string, long> GetSiteLookup(SqlConnection connection)
@@ -539,10 +286,13 @@ namespace SCANHarvester
 
         public void UpdateSites_fast()
         {
-            var sitesList = ReadSitesFromGhcn();
+            var client = new AwdbClient(_log);
+            List<Site> siteList = client.GetStations();
 
-            Console.WriteLine("updating sites for " + sitesList.Count.ToString() + " sites ...");
-            _log.LogWrite("UpdateSites for " + sitesList.Count.ToString() + " sites ...");
+            string[] uniqueElements = client.ListUniqueElements();
+            Array.Sort(uniqueElements);
+
+            _log.LogWrite("UpdateSites for " + siteList.Count.ToString() + " sites ...");
 
             try
             {
@@ -558,14 +308,11 @@ namespace SCANHarvester
                         {
                             connection.Open();
                             cmd.ExecuteNonQuery();
-                            Console.WriteLine("deleted old series from SeriesCatalog");
                             _log.LogWrite("deleted old series from SeriesCatalog");
                         }
                         catch (Exception ex)
                         {
-                            var msg = "error deleting old SeriesCatalog table: " + ex.Message;
-                            Console.WriteLine(msg);
-                            _log.LogWrite(msg);
+                            _log.LogWrite("error deleting old SeriesCatalog table: " + ex.Message);
                             return;
                         }
                         finally
@@ -576,14 +323,14 @@ namespace SCANHarvester
 
                     // delete old entries from "sites" table
                     // using batch delete 
-                    DeleteOldSites(sitesList.Count, connection);
+                    DeleteOldSites(siteList.Count, connection);
                     
 
                     // to be adjusted
                     int batchSize = 500;
                     long siteID = 0L;
 
-                    int numBatches = (sitesList.Count / batchSize) + 1;
+                    int numBatches = (siteList.Count / batchSize) + 1;
                     for (int b = 0; b < numBatches; b++)
                     {
                         // prepare for bulk insert
@@ -608,30 +355,30 @@ namespace SCANHarvester
 
                         int batchStart = b * batchSize;
                         int batchEnd = batchStart + batchSize;
-                        if (batchEnd >= sitesList.Count)
+                        if (batchEnd >= siteList.Count)
                         {
-                            batchEnd = sitesList.Count;
+                            batchEnd = siteList.Count;
                         }
                         for (int i = batchStart; i < batchEnd; i++)
                         {
                             siteID = siteID + 1;
                             var row = bulkTable.NewRow();
                             row["SiteID"] = siteID;
-                            row["SiteCode"] = sitesList[i].SiteCode;
-                            row["SiteName"] = sitesList[i].SiteName;
-                            row["Latitude"] = sitesList[i].Latitude;
-                            row["Longitude"] = sitesList[i].Longitude;
+                            row["SiteCode"] = siteList[i].SiteCode;
+                            row["SiteName"] = siteList[i].SiteName;
+                            row["Latitude"] = siteList[i].Latitude;
+                            row["Longitude"] = siteList[i].Longitude;
                             row["LatLongDatumID"] = 3; // WGS1984
-                            row["Elevation_m"] = sitesList[i].Elevation;
+                            row["Elevation_m"] = siteList[i].Elevation;
                             row["VerticalDatum"] = "Unknown";
                             row["LocalX"] = 0.0f;
                             row["LocalY"] = 0.0f;
                             row["LocalProjectionID"] = DBNull.Value;
                             row["PosAccuracy_m"] = 0.0f;
-                            row["State"] = sitesList[i].State;
-                            row["County"] = sitesList[i].County;
-                            row["Comments"] = "no comment";
-                            row["SiteType"] = "Atmosphere";
+                            row["State"] = siteList[i].State;
+                            row["County"] = siteList[i].County;
+                            row["Comments"] = siteList[i].Comments;
+                            row["SiteType"] = "Soil hole"; // from CUAHSI SiteTypeCV controlled vocabulary
                             bulkTable.Rows.Add(row);
                         }
                         SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
@@ -642,7 +389,7 @@ namespace SCANHarvester
                         Console.WriteLine("Sites inserted row " + batchEnd.ToString());
                     }
                 }
-                _log.LogWrite("UpdateSites: " + sitesList.Count.ToString() + " sites updated.");
+                _log.LogWrite("UpdateSites: " + siteList.Count.ToString() + " sites updated.");
             }
             catch(Exception ex)
             {

@@ -12,18 +12,95 @@ namespace SCANHarvester
     class AwdbClient
     {
         private string _serviceUrl;
+        private LogWriter _logger;
 
-        public AwdbClient()
+        public AwdbClient(LogWriter logger)
         {
             _serviceUrl = "https://wcc.sc.egov.usda.gov/awdbWebService/services";
+            _logger = logger;
+
+            // !!! necessary configuration to prevent the "Bad Gateway" error
+            // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
+            System.Net.ServicePointManager.Expect100Continue = false;
         }
 
-        public void GetSitesAuto()
+        /// <summary>
+        /// Converts value in feet to value in meters (for elevation)
+        /// </summary>
+        /// <param name="valueInFeet">The elevation value in ft</param>
+        /// <returns>The elevation value in m</returns>
+        private decimal ft2m(decimal valueInFeet)
         {
-            // !!! necessary to prevent the "Bad Gateway" error
-            System.Net.ServicePointManager.Expect100Continue = false;
+            return valueInFeet * 0.3048m;
+        }
 
-            Awdb.AwdbWebServiceClient wsc = new Awdb.AwdbWebServiceClient();
+        private string fips2stateName(string fipsStateNumber)
+        {
+            switch(fipsStateNumber)
+            {
+                case "01":
+                    return "Alabama";
+                case "02":
+                    return "Alaska";
+                case "04":
+                    return "Arizona";
+                case "05":
+                    return "Arkansas";
+                case "06":
+                    return "California";
+                case "08":
+                    return "Colorado";
+                case "09":
+                    return "Connecticut";
+                case "10":
+                    return "Delaware";
+                case "11":
+                    return "District of Columbia";
+                case "12":
+                    return "Florida";
+                case "13":
+                    return "Georgia";
+                case "15":
+                    return "Hawaii";
+                case "16":
+                    return "Idaho";
+                default:
+                    return fipsStateNumber;
+            }
+        }
+
+        public string[] ListUniqueElements()
+        {
+            var uniqueElements = new HashSet<string>();
+            
+            // using auto-generated class from AWDB SOAP service reference
+            var wsc = new Awdb.AwdbWebServiceClient();
+
+            // download a list of all SCAN station triplets
+            string[] stationTriplets = LoadStationTriplets(wsc);
+
+            foreach(string stationTriplet in stationTriplets)
+            {
+                var elements = wsc.getStationElements(stationTriplet, null, null);
+
+                // ignore stations with no elements
+                if (elements is null) { continue; }
+
+                // add elements at this station to unique list
+                foreach(var element in elements)
+                {
+                    string elementName = element.elementCd;
+                    if (!uniqueElements.Contains(elementName))
+                    {
+                        uniqueElements.Add(elementName);
+                    }
+                }
+            }
+            return uniqueElements.ToArray();
+        }
+
+        private string[] LoadStationTriplets(Awdb.AwdbWebServiceClient wsc)
+        {
             var stationIds = new string[] { };
             var stateCds = new string[] { };
             var networkCds = new string[] { "SCAN" };
@@ -40,11 +117,59 @@ namespace SCANHarvester
             var heightDepths = new Awdb.heightDepth[] { };
             var logicalAnd = true;
 
-            string[] stationTriplets = wsc.getStations(stationIds, stateCds, networkCds, hucs, countyNames, minLatitude, maxLatitude, minLongitude, maxLongitude, minElevation, maxElevation, elementCds, ordinals, heightDepths, logicalAnd);
-            var stationCount = stationTriplets.Length;
+            var result = wsc.getStations(stationIds, stateCds, networkCds, hucs, countyNames, 
+                minLatitude, maxLatitude, minLongitude, maxLongitude, minElevation, maxElevation, 
+                elementCds, ordinals, heightDepths, logicalAnd);
+
+            return result;
         }
 
-        public void GetSites()
+        public List<Site> GetStations()
+        {
+            // !!! necessary to prevent the "Bad Gateway" error (moved to class constructor)
+            //System.Net.ServicePointManager.Expect100Continue = false;
+            List<Site> siteList = new List<Site>();
+
+            // using auto-generated class from AWDB SOAP service reference
+            var wsc = new Awdb.AwdbWebServiceClient();
+
+            // download a list of all SCAN station triplets
+            string[] stationTriplets = LoadStationTriplets(wsc);
+            var stationCount = stationTriplets.Length;
+            _logger.LogWrite("Retrieved SCAN Station codes from AWDB service: found " + stationTriplets.Length.ToString() + " stations.");
+            
+            foreach(string stationTriplet in stationTriplets)
+            {
+                // call method "getStationMetadata"
+                var metadata = wsc.getStationMetadata(stationTriplet);
+
+                var site = new Site
+                {
+                    SiteCode = metadata.stationTriplet.Replace(":", "_"),
+                    SiteName = metadata.name,
+                    Latitude = metadata.latitude,
+                    Longitude = metadata.longitude,
+                    Elevation = ft2m(metadata.elevation),
+                    State = fips2stateName(metadata.fipsStateNumber),
+                    County = metadata.countyName,
+                    HUC = metadata.huc,
+                    HUD = metadata.hud,
+                    ActonId = metadata.actonId,
+                    ShefId = metadata.shefId,
+                    BeginDate = Convert.ToDateTime(metadata.beginDate),
+                    EndDate = Convert.ToDateTime(metadata.endDate),
+                    TimeZone = metadata.stationDataTimeZone,
+                    StationTriplet = metadata.stationTriplet
+                };
+                siteList.Add(site);
+
+            }
+
+            return siteList;
+
+        }
+
+        public void GetSitesOld()
         {
             // necessary to prevent the "Bad Gateway" error
             System.Net.ServicePointManager.Expect100Continue = false;

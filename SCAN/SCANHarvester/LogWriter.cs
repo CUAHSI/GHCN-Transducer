@@ -13,14 +13,23 @@ namespace SCANHarvester
     {
         private string _logFile = string.Empty;
 
-        public LogWriter()
+        // if true then also write out the message to console
+        private bool _writeToConsole = true;
+
+        public LogWriter(bool alsoWriteToConsole)
         {
             var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _logFile = exePath + "\\log_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
+            _writeToConsole = alsoWriteToConsole;
         }
 
         public void LogWrite(string logMessage)
         {
+            if (_writeToConsole)
+            {
+                Console.WriteLine(logMessage);
+            }
+
             var m_exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             try
             {

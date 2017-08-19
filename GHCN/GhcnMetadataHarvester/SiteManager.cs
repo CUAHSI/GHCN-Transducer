@@ -222,16 +222,23 @@ namespace GhcnHarvester
         public void DeleteOldSites(SqlConnection connection)
         {
             // find the actual site count from database table
-            string sqlCount = "SELECT COUNT(*) FROM dbo.Sites";
+            string sqlCount = "SELECT COUNT(*), MIN(SiteID), MAX(SiteID) FROM dbo.Sites";
             int actualSiteCount = 1000000;
+            int minSiteID = 0;
+            int maxSiteID = actualSiteCount;
             using (var cmd = new SqlCommand(sqlCount, connection))
             {
                 try
                 {
                     connection.Open();
-                    var result = cmd.ExecuteScalar();
-                    actualSiteCount = Convert.ToInt32(result);
-                    Console.WriteLine("number of old sites to delete " + result.ToString());
+
+                    var reader = cmd.ExecuteReader();
+                    reader.Read();
+                    actualSiteCount = reader.GetInt32(0);
+                    minSiteID = reader.GetInt32(1);
+                    maxSiteID = reader.GetInt32(2);
+
+                    Console.WriteLine("number of old sites to delete " + actualSiteCount.ToString());
                 }
                 catch (Exception ex)
                 {
@@ -248,9 +255,9 @@ namespace GhcnHarvester
 
             string sqlDelete = "DELETE FROM dbo.Sites WHERE SiteID < @id";
 
-            int i = 0;
+            int i = minSiteID;
             int batchSize = 500;
-            while (i <= actualSiteCount)
+            while (i <= maxSiteID)
             {
                 using (SqlCommand cmd = new SqlCommand(sqlDelete, connection))
                 {

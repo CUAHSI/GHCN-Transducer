@@ -6,8 +6,8 @@ namespace SCANHarvester
     {
         static void Main(string[] args)
         {
-            // (0) setup progress logging
-            var logger = new LogWriter();
+            // (0) setup progress logging with writing to console and log file
+            var logger = new LogWriter(true);
             
             // (1) updating variables and sources
             //var varM = new VariableManager(logger);
@@ -23,7 +23,7 @@ namespace SCANHarvester
 
             // (4) updating sites
             var siteM = new SiteManager(logger);
-            siteM.UpdateSites();
+            siteM.UpdateSites_fast();
             // siteM.UpdateSites_fast();
 
             // (5) updating the series catalog
