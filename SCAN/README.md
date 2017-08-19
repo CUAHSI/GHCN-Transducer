@@ -54,6 +54,8 @@ The transducer contains two parts:
 | WTEQ      | SNOW WATER EQUIVALENT                     | inches        | Snow water equivalent    | ?                 |
 | ZDUM      | DUMMY LABEL                               | volt          | ?                        | ?                 |
 
+- See also http://www.fondriest.com/environmental-measurements/parameters/weather/photosynthetically-active-radiation/
+
 ## Setup Instructions for SCAN Harvester
 1. Install an empty ODM 1.1.1 database on your Microsoft SQL Server. 
 - To install an empty ODM 1.1.1 database, create a new database on the database server and execute the script https://github.com/CUAHSI/GHCN-Transducer/blob/master/odm/odm_111.sql
