@@ -9,6 +9,28 @@ The transducer contains two parts:
 - USDA NRCS Soil Climate Analysis Network (SCAN): www.wcc.nrcs.usda.gov/scan/
 - the data is retrieved from Air-Water Database (AWDB) Web Service: https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_landing.htm 
 
+## SCAN Variable Names 
+- This table documents the mapping of original SCAN Element names to [CUAHSI Controlled Vocabulary](http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV) variable names:
+
+| SCAN Code     | SCAN Element Name         | Units    | CUAHSI Variable Name     | CUAHSI DataType |
+| ------------- | ------------------------- | ---------| -------------------------| --------------- |
+| TAVG          | AIR TEMPERATURE AVERAGE   | degF     | Temperature              | Average         |
+| TMAX          | AIR TEMPERATURE MAXIMUM   | degF     | Temperature              | Maximum         |
+| TMIN          | AIR TEMPERATURE MINIMUM   | degF     | Temperature              | Minimum         |
+| TOBS          | AIR TEMPERATURE OBSERVED  | degF     | Temperature, sensor ?    | Continuous ?    |
+| PRES          | BAROMETRIC PRESSURE       | inch_Hg  | Barometric pressure      | Continuous      |
+| BATT          | BATTERY                   | volt     | Battery voltage          | Continuous      |
+| BATV          | BATTERY                   | volt     | Battery voltage          | Average         |
+| BATX          | BATTERY                   | volt     | Battery voltage          | Maximum         |
+| BATN          | BATTERY                   | volt     | Battery voltage          | Minimum         |
+| ETIB          | BATTERY-ETI PRECIP GUAGE  | volt     | Battery voltage?         | Continuous?     |
+| COND          | CONDUCTIVITY              | umho     | Electrical conductivity? | Continuous?     |
+| DPTP          | DEW POINT TEMPERATURE     | degF     | Temperature, dew point   | Continuous      |
+| DIAG          | DIAGNOSTICS               | unitless | ?                        | ?               |
+
+... to be continued ...
+
+
 ## Setup Instructions for SCAN Harvester
 1. Install an empty ODM 1.1.1 database on your Microsoft SQL Server. 
 - To install an empty ODM 1.1.1 database, create a new database on the database server and execute the script https://github.com/CUAHSI/GHCN-Transducer/blob/master/odm/odm_111.sql
