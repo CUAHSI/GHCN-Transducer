@@ -12,24 +12,47 @@ The transducer contains two parts:
 ## SCAN Variable Names 
 - This table documents the mapping of original SCAN Element names to [CUAHSI Controlled Vocabulary](http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV) variable names:
 
-| SCAN Code     | SCAN Element Name         | Units    | CUAHSI Variable Name     | CUAHSI DataType |
-| ------------- | ------------------------- | ---------| -------------------------| --------------- |
-| TAVG          | AIR TEMPERATURE AVERAGE   | degF     | Temperature              | Average         |
-| TMAX          | AIR TEMPERATURE MAXIMUM   | degF     | Temperature              | Maximum         |
-| TMIN          | AIR TEMPERATURE MINIMUM   | degF     | Temperature              | Minimum         |
-| TOBS          | AIR TEMPERATURE OBSERVED  | degF     | Temperature, sensor ?    | Continuous ?    |
-| PRES          | BAROMETRIC PRESSURE       | inch_Hg  | Barometric pressure      | Continuous      |
-| BATT          | BATTERY                   | volt     | Battery voltage          | Continuous      |
-| BATV          | BATTERY                   | volt     | Battery voltage          | Average         |
-| BATX          | BATTERY                   | volt     | Battery voltage          | Maximum         |
-| BATN          | BATTERY                   | volt     | Battery voltage          | Minimum         |
-| ETIB          | BATTERY-ETI PRECIP GUAGE  | volt     | Battery voltage?         | Continuous?     |
-| COND          | CONDUCTIVITY              | umho     | Electrical conductivity? | Continuous?     |
-| DPTP          | DEW POINT TEMPERATURE     | degF     | Temperature, dew point   | Continuous      |
-| DIAG          | DIAGNOSTICS               | unitless | ?                        | ?               |
-
-... to be continued ...
-
+| SCAN Code | SCAN Element Name                         | Units         | CUAHSI Variable Name     | CUAHSI DataType   |
+| --------- | ------------------------------------------| --------------| -------------------------| ------------------|
+| BATN      | BATTERY                                   | volt          | Battery voltage          | Minimum           |
+| BATT      | BATTERY                                   | volt          | Battery voltage          | Average           |
+| BATX      | BATTERY                                   | volt          | Battery voltage          | Maximum           |
+| DIAG      | DIAGNOSTICS                               | unitless      | ?                        | ?                 |
+| DPTP      | DEW POINT TEMPERATURE                     | degF          | Temperature, dew point   | Continuous        |
+| LRADT     | SOLAR RADIATION/LANGLEY TOTAL             | langley       | ?                        | ?                 |
+| NTRDV     | NET SOLAR RADIATION AVERAGE               | watt/m2       | Radiation, net           | Average           |
+| PARV      | PHOTOSYNTHETICALLY ACTIVE RADIATION (PAR) | micromole/m2/s| ?                        | ?                 |
+| PRCP      | PRECIPITATION INCREMENT                   | inches        | Precipitation            | Incremental       |
+| PRCPSA    | PRECIPITATION INCREMENT – SNOW-ADJUSTED   | inches        | Precipitation            | Incremental       |
+| PREC      | PRECIPITATION ACCUMULATION                | inches        | Precipitation            | Cumulative        |
+| PRES      | BAROMETRIC PRESSURE                       | inch_Hg       | Barometric pressure      | Continuous        |
+| PVPV      | VAPOR PRESSURE - PARTIAL                  | kPa           | Vapor pressure           | ?                 |
+| RDC       | REAL DIELECTRIC CONSTANT                  | unitless      | Real dielectric constant | ?                 |
+| RHENC     | RELATIVE HUMIDITY ENCLOSURE               | pct           | ?                        | ?                 |
+| RHUM      | RELATIVE HUMIDITY                         | pct           | Relative humidity        | ?                 |
+| RHUMN     | RELATIVE HUMIDITY                         | pct           | Relative humidity        | Minimum           |
+| RHUMV     | RELATIVE HUMIDITY                         | pct           | Relative humidity        | Average           |
+| RHUMX     | RELATIVE HUMIDITY                         | pct           | Relative humidity        | Maximum           |
+| SAL       | SALINITY                                  | gram/l        | Salinity                 | ?                 |
+| SMS       | SOIL MOISTURE PERCENT                     | pct           | Volumetric water content?| ?                 |
+| SNWD      | SNOW DEPTH                                | inches        | Snow depth               | ?                 |
+| SRADV     | SOLAR RADIATION AVERAGE                   | watt/m2       | ?                        | Average           |
+| STN       | SOIL TEMPERATURE MINIMUM                  | degF          | Temperature              | Minimum           |
+| STO       | SOIL TEMPERATURE OBSERVED                 | degF          | Temperature              | ?                 |
+| STV       | SOIL TEMPERATURE AVERAGE                  | degF          | Temperature              | Average           |
+| STX       | SOIL TEMPERATURE MAXIMUM                  | degF          | Temperature              | Maximum           |
+| SVPV      | VAPOR PRESSURE - SATURATED                | kPa           | Vapor pressure?          | ?                 |
+| TAVG      | AIR TEMPERATURE AVERAGE                   | degF          | Temperature              | Average           |
+| TMAX      | AIR TEMPERATURE MAXIMUM                   | degF          | Temperature              | Maximum           |
+| TMIN      | AIR TEMPERATURE MINIMUM                   | degF          | Temperature              | Minimum           |
+| TOBS      | AIR TEMPERATURE OBSERVED                  | degF          | Temperature, sensor?     | Continuous ?      |
+| WDIRV     | WIND DIRECTION AVERAGE                    | degree        | Wind direction           | Average           |
+| WDIRZ     | WIND DIRECTION STANDARD DEVIATION         | degree        | Wind direction           | StandardDeviation |           
+| WDMVT     | WIND MOVEMENT TOTAL                       | mile          | Wind Run?                | ?                 |
+| WSPDV     | WIND SPEED AVERAGE                        | mph           | Wind speed               | Average           |
+| WSPDX     | WIND SPEED MAXIMUM                        | mph           | Wind speed               | Maximum           |
+| WTEQ      | SNOW WATER EQUIVALENT                     | inches        | Snow water equivalent    | ?                 |
+| ZDUM      | DUMMY LABEL                               | volt          | ?                        | ?                 |
 
 ## Setup Instructions for SCAN Harvester
 1. Install an empty ODM 1.1.1 database on your Microsoft SQL Server. 
