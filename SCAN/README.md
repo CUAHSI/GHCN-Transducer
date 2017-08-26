@@ -56,6 +56,9 @@ The transducer contains two parts:
 
 - See also http://www.fondriest.com/environmental-measurements/parameters/weather/photosynthetically-active-radiation/
 
+## SCAN Heights and Depths 
+- SCAN observations are recorded at different heights above ground or depths below ground surface. , the WaterOneFlow service uses a separate variable code with duration attached to the element code. For example Daily average soil temperature is coded as "STV_D, Hourly soil temperature as STO_H
+
 ## SCAN Time Support 
 - For each available combination of SCAN element and duration, the WaterOneFlow service uses a separate variable code with duration attached to the element code. For example Daily average soil temperature is coded as "STV_D, Hourly soil temperature as STO_H
 
