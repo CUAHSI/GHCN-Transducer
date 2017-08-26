@@ -36,7 +36,7 @@ namespace SCANHarvester
 
         private string fips2stateName(string fipsStateNumber)
         {
-            switch(fipsStateNumber)
+            switch (fipsStateNumber)
             {
                 case "01":
                     return "Alabama";
@@ -64,6 +64,80 @@ namespace SCANHarvester
                     return "Hawaii";
                 case "16":
                     return "Idaho";
+                case "17":
+                    return "Illinois";
+                case "18":
+                    return "Indiana";
+                case "20":
+                    return "Kansas";
+                case "21":
+                    return "Kentucky";
+                case "22":
+                    return "Louisiana";
+                case "25":
+                    return "Massachusetts";
+                case "24":
+                    return "Maryland";
+                case "23":
+                    return "Maine";
+                case "26":
+                    return "Michigan";
+                case "27":
+                    return "Minnesota";
+                case "28":
+                    return "Mississippi";
+                case "29":
+                    return "Missouri";
+                case "30":
+                    return "Montana";
+                case "31":
+                    return "Nebraska";
+                case "32":
+                    return "Nevada";
+                case "33":
+                    return "New Hampshire";
+                case "34":
+                    return "New Jersey";
+                case "35":
+                    return "New Mexico";
+                case "36":
+                    return "New York";
+                case "37":
+                    return "North Carolina";
+                case "38":
+                    return "North Dakota";
+                case "39":
+                    return "Ohio";
+                case "40":
+                    return "Oklahoma";
+                case "41":
+                    return "Oregon";
+                case "42":
+                    return "Pennsylvania";
+                case "44":
+                    return "Rhode Island";
+                case "45":
+                    return "South Carolina";
+                case "46":
+                    return "South Dakota";
+                case "47":
+                    return "Tennessee";
+                case "48":
+                    return "Texas";
+                case "49":
+                    return "Utah";
+                case "50":
+                    return "Vermont";
+                case "51":
+                    return "Virginia";
+                case "53":
+                    return "Washington";
+                case "54":
+                    return "West Virginia";
+                case "55":
+                    return "Wisconsin";
+                case "56":
+                    return "Wyoming";
                 default:
                     return fipsStateNumber;
             }
@@ -72,14 +146,14 @@ namespace SCANHarvester
         public string[] ListUniqueElements()
         {
             var uniqueElements = new HashSet<string>();
-            
+
             // using auto-generated class from AWDB SOAP service reference
             var wsc = new Awdb.AwdbWebServiceClient();
 
             // download a list of all SCAN station triplets
             string[] stationTriplets = LoadStationTriplets(wsc);
 
-            foreach(string stationTriplet in stationTriplets)
+            foreach (string stationTriplet in stationTriplets)
             {
                 var elements = wsc.getStationElements(stationTriplet, null, null);
 
@@ -87,12 +161,107 @@ namespace SCANHarvester
                 if (elements is null) { continue; }
 
                 // add elements at this station to unique list
-                foreach(var element in elements)
+                foreach (var element in elements)
                 {
                     string elementName = element.elementCd;
                     if (!uniqueElements.Contains(elementName))
                     {
                         uniqueElements.Add(elementName);
+                    }
+                }
+            }
+            return uniqueElements.ToArray();
+        }
+
+
+        private string GetCuahsiVariableCode(string elementCd, string duration, decimal heightDepth)
+        {
+            string durationCode;
+
+            switch (duration)
+            {
+                case "INSTANTANEOUS":
+                    durationCode = "i";
+                    break;
+                case "HOURLY":
+                    durationCode = "H";
+                    break;
+                case "DAILY":
+                    durationCode = "D";
+                    break;
+                case "SEMIMONTHLY":
+                    durationCode = "sm";
+                    break;
+                case "MONTHLY":
+                    durationCode = "m";
+                    break;
+                case "SEASONAL":
+                    durationCode = "season";
+                    break;
+                case "WATER_YEAR":
+                    durationCode = "wy";
+                    break;
+                case "CALENDAR_YEAR":
+                    durationCode = "y";
+                    break;
+                default:
+                    durationCode = "unknown";
+                    break;
+            }
+
+            if (heightDepth != 0)
+            {
+                string depthCode;
+                if (heightDepth < 0)
+                {
+                    depthCode = "D" + (Math.Abs(heightDepth)).ToString();
+                }
+                else
+                {
+                    depthCode = "H" + (Math.Abs(heightDepth)).ToString();
+                }
+                return String.Format("{0}_{1}_{2}", elementCd, durationCode, depthCode);
+            }
+            else
+            {
+                return String.Format("{0}_{1}", elementCd, durationCode);
+            }
+        }
+
+
+        public string[] ListUniqueVariables()
+        {
+            var uniqueElements = new HashSet<string>();
+
+            // using auto-generated class from AWDB SOAP service reference
+            var wsc = new Awdb.AwdbWebServiceClient();
+
+            // download a list of all SCAN station triplets
+            string[] stationTriplets = LoadStationTriplets(wsc);
+
+            foreach (string stationTriplet in stationTriplets)
+            {
+                var elements = wsc.getStationElements(stationTriplet, null, null);
+
+                // ignore stations with no elements
+                if (elements is null) { continue; }
+
+                // unique variable code is a combination of code, duration and heightDepth
+                foreach (var element in elements)
+                {
+                    string elementCd = element.elementCd;
+                    string duration = element.duration.ToString();
+                    var hd = element.heightDepth;
+                    decimal heightDepthValue = 0.0M;
+                    if (hd != null)
+                    {
+                        heightDepthValue = hd.value;
+                    }
+                    string uniqueCode = GetCuahsiVariableCode(elementCd, duration, heightDepthValue);
+
+                    if (!uniqueElements.Contains(uniqueCode))
+                    {
+                        uniqueElements.Add(uniqueCode);
                     }
                 }
             }
