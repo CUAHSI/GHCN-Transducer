@@ -9,9 +9,9 @@ namespace SCANHarvester
             // (0) setup progress logging with writing to console and log file
             var logger = new LogWriter(true);
             
-            // (1) updating variables and sources
-            //var varM = new VariableManager(logger);
-            //varM.UpdateVariables();
+            // (1) updating variables
+            var varM = new VariableManager(logger);
+            varM.UpdateVariables();
 
             // (2) updating sources
             //var srcM = new SourceManager(logger);

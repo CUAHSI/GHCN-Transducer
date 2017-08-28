@@ -265,6 +265,17 @@ namespace SCANHarvester
                     }
                 }
             }
+            
+
+            // saving outputs to a .csv file
+            using (var file = File.CreateText("variables.csv"))
+            {
+                foreach (var arr in uniqueElements)
+                {
+                    //file.WriteLine(string.Join(",", arr));
+                    file.WriteLine(arr);
+                }
+            }
             return uniqueElements.ToArray();
         }
 
