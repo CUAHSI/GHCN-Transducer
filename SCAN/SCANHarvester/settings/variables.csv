@@ -214,12 +214,12 @@ SNWD_D,Snow depth,Snow,Continuous,international inch,49,day,104,1
 SNWD_H,Snow depth,Snow,Continuous,international inch,49,hour,103,1
 SNWD_m,Snow depth,Snow,Continuous,international inch,49,month,106,1
 SNWD_sm,Snow depth,Snow,Continuous,international inch,49,month,106,0.5
-SRADV_D,"Radiation, incoming",,Average,watts per square meter,33,day,104,1
-SRADV_H,"Radiation, incoming",,Average,watts per square meter,33,hour,103,1
-SRADV_H_H129,"Radiation, incoming",,Average,watts per square meter,33,hour,103,1
-SRADV_H_H130,"Radiation, incoming",,Average,watts per square meter,33,hour,103,1
-SRADV_m,"Radiation, incoming",,Average,watts per square meter,33,month,106,1
-SRADV_sm,"Radiation, incoming",,Average,watts per square meter,33,month,106,0.5
+SRADV_D,"Radiation, incoming",Air,Average,watts per square meter,33,day,104,1
+SRADV_H,"Radiation, incoming",Air,Average,watts per square meter,33,hour,103,1
+SRADV_H_H129,"Radiation, incoming",Air,Average,watts per square meter,33,hour,103,1
+SRADV_H_H130,"Radiation, incoming",Air,Average,watts per square meter,33,hour,103,1
+SRADV_m,"Radiation, incoming",Air,Average,watts per square meter,33,month,106,1
+SRADV_sm,"Radiation, incoming",Air,Average,watts per square meter,33,month,106,0.5
 STN_D_D2,Temperature,Soil,Minimum,degree fahrenheit,97,day,104,1
 STN_D_D4,Temperature,Soil,Minimum,degree fahrenheit,97,day,104,1
 STO_D_D10,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
