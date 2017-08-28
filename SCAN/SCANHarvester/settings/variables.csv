@@ -1,0 +1,713 @@
+VariableCode,VariableName,SampleMedium,DataType,UnitsName,UnitsID,TimeUnitsName,TimeUnitsID,TimeSupport
+BATN_D,Battery voltage,Not Relevant,Minimum,volts,168,day,104,1
+BATT_D,Battery voltage,Not Relevant,Continuous,volts,168,day,104,1
+BATT_H,Battery voltage,Not Relevant,Continuous,volts,168,hour,103,1
+BATX_D,Battery voltage,Not Relevant,Maximum,volts,168,day,104,1
+DIAG_D,x,x,x,x,x,x,x,x
+DIAG_H,x,x,x,x,x,x,x,x
+DPTP_H,Dew point temperature,Air,Continuous,degree fahrenheit,97,hour,103,1
+LRADT_D,"Radiation, total incoming",Air,Continuous,langleys per day,28,day,104,1
+LRADT_m,"Radiation, total incoming",Air,Continuous,langleys per day,28,month,106,1
+LRADT_sm,"Radiation, total incoming",Air,Continuous,langleys per day,28,day,106,0.5
+NTRDV_H,"Radiation, net",Air,Continuous,watts per square meter,33,hour,103,1
+PARV_D,"Radiation, incoming PAR",Air,Continuous,micromoles per square meter per second,143,day,104,1
+PARV_H,"Radiation, incoming PAR",Air,Continuous,micromoles per square meter per second,143,hour,103,1
+PARV_m,"Radiation, incoming PAR",Air,Continuous,micromoles per square meter per second,143,month,106,1
+PARV_sm,"Radiation, incoming PAR",Air,Continuous,micromoles per square meter per second,143,day,106,0.5
+PRCP_D,Precipitation,Precipitation,Incremental,international inch,49,day,104,1
+PRCP_H,Precipitation,Precipitation,Incremental,international inch,49,hour,103,1
+PRCP_m,Precipitation,Precipitation,Incremental,international inch,49,month,106,1
+PRCP_sm,Precipitation,Precipitation,Incremental,international inch,49,day,106,0.5
+PRCP_wy,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PRCP_y,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PRCPSA_D,Precipitation,Precipitation,Incremental,international inch,49,day,104,1
+PRCPSA_m,Precipitation,Precipitation,Incremental,international inch,49,month,106,1
+PRCPSA_sm,Precipitation,Precipitation,Incremental,international inch,49,day,106,0.5
+PRCPSA_wy,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PRCPSA_y,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PREC_D,Precipitation,Precipitation,Cumulative,international inch,49,day,104,1
+PREC_H,Precipitation,Precipitation,Cumulative,international inch,49,hour,103,1
+PREC_m,Precipitation,Precipitation,Cumulative,international inch,49,month,106,1
+PREC_sm,Precipitation,Precipitation,Cumulative,international inch,49,day,106,0.5
+PREC_wy,Precipitation,Precipitation,Cumulative,international inch,49,common year (365 days),107,1
+PRES_D,Barometricpressure,Air,Continuous,inch of mercury,84,day,104,1
+PRES_H,Barometric pressure,Air,Continuous,inch of mercury,84,hour,103,1
+PVPV_H,Vapor pressure,Air,Continuous,kilopascal,170,hour,103,1
+RDC_D_D10,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D12,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D15,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D16,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D18,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D2,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D20,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D24,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D27,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D30,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D4,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D40,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D6,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D60,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D8,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D80,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_H26,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_H33,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_H35,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_H51,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_H_D10,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D12,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D15,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D16,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D18,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D2,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D20,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D24,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D27,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D30,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D4,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D40,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D6,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D60,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D8,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_D80,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_H26,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_H33,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_H35,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RDC_H_H51,Real dielectric constant,Not Relevant,Continuous,dimensionless,137,hour,103,1
+RHENC_D,Relative humidity,Air,Continuous,percent,1,day,104,1
+RHENC_m,Relative humidity,Air,Continuous,percent,1,month,106,1
+RHENC_sm,Relative humidity,Air,Continuous,percent,1,month,106,0.5
+RHUM_D,Relative humidity,Air,Continuous,percent,1,day,104,1
+RHUM_H,Relative humidity,Air,Continuous,percent,1,hour,103,1
+RHUMN_D,Relative humidity,Air,Minimum,percent,1,day,104,1
+RHUMN_H,Relative humidity,Air,Minimum,percent,1,hour,103,1
+RHUMN_m,Relative humidity,Air,Minimum,percent,1,month,106,1
+RHUMN_sm,Relative humidity,Air,Minimum,percent,1,month,106,0.5
+RHUMV_D,Relative humidity,Air,Average,percent,1,day,104,1
+RHUMV_H,Relative humidity,Air,Average,percent,1,hour,103,1
+RHUMV_m,Relative humidity,Air,Average,percent,1,month,106,1
+RHUMV_sm,Relative humidity,Air,Average,percent,1,month,106,0.5
+RHUMX_D,Relative humidity,Air,Maximum,percent,1,day,104,1
+RHUMX_H,Relative humidity,Air,Maximum,percent,1,hour,103,1
+RHUMX_m,Relative humidity,Air,Maximum,percent,1,month,106,1
+RHUMX_sm,Relative humidity,Air,Maximum,percent,1,month,106,0.5
+SAL_D_D10,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D12,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D15,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D16,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D18,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D2,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D20,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D24,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D27,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D30,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D4,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D40,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D6,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D60,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D8,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D80,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_H26,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_H33,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_H35,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_H51,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_H_D10,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D12,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D15,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D16,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D18,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D2,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D20,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D24,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D27,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D30,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D4,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D40,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D6,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D60,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D8,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D80,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_H26,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_H33,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_H35,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_H51,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SMS_D_D10,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D12,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D15,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D16,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D18,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D2,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D20,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D24,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D27,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D30,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D4,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D40,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D6,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D60,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D8,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_D80,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_H26,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_H33,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_H35,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_D_H51,Volumnometric water content,Soil,Continuous,percent,1,day,104,1
+SMS_H_D10,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D12,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D15,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D16,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D18,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D2,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D20,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D24,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D27,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D30,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D4,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D40,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D6,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D60,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D8,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D80,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_H26,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_H33,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_H35,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_H_H51,Volumnometric water content,Soil,Continuous,percent,1,hour,103,1
+SMS_m_D10,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D12,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D15,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D16,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D18,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D2,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D20,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D24,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D27,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D30,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D4,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D40,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D6,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D60,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D8,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_D80,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_H26,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_H33,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_H35,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_m_H51,Volumnometric water content,Soil,Continuous,percent,1,month,106,1
+SMS_sm_D10,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D12,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D15,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D16,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D18,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D2,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D20,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D24,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D27,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D30,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D4,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D40,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D6,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D60,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D8,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D80,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_H26,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_H33,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_H35,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_H51,Volumnometric water content,Soil,Continuous,percent,1,month,106,0.5
+SNWD_D,Snow depth,Snow,Continuous,international inch,49,day,104,1
+SNWD_H,Snow depth,Snow,Continuous,international inch,49,hour,103,1
+SNWD_m,Snow depth,Snow,Continuous,international inch,49,month,106,1
+SNWD_sm,Snow depth,Snow,Continuous,international inch,49,month,106,0.5
+SRADV_D,"Radiation, incoming",,Average,watts per square meter,33,day,104,1
+SRADV_H,"Radiation, incoming",,Average,watts per square meter,33,hour,103,1
+SRADV_H_H129,"Radiation, incoming",,Average,watts per square meter,33,hour,103,1
+SRADV_H_H130,"Radiation, incoming",,Average,watts per square meter,33,hour,103,1
+SRADV_m,"Radiation, incoming",,Average,watts per square meter,33,month,106,1
+SRADV_sm,"Radiation, incoming",,Average,watts per square meter,33,month,106,0.5
+STN_D_D2,Temperature,Soil,Minimum,degree fahrenheit,97,day,104,1
+STN_D_D4,Temperature,Soil,Minimum,degree fahrenheit,97,day,104,1
+STO_D_D10,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D11,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D12,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D15,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D16,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D18,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D2,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D20,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D24,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D27,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D30,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D4,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D40,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D6,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D60,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D8,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D80,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_H26,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_H33,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_H35,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_H51,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_H_D10,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D11,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D12,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D15,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D16,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D18,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D2,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D20,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D24,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D27,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D30,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D4,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D40,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D6,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D60,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D8,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D80,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_H26,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_H33,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_H35,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_H51,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_m_D10,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D11,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D12,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D15,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D16,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D18,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D2,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D20,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D24,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D27,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D30,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D4,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D40,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D6,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D60,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D8,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D80,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_H26,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_H33,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_H35,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_H51,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_sm_D10,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D11,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D12,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D15,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D16,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D18,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D2,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D20,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D24,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D27,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D30,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D4,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D40,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D6,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D60,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D8,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D80,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_H26,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_H33,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_H35,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_H51,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STV_H,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D10,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D12,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D14,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D16,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D18,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D20,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D24,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D4,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D6,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_D8,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H22,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H26,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H30,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H35,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H41,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H47,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STV_H_H53,Temperature,Soil,Average,degree fahrenheit,97,hour,103,1
+STX_D_D2,Temperature,Soil,Maximum,degree fahrenheit,97,day,104,1
+STX_D_D4,Temperature,Soil,Maximum,degree fahrenheit,97,day,104,1
+SVPV_H,Vapor pressure,Air,Continuous,kilopascal,170,hour,103,1
+TAVG_D,Temperature,Air,Average,degree fahrenheit,97,day,104,
+TAVG_H,Temperature,Air,Average,degree fahrenheit,97,hour,103,
+TAVG_m,Temperature,Air,Average,degree fahrenheit,97,month,106,1
+TAVG_sm,Temperature,Air,Average,degree fahrenheit,97,month,106,0.5
+TAVG_wy,Temperature,Air,Average,degree fahrenheit,97,common year (365 days),107,1
+TAVG_y,Temperature,Air,Average,degree fahrenheit,97,common year (365 days),107,1
+TMAX_D,Temperature,Air,Maximum,degree fahrenheit,97,day,104,1
+TMAX_H,Temperature,Air,Maximum,degree fahrenheit,97,hour,103,1
+TMAX_m,Temperature,Air,Maximum,degree fahrenheit,97,month,106,1
+TMAX_sm,Temperature,Air,Maximum,degree fahrenheit,97,month,106,0.5
+TMAX_wy,Temperature,Air,Maximum,degree fahrenheit,97,common year (365 days),107,1
+TMAX_y,Temperature,Air,Maximum,degree fahrenheit,97,common year (365 days),107,1
+TMIN_D,Temperature,Air,Minimum,degree fahrenheit,97,day,104,1
+TMIN_H,Temperature,Air,Minimum,degree fahrenheit,97,hour,103,1
+TMIN_m,Temperature,Air,Minimum,degree fahrenheit,97,month,106,1
+TMIN_sm,Temperature,Air,Minimum,degree fahrenheit,97,month,106,0.5
+TMIN_wy,Temperature,Air,Minimum,degree fahrenheit,97,common year (365 days),107,1
+TMIN_y,Temperature,Air,Minimum,degree fahrenheit,97,common year (365 days),107,1
+TOBS_D,Temperature,Air,Continuous,degree fahrenheit,97,day,104,1
+TOBS_H,Temperature,Air,Continuous,degree fahrenheit,97,hour,103,1
+TOBS_m,Temperature,Air,Continuous,degree fahrenheit,97,month,106,1
+TOBS_sm,Temperature,Air,Continuous,degree fahrenheit,97,month,106,0.5
+WDIRV_D,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H106,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H113,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H116,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H117,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H118,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H119,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H120,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H121,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H122,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H123,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H124,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H125,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H126,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H127,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H128,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H129,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H130,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H131,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H132,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H133,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H134,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H135,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H137,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H138,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H140,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H141,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H142,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H144,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H145,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H147,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H155,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H166,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H30,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H324,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H394,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_H,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H101,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H106,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H107,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H112,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H113,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H116,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H117,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H118,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H119,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H120,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H121,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H122,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H123,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H124,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H125,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H126,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H127,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H128,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H129,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H130,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H131,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H132,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H133,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H134,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H135,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H136,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H137,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H138,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H140,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H141,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H142,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H144,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H145,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H147,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H148,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H152,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H155,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H166,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H219,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H222,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H30,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H324,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_m,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H106,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H113,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H116,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H117,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H118,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H119,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H120,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H121,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H122,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H123,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H124,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H125,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H126,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H127,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H128,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H129,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H130,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H131,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H132,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H133,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H134,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H135,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H137,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H138,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H140,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H141,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H142,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H144,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H145,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H147,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H155,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H166,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H30,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H324,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H394,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_sm,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H106,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H113,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H116,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H117,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H118,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H119,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H120,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H121,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H122,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H123,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H124,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H125,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H126,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H127,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H128,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H129,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H130,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H131,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H132,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H133,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H134,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H135,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H137,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H138,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H140,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H141,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H142,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H144,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H145,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H147,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H155,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H166,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H30,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H324,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H394,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRZ_D,Wind direction,Air,Standard deviation,degree,2,day,104,1
+WDIRZ_H,Wind direction,Air,Standard deviation,degree,2,hour,103,1
+WDMVT_D_H113,Wind Run,Air,Continuous,international mile,53,day,104,1
+WDMVT_D_H118,Wind Run,Air,Continuous,international mile,53,day,104,1
+WDMVT_D_H119,Wind Run,Air,Continuous,international mile,53,day,104,1
+WDMVT_D_H120,Wind Run,Air,Continuous,international mile,53,day,104,1
+WDMVT_D_H121,Wind Run,Air,Continuous,international mile,53,day,104,1
+WDMVT_D_H128,Wind Run,Air,Continuous,international mile,53,day,104,1
+WSPDV_D,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H106,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H113,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H116,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H117,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H118,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H119,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H120,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H121,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H122,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H123,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H124,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H125,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H126,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H127,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H128,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H129,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H130,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H131,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H132,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H133,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H134,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H135,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H137,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H138,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H140,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H141,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H142,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H144,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H145,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H147,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H155,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H166,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H30,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H324,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H394,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_H,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H101,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H106,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H107,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H112,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H113,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H116,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H117,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H118,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H119,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H120,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H121,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H122,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H123,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H124,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H125,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H126,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H127,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H128,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H129,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H130,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H131,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H132,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H133,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H134,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H135,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H136,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H137,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H138,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H140,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H141,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H142,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H144,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H145,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H147,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H148,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H152,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H155,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H166,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H219,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H222,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H30,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H324,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_m,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H106,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H113,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H116,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H117,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H118,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H119,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H120,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H121,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H122,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H123,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H124,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H125,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H126,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H127,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H128,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H129,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H130,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H131,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H132,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H133,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H134,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H135,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H137,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H138,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H140,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H141,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H142,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H144,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H145,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H147,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H155,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H166,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H30,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H324,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H394,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_sm,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H106,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H113,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H116,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H117,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H118,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H119,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H120,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H121,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H122,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H123,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H124,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H125,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H126,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H127,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H128,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H129,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H130,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H131,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H132,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H133,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H134,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H135,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H137,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H138,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H140,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H141,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H142,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H144,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H145,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H147,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H155,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H166,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H30,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H324,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H394,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDX_D,Wind speed,Air,Maximum,miles per hour,120,day,104,1
+WSPDX_H,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H101,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H106,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H107,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H112,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H113,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H116,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H117,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H118,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H119,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H120,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H121,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H122,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H123,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H124,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H125,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H126,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H127,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H128,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H129,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H130,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H131,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H132,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H133,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H134,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H135,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H136,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H137,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H138,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H140,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H141,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H142,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H144,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H145,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H147,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H148,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H152,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H155,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H166,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H219,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H222,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H30,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H324,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_m,Wind speed,Air,Maximum,miles per hour,120,month,106,1
+WSPDX_sm,Wind speed,Air,Maximum,miles per hour,120,month,106,0.5
+WTEQ_D,Snow water equivalent,Snow,Continuous,international inch,49,day,104,1
+WTEQ_H,Snow water equivalent,Snow,Continuous,international inch,49,hour,103,1
+WTEQ_m,Snow water equivalent,Snow,Continuous,international inch,49,month,106,1
+WTEQ_sm,Snow water equivalent,Snow,Continuous,international inch,49,month,106,0.5
+ZDUM_D,x,,,,,,,
+ZDUM_H,x,,,,,,,
