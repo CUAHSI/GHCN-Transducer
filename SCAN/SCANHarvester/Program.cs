@@ -13,6 +13,10 @@ namespace SCANHarvester
             var varM = new VariableManager(logger);
             varM.UpdateVariables();
 
+            // (2) updating methods
+            var methM = new MethodManager(logger);
+            methM.UpdateMethods();
+
             // (2) updating sources
             //var srcM = new SourceManager(logger);
             //srcM.UpdateSources();

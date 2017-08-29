@@ -57,6 +57,8 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Compile Include="ISOMetadata.cs" />
+    <Compile Include="MethodInfo.cs" />
+    <Compile Include="MethodManager.cs" />
     <Compile Include="Qualifier.cs" />
     <Compile Include="Series.cs" />
     <Compile Include="Site.cs" />
