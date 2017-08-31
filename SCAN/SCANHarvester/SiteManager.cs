@@ -289,9 +289,9 @@ namespace SCANHarvester
             var client = new AwdbClient(_log);
             List<Site> siteList = client.GetStations();
 
-            string[] uniqueVariables = client.ListUniqueVariables();
-            string[] uniqueElements = client.ListUniqueElements();
-            Array.Sort(uniqueElements);
+            //string[] uniqueVariables = client.ListUniqueVariables();
+            //string[] uniqueElements = client.ListUniqueElements();
+            //Array.Sort(uniqueElements);
 
             _log.LogWrite("UpdateSites for " + siteList.Count.ToString() + " sites ...");
 

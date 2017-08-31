@@ -174,9 +174,14 @@ namespace SCANHarvester
         }
 
 
-        private string GetCuahsiVariableCode(string elementCd, string duration, decimal heightDepth)
+        private string GetCuahsiVariableCode(string elementCd, string duration, decimal heightDepth, string heightDepthUnits)
         {
             string durationCode;
+            string heightDepthUnitsCode = "";
+            if (heightDepthUnits != null)
+            {
+                heightDepthUnitsCode = heightDepthUnits;
+            }
 
             switch (duration)
             {
@@ -214,11 +219,11 @@ namespace SCANHarvester
                 string depthCode;
                 if (heightDepth < 0)
                 {
-                    depthCode = "D" + (Math.Abs(heightDepth)).ToString();
+                    depthCode = "D" + (Math.Abs(heightDepth)).ToString() + heightDepthUnitsCode;
                 }
                 else
                 {
-                    depthCode = "H" + (Math.Abs(heightDepth)).ToString();
+                    depthCode = "H" + (Math.Abs(heightDepth)).ToString() + heightDepthUnitsCode;
                 }
                 return String.Format("{0}_{1}_{2}", elementCd, durationCode, depthCode);
             }
@@ -253,11 +258,13 @@ namespace SCANHarvester
                     string duration = element.duration.ToString();
                     var hd = element.heightDepth;
                     decimal heightDepthValue = 0.0M;
+                    string heightDepthUnits = null;
                     if (hd != null)
                     {
                         heightDepthValue = hd.value;
+                        heightDepthUnits = hd.unitCd;
                     }
-                    string uniqueCode = GetCuahsiVariableCode(elementCd, duration, heightDepthValue);
+                    string uniqueCode = GetCuahsiVariableCode(elementCd, duration, heightDepthValue, heightDepthUnits);
 
                     if (!uniqueElements.Contains(uniqueCode))
                     {
@@ -265,7 +272,7 @@ namespace SCANHarvester
                     }
                 }
             }
-            
+
 
             // saving outputs to a .csv file
             using (var file = File.CreateText("variables.csv"))
@@ -297,11 +304,104 @@ namespace SCANHarvester
             var heightDepths = new Awdb.heightDepth[] { };
             var logicalAnd = true;
 
-            var result = wsc.getStations(stationIds, stateCds, networkCds, hucs, countyNames, 
-                minLatitude, maxLatitude, minLongitude, maxLongitude, minElevation, maxElevation, 
+            var result = wsc.getStations(stationIds, stateCds, networkCds, hucs, countyNames,
+                minLatitude, maxLatitude, minLongitude, maxLongitude, minElevation, maxElevation,
                 elementCds, ordinals, heightDepths, logicalAnd);
 
             return result;
+        }
+
+        public List<Series> GetAllSeries()
+        {
+            List<Series> seriesList = new List<Series>();
+
+            var wsc = new Awdb.AwdbWebServiceClient();
+            string[] stationTriplets = LoadStationTriplets(wsc);
+            var stationCount = stationTriplets.Length;
+            _logger.LogWrite("Retrieving series catalog for " + stationTriplets.Length.ToString() + " stations.");
+
+            foreach(string stationTriplet in stationTriplets)
+            {
+                var elements = wsc.getStationElements(stationTriplet, null, null);
+
+                // ignore stations with no elements
+                if (elements is null) { continue; }
+
+                // element to series
+                foreach (var element in elements)
+                {
+                    Series series = new Series();
+
+                    string elementCd = element.elementCd;
+                    string duration = element.duration.ToString();
+                    var hd = element.heightDepth;
+                    decimal heightDepthValue = 0.0M;
+                    string heightDepthUnits = null;
+                    if (hd != null)
+                    {
+                        heightDepthValue = hd.value;
+                    }
+                    // get the variable code
+                    string variableCode = GetCuahsiVariableCode(elementCd, duration, heightDepthValue, heightDepthUnits);
+
+                    // get the method code ---> from variable code ...
+                    // extract the method code from the name
+                    string[] codeSplit = variableCode.Split('_');
+                    string methodCode = "NOTSPECIFIED";
+                    if (codeSplit.Length > 2)
+                    {
+                        methodCode = codeSplit[2];
+                    }
+                    else
+                    {
+                        methodCode = "NOTSPECIFIED";
+                    }
+                    series.MethodCode = methodCode;
+                    series.SiteCode = stationTriplet.Replace(":", "_");
+                    series.VariableCode = variableCode;
+                    series.BeginDateTime = Convert.ToDateTime(element.beginDate);
+                    series.EndDateTime = Convert.ToDateTime(element.endDate);
+                    series.BeginDateTimeUTC = series.BeginDateTime;
+                    series.EndDateTimeUTC = series.EndDateTime;
+
+                    // estimate the value count
+                    DateTime realEndTime = series.EndDateTime;
+                    if (series.EndDateTime > DateTime.Now.AddDays(1))
+                    {
+                        realEndTime = DateTime.Now.AddDays(1);
+                    }
+                    double estValueCount = (realEndTime - series.BeginDateTime).TotalHours;
+                    switch (element.duration)
+                    {
+                        case Awdb.duration.ANNUAL:
+                        case Awdb.duration.CALENDAR_YEAR:
+                        case Awdb.duration.WATER_YEAR:
+                            estValueCount = ((realEndTime - series.BeginDateTime).TotalDays) / 365.0;
+                            break;
+                        case Awdb.duration.SEASONAL:
+                            estValueCount = ((realEndTime - series.BeginDateTime).TotalDays) / 90.0;
+                            break;
+                        case Awdb.duration.MONTHLY:
+                            estValueCount = ((realEndTime - series.BeginDateTime).TotalDays) / 30.5;
+                            break;
+                        case Awdb.duration.SEMIMONTHLY:
+                            estValueCount = ((realEndTime - series.BeginDateTime).TotalDays) / 15.0;
+                            break;
+                        case Awdb.duration.DAILY:
+                            estValueCount = (realEndTime - series.BeginDateTime).TotalDays;
+                            break;
+                        case Awdb.duration.HOURLY:
+                            estValueCount = (realEndTime - series.BeginDateTime).TotalHours;
+                            break;
+
+                    }
+                    series.ValueCount = (int)(Math.Ceiling(estValueCount));
+                    seriesList.Add(series);
+                }
+            }
+
+            return seriesList;
+
         }
 
         public List<Site> GetStations()

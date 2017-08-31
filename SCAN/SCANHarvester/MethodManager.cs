@@ -84,6 +84,7 @@ namespace SCANHarvester
 
                                 newMethod = new MethodInfo
                                 {
+                                    MethodLink = methodCode,
                                     MethodDescription = methodDesc
                                 };
 
@@ -138,9 +139,10 @@ namespace SCANHarvester
             {
                 //update the method
                 meth.MethodID = Convert.ToInt32(methodIDResult);
-                using (SqlCommand cmd = new SqlCommand("UPDATE Methods SET MethodDescription = @desc WHERE MethodID = @id", connection))
+                using (SqlCommand cmd = new SqlCommand("UPDATE Methods SET MethodDescription = @desc, MethodLink = @link WHERE MethodID = @id", connection))
                 {
                     cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
+                    cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
                     cmd.Parameters.Add(new SqlParameter("@id", meth.MethodID));
                     
                     connection.Open();
@@ -152,12 +154,13 @@ namespace SCANHarvester
             else
             {
                 //save the method
-                string sql = "INSERT INTO Methods(MethodDescription) VALUES (@desc)";
+                string sql = "INSERT INTO Methods(MethodDescription, MethodLink) VALUES (@desc, @link)";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
                     connection.Open();
                     cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
-                    
+                    cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
+
                     // to get the inserted method id
                     SqlParameter param = new SqlParameter("@MethodID", SqlDbType.Int);
                     param.Direction = ParameterDirection.Output;

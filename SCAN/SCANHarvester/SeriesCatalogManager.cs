@@ -12,7 +12,7 @@ namespace SCANHarvester
     {
         private LogWriter _log;
         private Dictionary<string, Variable> _variableLookup;
-        
+
 
         public SeriesCatalogManager(LogWriter log)
         {
@@ -28,7 +28,7 @@ namespace SCANHarvester
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
 
             using (SqlConnection connection = new SqlConnection(connString))
-            {               
+            {
                 string sql = "SELECT SiteID, SiteCode, SiteName FROM dbo.Sites";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -42,13 +42,13 @@ namespace SCANHarvester
                         {
                             SiteID = reader.GetInt32(0),
                             SiteCode = code,
-                            SiteName = reader.GetString(2),  
+                            SiteName = reader.GetString(2),
                         };
                         lookup.Add(code, site);
                     }
                     reader.Close();
                     cmd.Connection.Close();
-                }   
+                }
             }
             return lookup;
         }
@@ -64,7 +64,7 @@ namespace SCANHarvester
 
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    string sql = "SELECT VariableID, VariableCode, VariableName, VariableUnitsID, SampleMedium, DataType FROM dbo.Variables";
+                    string sql = "SELECT VariableID, VariableCode, VariableName, VariableUnitsID, SampleMedium, DataType, TimeSupport, TimeUnitsID FROM dbo.Variables";
                     using (SqlCommand cmd = new SqlCommand(sql, connection))
                     {
                         cmd.Connection.Open();
@@ -80,7 +80,10 @@ namespace SCANHarvester
                                 VariableName = reader.GetString(2),
                                 VariableUnitsID = reader.GetInt32(3),
                                 SampleMedium = reader.GetString(4),
-                                DataType = reader.GetString(5)
+                                DataType = reader.GetString(5),
+                                TimeSupport = Convert.ToSingle(reader.GetValue(6)),
+                                TimeUnitsID = reader.GetInt32(7)
+                 
                             };
                             lookup.Add(code, variable);
                         }
@@ -89,9 +92,47 @@ namespace SCANHarvester
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _log.LogWrite("SeriesCatalogManager ERROR in GetVariableLookup: " + ex.Message);
+            }
+            return lookup;
+        }
+
+        private Dictionary<string, MethodInfo> getMethodLookup()
+        {
+            Dictionary<string, MethodInfo> lookup = new Dictionary<string, MethodInfo>();
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+
+            try
+            {
+
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    string sql = "SELECT MethodID, MethodDescription, MethodLink FROM dbo.Methods";
+                    using (SqlCommand cmd = new SqlCommand(sql, connection))
+                    {
+                        cmd.Connection.Open();
+
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            var m = new MethodInfo
+                            {
+                                MethodID = reader.GetInt32(0),
+                                MethodDescription = reader.GetString(1),
+                                MethodLink = reader.GetString(2)
+                            };
+                            lookup.Add(m.MethodLink, m);
+                        }
+                        reader.Close();
+                        cmd.Connection.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("SeriesCatalogManager ERROR in GetMethodLookup: " + ex.Message);
             }
             return lookup;
         }
@@ -99,7 +140,7 @@ namespace SCANHarvester
         public List<Series> ReadSeriesFromInventory(Dictionary<string, Site> siteLookup)
         {
             List<Series> seriesList = new List<Series>();
-            Dictionary<string, TextFileColumn> colPos = new Dictionary<string,TextFileColumn>();
+            Dictionary<string, TextFileColumn> colPos = new Dictionary<string, TextFileColumn>();
             colPos.Add("sitecode", new TextFileColumn(1, 11));
             colPos.Add("varcode", new TextFileColumn(32, 35));
             colPos.Add("firstyear", new TextFileColumn(37, 40));
@@ -151,7 +192,7 @@ namespace SCANHarvester
                 Console.WriteLine(String.Format("found {0} series", seriesList.Count));
                 _log.LogWrite(String.Format("found {0} series", seriesList.Count));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _log.LogWrite("UpdateSeriesCatalog ERROR reading series from web: " + ex.Message);
             }
@@ -199,9 +240,9 @@ namespace SCANHarvester
                         cmd.ExecuteNonQuery();
                         connection.Close();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        Console.WriteLine("Error inserting series SiteID=" + series.SiteID.ToString() + "VariableID=" + series.VariableID.ToString() +  " " + ex.Message);
+                        Console.WriteLine("Error inserting series SiteID=" + series.SiteID.ToString() + "VariableID=" + series.VariableID.ToString() + " " + ex.Message);
                     }
                     finally
                     {
@@ -230,7 +271,7 @@ namespace SCANHarvester
                         cmd.Parameters.Add(new SqlParameter("@SeriesID", seriesID));
                         cmd.ExecuteNonQuery();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine("Error updating series ID=" + seriesID.ToString() + " " + ex.Message);
                     }
@@ -264,12 +305,55 @@ namespace SCANHarvester
             return lookup;
         }
 
+        private Source getSource()
+        {
+            // getting the first Source from the Sources table
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            var s = new Source();
+            try
+            {
+
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    string sql = "SELECT SourceID, Organization, SourceDescription, Citation FROM dbo.Sources";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Connection.Open();
+
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            s = new Source
+                            {
+                                SourceID = reader.GetInt32(0),
+                                Organization = reader.GetString(1),
+                                SourceDescription = reader.GetString(2),
+                                Citation = reader.GetString(3)
+                            };
+                        }
+                        reader.Close();
+                        cmd.Connection.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("SeriesCatalogManager ERROR in GetMethodLookup: " + ex.Message);
+            }
+            return s;
+        }
+
 
         public void UpdateSeriesCatalog_fast()
         {
             var siteLookup = GetSiteLookup();
+            var variableLookup = getVariableLookup();
+            var methodLookup = getMethodLookup();
+            var source = getSource();
 
-            List<Series> seriesList = ReadSeriesFromInventory(siteLookup);
+            var wsClient = new AwdbClient(_log);
+            List<Series> seriesList = wsClient.GetAllSeries();
+            
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -347,41 +431,60 @@ namespace SCANHarvester
                         }
                         for (int i = batchStart; i < batchEnd; i++)
                         {
-                            var row = bulkTable.NewRow();
-                            seriesID = seriesID + 1;
-                            Variable v = _variableLookup[seriesList[i].VariableCode];
-                            row["SeriesID"] = seriesID;
-                            row["SiteID"] = seriesList[i].SiteID;
-                            row["SiteCode"] = seriesList[i].SiteCode;
-                            row["SiteName"] = seriesList[i].SiteName;
-                            row["SiteType"] = "Atmosphere";
-                            row["VariableID"] = seriesList[i].VariableID;
-                            row["VariableCode"] = v.VariableCode;
-                            row["VariableName"] = v.VariableName;
-                            row["Speciation"] = v.Speciation;
-                            row["VariableUnitsID"] = v.VariableUnitsID;
-                            row["VariableUnitsName"] = "Centimeter"; // todo get from DB!!
-                            row["SampleMedium"] = v.SampleMedium;
-                            row["ValueType"] = v.ValueType;
-                            row["TimeSupport"] = v.TimeSupport;
-                            row["TimeUnitsID"] = v.TimeUnitsID;
-                            row["TimeUnitsName"] = "Day"; // todo get from DB!!
-                            row["DataType"] = v.DataType;
-                            row["GeneralCategory"] = v.GeneralCategory;
-                            row["MethodID"] = 0;
-                            row["MethodDescription"] = "Unknown"; // todo get from DB !!
-                            row["SourceID"] = 1;
-                            row["Organization"] = "Unknown"; // toto get from DB
-                            row["SourceDescription"] = "Unknown"; // todo get from DB !!
-                            row["Citation"] = "Unknown"; // todo get from DB 
-                            row["QualityControlLevelID"] = 1;
-                            row["QualityControlLevelCode"] = "1";
-                            row["BeginDateTime"] = seriesList[i].BeginDateTime;
-                            row["EndDateTime"] = seriesList[i].EndDateTime;
-                            row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
-                            row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
-                            row["ValueCount"] = seriesList[i].ValueCount;
-                            bulkTable.Rows.Add(row);
+                            try
+                            {
+                                var variableCode = seriesList[i].VariableCode;
+                                var siteCode = seriesList[i].SiteCode;
+                                var methodCode = seriesList[i].MethodCode;
+
+                                // only include series for variables which are already in the Variables table
+                                // for example "DIAG" series are excluded because the "DIAG" variable has no CUAHSI equivalent ...
+                                if (_variableLookup.ContainsKey(variableCode) && siteLookup.ContainsKey(siteCode) && methodLookup.ContainsKey(methodCode))
+                                {
+                                    var row = bulkTable.NewRow();
+                                    seriesID = seriesID + 1;
+                                    Variable v = _variableLookup[variableCode];
+                                    Site s = siteLookup[siteCode];
+                                    MethodInfo m = methodLookup[methodCode];
+
+                                    row["SeriesID"] = seriesID;
+                                    row["SiteID"] = s.SiteID;
+                                    row["SiteCode"] = seriesList[i].SiteCode;
+                                    row["SiteName"] = s.SiteName;
+                                    row["SiteType"] = "Atmosphere";
+                                    row["VariableID"] = v.VariableID;
+                                    row["VariableCode"] = v.VariableCode;
+                                    row["VariableName"] = v.VariableName;
+                                    row["Speciation"] = v.Speciation;
+                                    row["VariableUnitsID"] = v.VariableUnitsID;
+                                    row["VariableUnitsName"] = v.VariableUnitsName;
+                                    row["SampleMedium"] = v.SampleMedium;
+                                    row["ValueType"] = v.ValueType;
+                                    row["TimeSupport"] = v.TimeSupport;
+                                    row["TimeUnitsID"] = v.TimeUnitsID;
+                                    row["TimeUnitsName"] = "Day"; // todo get from DB !!!
+                                    row["DataType"] = v.DataType;
+                                    row["GeneralCategory"] = v.GeneralCategory;
+                                    row["MethodID"] = m.MethodID;
+                                    row["MethodDescription"] = m.MethodDescription;
+                                    row["SourceID"] = source.SourceID;
+                                    row["Organization"] = source.Organization;
+                                    row["SourceDescription"] = source.SourceDescription;
+                                    row["Citation"] = source.Citation;
+                                    row["QualityControlLevelID"] = 1;
+                                    row["QualityControlLevelCode"] = "1";
+                                    row["BeginDateTime"] = seriesList[i].BeginDateTime;
+                                    row["EndDateTime"] = seriesList[i].EndDateTime;
+                                    row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
+                                    row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
+                                    row["ValueCount"] = seriesList[i].ValueCount;
+                                    bulkTable.Rows.Add(row);
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
                         }
                         SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
                         bulkCopy.DestinationTableName = "dbo.SeriesCatalog";

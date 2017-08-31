@@ -31,8 +31,8 @@ namespace SCANHarvester
             // siteM.UpdateSites_fast();
 
             // (5) updating the series catalog
-            //SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-            //seriesM.UpdateSeriesCatalog_fast();
+            SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
+            seriesM.UpdateSeriesCatalog_fast();
         }
     }
 }

@@ -8,8 +8,8 @@ namespace SCANHarvester
 {
     class Series
     {
-        // the method is always id=0 ("method not specified")
-        public int MethodID { get { return 0; } }
+        public string MethodCode { get; set; }
+        public int MethodID { get; set; }
 
         // the QC level is always id=0 ("quality controlled data")
         public int QualityControlLevelID { get { return 1; } }
