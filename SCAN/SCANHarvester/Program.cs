@@ -17,11 +17,11 @@ namespace SCANHarvester
             var methM = new MethodManager(logger);
             methM.UpdateMethods();
 
-            // (2) updating sources
-            //var srcM = new SourceManager(logger);
-            //srcM.UpdateSources();
+            // (3) updating sources
+            var srcM = new SourceManager(logger);
+            srcM.UpdateSources();
 
-            // (3) updating qualifiers
+            // (4) updating qualifiers
             //var qualM = new QualifierManager(logger);
             //qualM.UpdateQualifiers();
 

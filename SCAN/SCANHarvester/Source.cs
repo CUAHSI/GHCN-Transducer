@@ -20,6 +20,7 @@ namespace SCANHarvester
         public string State { get; set; }
         public string ZipCode { get; set; }
         public string Citation { get; set; }
+        public string SourceCode { get; set; }
         public int MetadataID { get; set; }
     }
 }

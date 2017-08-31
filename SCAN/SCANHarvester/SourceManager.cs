@@ -25,17 +25,18 @@ namespace SCANHarvester
                 int metadataID = SaveOrUpdateMetadata();
                 Source source = new Source
                 {
-                    Organization = "Community Collaborative Rain, Hail and Snow Network",
-                    SourceDescription = "Community Collaborative Rain, Hail and Snow Network",
-                    SourceLink = "www.cocorahs.org",
-                    ContactName = "CoCoRaHS",
-                    Phone = "",
-                    Email = "info@cocorahs.org",
+                    Organization = "United States Department of Agriculture Natural Resources Conservation Service",
+                    SourceDescription = "Soil Climate Analysis Network",
+                    SourceLink = "www.wcc.nrcs.usda.gov/about/mon_scan.html",
+                    ContactName = "Deb Harms",
+                    Phone = "503-414-3050",
+                    Email = "deb.harms@por.usda.gov",
                     Address = "",
                     City = "",
                     State = "",
                     ZipCode = "",
-                    Citation = @"Community Collaborative Rain, Hail and Snow Network (www.cocorahs.org)",
+                    Citation = @"USDA NRCS National Water and Climate Center Soil Climate Analysis Network (SCAN) ",
+                    SourceCode = "NRCS-WCC-SCAN",
                     MetadataID = metadataID
                 };
 
@@ -81,7 +82,8 @@ namespace SCANHarvester
                                 State = @state,
                                 ZipCode = @zipcode,
                                 Citation = @citation,
-                                MetadataID = @metadataid
+                                MetadataID = @metadataid,
+                                SourceCode = @sourcecode
                                WHERE Organization = @org";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -98,6 +100,7 @@ namespace SCANHarvester
                     cmd.Parameters.Add(new SqlParameter("@zipcode", source.ZipCode));
                     cmd.Parameters.Add(new SqlParameter("@citation", source.Citation));
                     cmd.Parameters.Add(new SqlParameter("@metadataid", source.MetadataID));
+                    cmd.Parameters.Add(new SqlParameter("@sourcecode", source.SourceCode));
                     cmd.ExecuteNonQuery();
                     connection.Close();
 
@@ -118,7 +121,8 @@ namespace SCANHarvester
                                 State,
                                 ZipCode,
                                 Citation,
-                                MetadataID)
+                                MetadataID,
+                                SourceCode)
                               VALUES (
                                 @org,
                                 @desc, 
@@ -131,7 +135,8 @@ namespace SCANHarvester
                                 @state,
                                 @zipcode,
                                 @citation,
-                                @metadataid)";
+                                @metadataid,
+                                @sourcecode)";
 
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
@@ -148,6 +153,7 @@ namespace SCANHarvester
                     cmd.Parameters.Add(new SqlParameter("@zipcode", source.ZipCode));
                     cmd.Parameters.Add(new SqlParameter("@citation", source.Citation));
                     cmd.Parameters.Add(new SqlParameter("@metadataid", source.MetadataID));
+                    cmd.Parameters.Add(new SqlParameter("@sourcecode", source.SourceCode));
 
                     // to get the inserted variable id
                     SqlParameter param = new SqlParameter("@SourceID", SqlDbType.Int);
@@ -178,15 +184,17 @@ namespace SCANHarvester
             var metadata = new ISOMetadata
             {
                 TopicCategory = "climatology/meteorology/atmosphere",
-                Title = "Community Collaborative Rain, Hail and Snow Network",
-                Abstract = @"CoCoRaHS is a unique, non-profit, community-based network of volunteers 
-of all ages and backgrounds working together to measure and map 
-precipitation (rain, hail and snow). By using low-cost measurement tools, 
-stressing training and education, and utilizing an interactive 
-Web-site, our aim is to provide the highest quality data for natural 
-resource, education and research applications.",
+                Title = "Soil Climate Analysis Network",
+                Abstract = @"As part of the Snow Survey and Water Supply Forecasting (SSWSF) Program, 
+the National Water and Climate Center administers a soil climate monitoring program consisting of 
+automated data collection sites across the U.S. The Soil Climate Analysis Network (SCAN) began as 
+a soil moisture/soil temperature pilot project of the Natural Resources Conservation Service in 1991. 
+The system is designed to provide data to support natural resource assessments and conservation activities. 
+The SCAN system focuses on agricultural areas of the U.S. and is composed of over 200 stations. 
+A typical SCAN site monitors soil moisture content at several depths, air temperature, relative humidity, solar radiation, 
+wind speed and direction, liquid precipitation, and barometric pressure.",
                 ProfileVersion = "19115-2",
-                MetadataLink = "www.cocorahs.org"
+                MetadataLink = "catalog.data.gov/dataset/soil-climate-analysis-network-scan"
             };
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
