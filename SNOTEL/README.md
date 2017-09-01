@@ -56,6 +56,29 @@ The transducer contains two parts:
 
 - See also http://www.fondriest.com/environmental-measurements/parameters/weather/photosynthetically-active-radiation/
 
+## SNOTEL Quality Control Flags
+- Each SNOTEL data value may have a quality control flag represented by a *QualifierCode* in the WaterML. For explanation
+of qualifier codes see the table below:
+
+| Flag Code | Flag Name         | Flag Description                                                                            |
+|-----------|-------------------|---------------------------------------------------------------------------------------------|
+|  V        | Valid             | Validated Data                                                                              |
+|  N        | No Profile        | No profile for automated validation                                                         |
+|  E        | Edit              | Edit, minor adjustment for sensor noise                                                     |
+|  B        | Back Estimate     | Regression-based estimate for homogenizing collocated Snow Course and Snow Pillow data sets |
+|  K        | Estimate          | Estimate                                                                                    |
+|  X        | External Estimate | External estimate                                                                           |
+|  S        | Suspect           | Suspect data                                                                                |
+
+## SNOTEL Quality Assurance flags:
+
+| Flag Code | Flag Name   | Flag Description                      |
+|-----------|-------------|---------------------------------------|
+|  U        | Unknown     | Unknown                               |
+|  R        | Raw         | No Human Review                       |
+|  P        | Provisional | Preliminary Human Review              |
+|  A        | Approved    | Processing and Final Review Completed |
+
 ## SNOTEL Time Support 
 - For each available combination of SNOTEL element and duration, the WaterOneFlow service uses a separate variable code with duration attached to the element code. For example Daily average soil temperature is coded as *STV_D*, Hourly soil temperature as *STO_H*. The SCAN time support is also encoded by the *TimeSupport* element of the WaterML *Variable* object:
 
