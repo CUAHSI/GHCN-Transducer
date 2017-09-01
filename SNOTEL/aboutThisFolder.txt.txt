@@ -1,1 +1,0 @@
-future location of upgraded SNOTEL metadata harvester and web service
