@@ -145,9 +145,6 @@ namespace WaterOneFlow.odws
                 {
                     string sqlSites = "SELECT * FROM dbo.Sites WHERE Latitude >= @lat1 AND Latitude <= @lat2 AND Longitude >= @lon1 AND Longitude <= @lon2";
                     
-                    //sqlSites = "SELECT plaveninycz.Stations.st_id, st_name, altitude, location_id, lat, lon FROM plaveninycz.Stations INNER JOIN StationsVariables stv ON Stations.st_id = stv.st_id " +                  
-                    //"WHERE var_id in (1, 4, 5, 16) AND lat IS NOT NULL";
-                    
                     cmd.CommandText = sqlSites;
                     cmd.Connection = conn;
 
@@ -390,6 +387,31 @@ namespace WaterOneFlow.odws
             return m;
         }
 
+        public static MethodType GetMethodByCode(string methodCode)
+        {
+            // in our DB we use "methodLink" field to store the custom method code...
+            string cnn = GetConnectionString();
+            MethodType m = new MethodType();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT * FROM dbo.Methods WHERE MethodLink = @MethodLink";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@MethodLink", methodCode));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+                    m.methodCode = Convert.ToString(dr["MethodID"]);
+                    m.methodID = Convert.ToInt32(dr["MethodID"]);
+                    m.methodDescription = Convert.ToString(dr["MethodDescription"]);
+                    m.methodLink = Convert.ToString(dr["MethodLink"]);
+                }
+            }
+            return m;
+        }
+
         public static QualityControlLevelType GetQualityControlFromDb(int qcID)
         {
             string cnn = GetConnectionString();
@@ -429,6 +451,7 @@ namespace WaterOneFlow.odws
                     SqlDataReader dr = cmd.ExecuteReader();
                     dr.Read();
                     s.sourceID = Convert.ToInt32(dr["SourceID"]);
+                    s.sourceIDSpecified = true;
                     s.sourceCode = Convert.ToString(dr["SourceID"]);
                     s.sourceDescription = Convert.ToString(dr["SourceDescription"]);
                     s.organization = Convert.ToString(dr["Organization"]);
@@ -1065,24 +1088,20 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             string[] vcSplit = variableCode.Split('_');
             string elementCd = vcSplit[0];
             string methodCode = "NOTSPECIFIED";
-            if(vcSplit.Length > 2)
+            int offsetTypeID = 1;
+            string offsetTypeCode = "H";
+
+            if (vcSplit.Length > 2)
             {
                 methodCode = vcSplit[2];
-
-                if (methodCode.StartsWith("H"))
-                {
-                    heightDepthVal = Convert.ToInt32(methodCode.Substring(1));
-                }
-                else
-                {
-                    heightDepthVal = (-1) * Convert.ToInt32(methodCode.Substring(1));
-                }
             }
+
             
             //default methodID and qcID
             int methodID = 0;
             int qcID = 1;
             int sourceID = 1;
+            
             
             //numeric variable id
             int varId = VariableCodeToID(variableCode);
@@ -1096,9 +1115,25 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             s.censorCode[0].censorCodeID = 1;
             s.censorCode[0].censorCodeIDSpecified = true;
 
-            //method
+            // method object from database
             s.method = new MethodType[1];
-            s.method[0] = GetMethodFromDb(0);
+            s.method[0] = GetMethodByCode(methodCode);
+            s.method[0].methodIDSpecified = true;
+            methodID = s.method[0].methodID;
+
+            // heightDepth, offset type id and code based on method code (if relevant)
+            if (methodCode.StartsWith("H"))
+            {
+                heightDepthVal = Convert.ToInt32(methodCode.Substring(1));
+                offsetTypeID = methodID;
+                offsetTypeCode = methodCode;
+            }
+            else
+            {
+                heightDepthVal = (-1) * Convert.ToInt32(methodCode.Substring(1));
+                offsetTypeID = methodID;
+                offsetTypeCode = methodCode;
+            }
 
             //variable
             VariableInfoType v = GetVariableInfoFromDb(variableCode);
@@ -1106,16 +1141,16 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             //time units
             s.units = v.timeScale.unit;
 
-            //qc level
+            //qc level - always "quality controlled data"
             s.qualityControlLevel = new QualityControlLevelType[1];
             s.qualityControlLevel[0] = GetQualityControlFromDb(qcID);
             s.qualityControlLevel[0].qualityControlLevelIDSpecified = true;
 
-            //source
+            //source - always the first source in the db 
             s.source = new SourceType[1];
             s.source[0] = GetSourceFromDb();
 
-            //qualifiers
+            //qualifiers - not used by SCAN
             s.qualifier = new QualifierType[3];
             s.qualifier[0] = new QualifierType();
             Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
@@ -1127,11 +1162,13 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
             System.Net.ServicePointManager.Expect100Continue = false;
 
+            // connecting to the AWDB web service
             Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
 
+            // the AWDB station parameter must be in form ID:STATE:NETWORK
             string[] stationTriplets = new string[] { siteCode.Replace("_", ":") };
 
-            // duration parameter
+            // selecting the duration parameter
             Awdb.duration duration = Awdb.duration.HOURLY;
             string durationCode = vcSplit[1];
             int hourIncrement = 1;
@@ -1175,7 +1212,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     break;
             }
 
-            // heightDepth parameter
+            // selecting the heightDepth parameter and offset
             Awdb.heightDepth heightDepth = null;
             if (heightDepthVal != 0)
             {
@@ -1183,48 +1220,157 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 heightDepth.unitCd = "in";
                 heightDepth.value = heightDepthVal;
                 heightDepth.valueSpecified = true;
+
+                s.offset = new OffsetType[1];
+                s.offset[0] = new OffsetType();
+                s.offset[0].offsetDescription = s.method[0].methodDescription;
+                s.offset[0].offsetIsVertical = true;
+                s.offset[0].offsetTypeCode = offsetTypeCode;
+                s.offset[0].offsetTypeID = offsetTypeID;
+                s.offset[0].offsetTypeIDSpecified = true;
+                s.offset[0].offsetValue = heightDepthVal;
+                s.offset[0].unit = new UnitsType();
+                s.offset[0].unit.unitAbbreviation = "in";
+                s.offset[0].unit.unitName = "international inch";
+                s.offset[0].unit.unitCode = "49";
+                s.offset[0].unit.unitType = "Length";
+                s.offset[0].unit.unitID = 49;
+                s.offset[0].unit.unitIDSpecified = true;
             }
 
-            // ordinal parameter
+            // ordinal parameter - should be set to 1 ...
             var ordinal = 1;
 
             string beginDateStr = startDateTime.ToString("yyyy-MM-dd HH:mm:ss");
             string endDateStr = endDateTime.ToString("yyyy-MM-dd HH:mm:ss");
-            var valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, false, beginDateStr, endDateStr, false);
 
-            // getting parameters
-            var vals0 = valuesObj[0];
-            DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-            DateTime endDate = Convert.ToDateTime(vals0.endDate);
-
-            decimal?[] vals = vals0.values;
+            // increasing AWDB SOAP service timeout ...
+            wc.Endpoint.Binding.CloseTimeout = new TimeSpan(1);
+            wc.Endpoint.Binding.ReceiveTimeout = new TimeSpan(1);
+            wc.Endpoint.Binding.OpenTimeout = new TimeSpan(1);
 
             List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
 
-            for (int i=0; i < vals.Length; i++)
+            if (duration == Awdb.duration.HOURLY)
             {
-                ValueSingleVariable val = new ValueSingleVariable();
-                val.censorCode = "nc";
+                // hourly data
 
-                val.dateTime = begDate.AddHours(i * hourIncrement);
-                val.dateTimeUTC = val.dateTime;
-                //val.timeOffset = "00:00";
-                //val.timeOffsetSpecified = false;
-                val.methodCode = methodID.ToString();
-                val.offsetValueSpecified = false;
-                val.qualityControlLevelCode = qcID.ToString();
-                val.sourceCode = sourceID.ToString();
-                if(vals[i] == null)
+                beginDateStr = startDateTime.ToString("yyyy-MM-dd");
+                endDateStr = endDateTime.ToString("yyyy-MM-dd");
+                int beginHour = startDateTime.Hour;
+                int endHour = endDateTime.Hour;
+                Awdb.hourlyData[] valuesObjH = wc.getHourlyData(stationTriplets, elementCd, ordinal, heightDepth, beginDateStr, endDateStr, beginHour, endHour);
+
+                var vals0 = valuesObjH[0];
+                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
+                DateTime endDate = Convert.ToDateTime(vals0.endDate);
+                Awdb.hourlyDataValue[] vals = vals0.values;
+
+                for (int i = 0; i < vals.Length; i++)
                 {
-                    val.Value = -9999.0M;
+                    ValueSingleVariable val = new ValueSingleVariable();
+                    val.censorCode = "nc";
+
+                    val.dateTime = begDate.AddHours(i);
+                    val.dateTimeUTC = val.dateTime;
+                    //val.timeOffset = "00:00";
+                    //val.timeOffsetSpecified = false;
+                    val.methodCode = methodID.ToString();
+                    val.methodID = methodID.ToString();
+
+                    // offset value (if relevant)
+                    if (heightDepthVal != 0)
+                    {
+                        val.offsetValueSpecified = true;
+                        val.offsetValue = heightDepthVal;
+                        val.offsetTypeID = offsetTypeID.ToString();
+                        val.offsetTypeCode = offsetTypeCode;
+                    }
+                    val.qualityControlLevelCode = qcID.ToString();
+                    val.sourceCode = sourceID.ToString();
+                    if (vals[i] == null)
+                    {
+                        val.Value = -9999.0M;
+                    }
+                    else
+                    {
+                        val.Value = vals[i].value;
+                    }
+
+                    valuesList.Add(val);
                 }
-                else
-                {
-                    val.Value = Convert.ToDecimal(vals[i]);
-                }
-                
-                valuesList.Add(val);
+
             }
+            else
+            {
+                // daily, semimonthly, monthly, seasonal or yearly data
+
+                Awdb.data[] valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, false, beginDateStr, endDateStr, false);
+
+                // getting parameters
+                var vals0 = valuesObj[0];
+                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
+                DateTime endDate = Convert.ToDateTime(vals0.endDate);
+
+                decimal?[] vals = vals0.values;
+
+                for (int i = 0; i < vals.Length; i++)
+                {
+                    ValueSingleVariable val = new ValueSingleVariable();
+                    val.censorCode = "nc";
+                    
+                    switch(duration)
+                    {
+                        case Awdb.duration.DAILY:
+                            val.dateTime = begDate.AddDays(i);
+                            break;
+                        case Awdb.duration.MONTHLY:
+                            val.dateTime = begDate.AddMonths(i);
+                            break;
+                        case Awdb.duration.SEASONAL:
+                            val.dateTime = begDate.AddMonths(i * 3);
+                            break;
+                        case Awdb.duration.ANNUAL:
+                        case Awdb.duration.CALENDAR_YEAR:
+                        case Awdb.duration.WATER_YEAR:
+                            val.dateTime = begDate.AddYears(i);
+                            break;
+                        default:
+                            val.dateTime = begDate.AddHours(hourIncrement);
+                            break;
+                    }
+                    
+                    val.dateTimeUTC = val.dateTime;
+                    //val.timeOffset = "00:00";
+                    //val.timeOffsetSpecified = false;
+                    val.methodCode = methodID.ToString();
+                    val.methodID = methodID.ToString();
+
+                    // offset value
+                    if (heightDepthVal != 0)
+                    {
+                        val.offsetValueSpecified = true;
+                        val.offsetValue = heightDepthVal;
+                        val.offsetTypeID = offsetTypeID.ToString();
+                        val.offsetTypeCode = offsetTypeCode;
+                    }
+                    val.qualityControlLevelCode = qcID.ToString();
+                    val.sourceCode = sourceID.ToString();
+                    if (vals[i] == null)
+                    {
+                        val.Value = -9999.0M;
+                    }
+                    else
+                    {
+                        val.Value = Convert.ToDecimal(vals[i]);
+                    }
+
+                    valuesList.Add(val);
+                }
+
+            }
+
+            
 
             s.value = valuesList.ToArray();
 

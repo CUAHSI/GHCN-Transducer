@@ -322,26 +322,10 @@ namespace WaterOneFlow.odws
                 string siteId = SiteNumber.Substring(SiteNumber.LastIndexOf(":") + 1);
                 string variableId = Variable.Substring(Variable.LastIndexOf(":") + 1);
 
-                // fix variable code
-                if (variableId == "8")
-                {
-                    variableId = "PRCP";
-                }
-                if (variableId == "9")
-                {
-                    variableId = "SNWD";
-                }
-                if (variableId == "4")
-                {
-                    variableId = "TMIN";
-                }
-                if (variableId == "3")
-                {
-                    variableId = "TMAX";
-                }
+                
 
-                //get startDateTime, endDateTime
-                DateTime startDateTime = new DateTime(1700, 1, 1);
+                
+                DateTime startDateTime = new DateTime(2000, 1, 1);
                 DateTime endDateTime = DateTime.Now;
 
                 if (StartDate != String.Empty)
