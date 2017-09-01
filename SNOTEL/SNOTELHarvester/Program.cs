@@ -10,16 +10,16 @@ namespace SNOTELHarvester
             var logger = new LogWriter(true);
             
             // (1) updating variables
-            var varM = new VariableManager(logger);
-            varM.UpdateVariables();
+            //var varM = new VariableManager(logger);
+            //varM.UpdateVariables();
 
             // (2) updating methods
-            var methM = new MethodManager(logger);
-            methM.UpdateMethods();
+            //var methM = new MethodManager(logger);
+            //methM.UpdateMethods();
 
             // (3) updating sources
-            var srcM = new SourceManager(logger);
-            srcM.UpdateSources();
+            //var srcM = new SourceManager(logger);
+            //srcM.UpdateSources();
 
             // (4) updating qualifiers
             //var qualM = new QualifierManager(logger);
@@ -31,8 +31,8 @@ namespace SNOTELHarvester
             // siteM.UpdateSites_fast();
 
             // (5) updating the series catalog
-            SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-            seriesM.UpdateSeriesCatalog_fast();
+            //SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
+            //seriesM.UpdateSeriesCatalog_fast();
         }
     }
 }

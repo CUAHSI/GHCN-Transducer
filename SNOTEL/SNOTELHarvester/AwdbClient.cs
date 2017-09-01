@@ -290,7 +290,7 @@ namespace SNOTELHarvester
         {
             var stationIds = new string[] { };
             var stateCds = new string[] { };
-            var networkCds = new string[] { "SCAN" };
+            var networkCds = new string[] { "SNTL" };
             var hucs = new string[] { };
             var countyNames = new string[] { };
             var minLatitude = -90;
