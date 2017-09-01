@@ -56,11 +56,30 @@ The transducer contains two parts:
 
 - See also http://www.fondriest.com/environmental-measurements/parameters/weather/photosynthetically-active-radiation/
 
-## SCAN Heights and Depths 
-- SCAN observations are recorded at different heights above ground or depths below ground surface. , the WaterOneFlow service uses a separate variable code with duration attached to the element code. For example Daily average soil temperature is coded as "STV_D, Hourly soil temperature as STO_H
-
 ## SCAN Time Support 
-- For each available combination of SCAN element and duration, the WaterOneFlow service uses a separate variable code with duration attached to the element code. For example Daily average soil temperature is coded as "STV_D, Hourly soil temperature as STO_H
+- For each available combination of SCAN element and duration, the WaterOneFlow service uses a separate variable code with duration attached to the element code. For example Daily average soil temperature is coded as *STV_D*, Hourly soil temperature as *STO_H*. The SCAN time support is also encoded by the *TimeSupport* element of the WaterML *Variable* object:
+
+| SCAN duration | CUAHSI variable code part | CUAHSI time unit | CUAHSI time support value |
+| ------------- | --------------------------| -----------------| --------------------------|
+| HOURLY        | H                         | hour             | 1                         |
+| DAILY         | D                         | day              | 1                         |
+| SEMIMONTHLY   | sm                        | month            | 0.5                       |
+| MONTHLY       | m                         | month            | 1                         |
+| SEASONAL      | season                    | month            | 3                         |
+| ANNUAL        | a                         | year             | 1                         |
+| WATER_YEAR    | wy                        | year             | 1                         |
+| CALENDAR_YEAR | y                         | year             | 1                         |
+
+## SCAN Heights and Depths 
+- SCAN observations are recorded at different heights above ground or depths below ground surface. The height or depth value is always in inches. Negative value indicates a subsurface sensor (in the soil profile). Positive values are used for wind sensors at different heights above ground. The WaterOneFlow service represents the heights and depths using the VariableCode, Method and Offset. For example the CUAHSI variable code **SMS_H_D2** means "Volumetric water content measured hourly at 2 inches depth" or the CUAHSI variable code **WSPDV_D_H40** means "Average wind speed (daily) at 40 inches height".
+
+## Resulting CUAHSI variable code
+- The resulting CUAHSI variable code consists of two or three parts separated by the **underscore** character. 
+- The first part is the SCAN element code (for example SMS, TMAX, WSPDX ...)
+- The second part is the time support abbreviation (H, D, sm, m, season, a, wy, y) - see table above
+- The third part is only included if the variable can be measured at multiple heights or depths (for example D40, D2, H60, H120 ...) The "D" means depth below ground surface and the "H" means height above ground surface.
+- For example the CUAHSI variable code **SMS_D_D40** means "Volumetric water content (daily) at depth of 40 inches
+- another example: The CUAHSI variable code **TMAX_m** means "Maximum air temperature (monthly) with no specified height or depth.
 
 
 ## Setup Instructions for SCAN Harvester
