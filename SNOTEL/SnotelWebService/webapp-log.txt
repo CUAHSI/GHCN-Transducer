@@ -1,0 +1,5 @@
+2011-08-12 16:22:11,073 [10] DEBUG CUAHSI.WEBSERVICES [(null)] - GenericODWS_sessionStart
+2011-08-12 16:22:29,410 [10] DEBUG WaterOneFlow.odws.v1_1.CustomService [(null)] - Starting CZSNW
+2011-08-12 16:22:29,412 [10] INFO  QueryLog [(null)] - CZSNW|GetSites|System.String[]||||||127.0.0.1
+2011-08-12 16:22:30,472 [10] INFO  QueryLog [(null)] - CZSNW|GetSites|System.String[]||||1059|58|127.0.0.1
+2011-08-12 16:49:29,945 [12] INFO  CUAHSI.WEBSERVICES [(null)] - GenericODWS_Stop
