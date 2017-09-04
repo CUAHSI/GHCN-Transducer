@@ -25,7 +25,8 @@ namespace SNOTELHarvester
 
         public void UpdateVariables()
         {
-            string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/variables.xlsx";
+            
+            string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
             var variables = new List<Variable>();
             _log.LogWrite("Read Variables from URL " + variablesUrl);
             int rowNum = 0;
@@ -49,6 +50,10 @@ namespace SNOTELHarvester
                             { // Row by row..
                                 rowNum++;
                                 string code = Convert.ToString(worksheet.Cells[row, 1].Value);
+                                if (code.EndsWith("in"))
+                                {
+                                    code = code.Substring(0, code.Length - 2);
+                                }
                                 if (code == "VariableCode")
                                 {
                                     continue;
@@ -85,8 +90,12 @@ namespace SNOTELHarvester
                 }
                 _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
+                    // to remove any old ("unused") variables
+                    DeleteOldVariables(connection);
+
                     foreach (Variable variable in variables)
                     {
                         try
@@ -109,6 +118,82 @@ namespace SNOTELHarvester
             }
 
         }
+
+
+        public void DeleteOldVariables(SqlConnection connection)
+        {
+            string sqlCount = "SELECT COUNT(*) FROM dbo.Variables";
+            int variablesCount = 0;
+            using (var cmd = new SqlCommand(sqlCount, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var result = cmd.ExecuteScalar();
+                    variablesCount = Convert.ToInt32(result);
+                    Console.WriteLine("number of old variables to delete " + result.ToString());
+                }
+                catch (Exception ex)
+                {
+                    var msg = "finding variables count " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            string sqlDelete = "DELETE FROM dbo.Variables";
+
+            using (SqlCommand cmd = new SqlCommand(sqlDelete, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("deleting old variables ... ");
+                }
+                catch (Exception ex)
+                {
+                    var msg = "error deleting old variables " + " " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            // reset variable ID
+            string sqlReset = @"DBCC CHECKIDENT('dbo.Variables', RESEED, 0);";
+            using (SqlCommand cmd = new SqlCommand(sqlReset, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("reset id of Variables Table");
+
+                }
+                catch (Exception ex)
+                {
+                    var msg = "error deleting old Variables table: " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+        }
+
 
         private object SaveOrUpdateVariable(Variable variable, SqlConnection connection)
         {

@@ -26,8 +26,8 @@ namespace SNOTELHarvester
                 Source source = new Source
                 {
                     Organization = "United States Department of Agriculture Natural Resources Conservation Service",
-                    SourceDescription = "Soil Climate Analysis Network",
-                    SourceLink = "www.wcc.nrcs.usda.gov/about/mon_scan.html",
+                    SourceDescription = "Snow Telemetry (SNOTEL)",
+                    SourceLink = "www.wcc.nrcs.usda.gov/about/mon_automate.html",
                     ContactName = "Deb Harms",
                     Phone = "503-414-3050",
                     Email = "deb.harms@por.usda.gov",
@@ -35,8 +35,8 @@ namespace SNOTELHarvester
                     City = "",
                     State = "",
                     ZipCode = "",
-                    Citation = @"USDA NRCS National Water and Climate Center Soil Climate Analysis Network (SCAN) ",
-                    SourceCode = "NRCS-WCC-SCAN",
+                    Citation = @"USDA NRCS Snow Telemetry (SNOTEL) Network",
+                    SourceCode = "NRCS-WCC-SNOTEL",
                     MetadataID = metadataID
                 };
 
@@ -184,17 +184,24 @@ namespace SNOTELHarvester
             var metadata = new ISOMetadata
             {
                 TopicCategory = "climatology/meteorology/atmosphere",
-                Title = "Soil Climate Analysis Network",
-                Abstract = @"As part of the Snow Survey and Water Supply Forecasting (SSWSF) Program, 
-the National Water and Climate Center administers a soil climate monitoring program consisting of 
-automated data collection sites across the U.S. The Soil Climate Analysis Network (SCAN) began as 
-a soil moisture/soil temperature pilot project of the Natural Resources Conservation Service in 1991. 
-The system is designed to provide data to support natural resource assessments and conservation activities. 
-The SCAN system focuses on agricultural areas of the U.S. and is composed of over 200 stations. 
-A typical SCAN site monitors soil moisture content at several depths, air temperature, relative humidity, solar radiation, 
-wind speed and direction, liquid precipitation, and barometric pressure.",
+                Title = "Snow Telemetry (SNOTEL) Network",
+                Abstract = @"The SNOTEL network is composed of over 800 automated data collection sites located in remote, 
+high-elevation mountain watersheds in the western U.S. They are used to monitor snowpack, precipitation, temperature, and 
+other climatic conditions. The data collected at SNOTEL sites are transmitted to a central database, 
+called the Water and Climate Information System, where they are used for water supply forecasting, maps, and reports.
+SNOTEL sites are designed to operate unattended and without maintenance for a year or more. A typical SNOTEL remote site 
+consists of measuring devices and sensors, an equipment shelter for the radio telemetry equipment, and an antenna that 
+also supports the solar panels used to keep batteries charged. A standard sensor configuration includes a snow pillow, 
+a storage precipitation gage, and a temperature sensor. The snow pillow measures how much water is in the snowpack by 
+weighing the snow with a pressure transducer. Devices in the shelter convert the weight of the snow into the snow's 
+water equivalent -- that is, the actual amount of water in a given volume of snow. SNOTEL stations also collect data on 
+snow depth, all-season precipitation accumulation, and air temperature with daily maximums, minimums, and averages. 
+Many enhanced SNOTEL sites are equipped to take soil moisture and soil temperature measurements at various depths, 
+as well as solar radiation, wind speed, and relative humidity. The configuration at each site is tailored to the physical 
+conditions, the climate, and the specific requirements of the data users.
+The data collected at SNOTEL sites are generally reported multiple times per day, with some sensors reporting hourly.",
                 ProfileVersion = "19115-2",
-                MetadataLink = "catalog.data.gov/dataset/soil-climate-analysis-network-scan"
+                MetadataLink = "catalog.data.gov/dataset/snowpack-telemetry-network-snotel"
             };
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;

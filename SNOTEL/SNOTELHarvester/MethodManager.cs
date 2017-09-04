@@ -25,7 +25,7 @@ namespace SNOTELHarvester
 
         public void UpdateMethods()
         {
-            string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SCAN/SCANHarvester/settings/variables.xlsx";
+            string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
             var methodLookup = new Dictionary<string, MethodInfo>();
             var methodCodes = new List<string>();
             _log.LogWrite("Read Method Codes from URL " + variablesUrl);
@@ -50,6 +50,10 @@ namespace SNOTELHarvester
                             { // Row by row..
                                 rowNum++;
                                 string code = Convert.ToString(worksheet.Cells[row, 1].Value);
+                                if (code.EndsWith("in"))
+                                {
+                                    code = code.Substring(0, code.Length - 2);
+                                }
                                 if (code == "VariableCode")
                                 {
                                     continue;

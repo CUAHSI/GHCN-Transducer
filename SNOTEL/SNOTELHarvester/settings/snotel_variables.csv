@@ -4,7 +4,7 @@ BATT_D,Battery voltage,Not Relevant,Continuous,volts,168,day,104,1
 BATT_H,Battery voltage,Not Relevant,Continuous,volts,168,hour,103,1
 BATX_D,Battery voltage,Not Relevant,Maximum,volts,168,day,104,1
 BATX_H,Battery voltage,Not Relevant,Maximum,volts,168,hour,104,1
-DIAG_D,,,,,,,,
+DIAG_D,x,,,,,,,
 DPTP_H,"Temperature, dew point",Air,Continuous,degree fahrenheit,97,hour,103,1
 LRADT_D,"Radiation, total incoming",Air,Continuous,langleys per day,28,day,104,1
 LRADT_m,"Radiation, total incoming",Air,Continuous,langleys per day,28,month,106,1
@@ -314,5 +314,5 @@ WTEQ_m,Snow water equivalent,Snow,Continuous,international inch,49,month,106,1
 WTEQ_sm,Snow water equivalent,Snow,Continuous,international inch,49,month,106,0.5
 WTMAX_H,Temperature,Surface water,Maximum,degree fahrenheit,97,hour,103,1
 WTMIN_H,Temperature,Surface water,Minimum,degree fahrenheit,97,hour,103,1
-ZDUM_D,,,,,,,,
-ZDUM_H,,,,,,,,
+ZDUM_D,x,,,,,,,
+ZDUM_H,x,,,,,,,
