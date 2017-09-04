@@ -1128,7 +1128,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 offsetTypeID = methodID;
                 offsetTypeCode = methodCode;
             }
-            else
+            else if (methodCode.StartsWith("D"))
             {
                 heightDepthVal = (-1) * Convert.ToInt32(methodCode.Substring(1));
                 offsetTypeID = methodID;
