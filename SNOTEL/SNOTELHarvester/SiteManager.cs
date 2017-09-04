@@ -260,7 +260,7 @@ namespace SNOTELHarvester
                     }
                 }
             }
-            string sqlReset = @"DBCC CHECKIDENT('dbo.Sites', RESEED, 0);";
+            string sqlReset = @"DBCC CHECKIDENT('dbo.Sites', RESEED, 1);";
             using (SqlCommand cmd = new SqlCommand(sqlReset, connection))
             {
                 try

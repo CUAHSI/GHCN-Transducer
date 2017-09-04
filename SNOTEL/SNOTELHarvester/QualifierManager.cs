@@ -23,16 +23,17 @@ namespace SNOTELHarvester
             try
             {
                 var q = new List<Qualifier>();
-                q.Add(new Qualifier("m_", "no measurement information applicable"));
-                q.Add(new Qualifier("mB", "precipitation total formed from two 12 - hour totals"));
-                q.Add(new Qualifier("mD", "precipitation total formed from four six-hour totals"));
-                q.Add(new Qualifier("mH", "represents highest or lowest hourly temperature(TMAX or TMIN) or the average of hourly values (TAVG)"));
-                q.Add(new Qualifier("mK", "converted from knots"));
-                q.Add(new Qualifier("mL", "temperature appears to be lagged with respect to reported hour of observation"));
-                q.Add(new Qualifier("mO", "converted from oktas"));
-                q.Add(new Qualifier("mP", "identified as 'missing presumed zero' in DSI 3200 and 3206"));
-                q.Add(new Qualifier("mT", "trace of precipitation, snowfall, or snow depth"));
-                q.Add(new Qualifier("mW", "converted from 16 - point WBAN code(for wind direction)"));
+                q.Add(new Qualifier("V", "Validated Data"));
+                q.Add(new Qualifier("N", "No profile for automated validation"));
+                q.Add(new Qualifier("E", "Edit, minor adjustment for sensor noise"));
+                q.Add(new Qualifier("B", "Regression-based estimate for homogenizing collocated Snow Course and Snow Pillow data sets"));
+                q.Add(new Qualifier("K", "Estimate"));
+                q.Add(new Qualifier("X", "External estimate"));
+                q.Add(new Qualifier("S", "Suspect data"));
+                q.Add(new Qualifier("U", "Unknown"));
+                q.Add(new Qualifier("R", "No Human Review"));
+                q.Add(new Qualifier("P", "Preliminary Human Review"));
+                q.Add(new Qualifier("A", "Processing and Final Review Completed"));
 
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))

@@ -170,7 +170,7 @@ namespace SNOTELHarvester
             }
 
             // reset variable ID
-            string sqlReset = @"DBCC CHECKIDENT('dbo.Variables', RESEED, 0);";
+            string sqlReset = @"DBCC CHECKIDENT('dbo.Variables', RESEED, 1);";
             using (SqlCommand cmd = new SqlCommand(sqlReset, connection))
             {
                 try

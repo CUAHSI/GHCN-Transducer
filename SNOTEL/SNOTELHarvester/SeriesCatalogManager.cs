@@ -40,9 +40,9 @@ namespace SNOTELHarvester
                         string code = reader.GetString(1);
                         var site = new Site
                         {
-                            SiteID = reader.GetInt32(0),
-                            SiteCode = code,
-                            SiteName = reader.GetString(2),
+                            SiteID = Convert.ToInt32(reader["SiteID"]),
+                            SiteCode = Convert.ToString(reader["SiteCode"]),
+                            SiteName = Convert.ToString(reader["SiteName"])
                         };
                         lookup.Add(code, site);
                     }
