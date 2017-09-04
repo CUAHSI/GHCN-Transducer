@@ -1,0 +1,318 @@
+VariableCode,VariableName,SampleMedium,DataType,UnitsName,UnitsID,TimeUnitsName,TimeUnitsID,TimeSupport
+BATN_D,Battery voltage,Not Relevant,Minimum,volts,168,day,104,1
+BATT_D,Battery voltage,Not Relevant,Continuous,volts,168,day,104,1
+BATT_H,Battery voltage,Not Relevant,Continuous,volts,168,hour,103,1
+BATX_D,Battery voltage,Not Relevant,Maximum,volts,168,day,104,1
+BATX_H,Battery voltage,Not Relevant,Maximum,volts,168,hour,104,1
+DIAG_D,,,,,,,,
+DPTP_H,"Temperature, dew point",Air,Continuous,degree fahrenheit,97,hour,103,1
+LRADT_D,"Radiation, total incoming",Air,Continuous,langleys per day,28,day,104,1
+LRADT_m,"Radiation, total incoming",Air,Continuous,langleys per day,28,month,106,1
+LRADT_sm,"Radiation, total incoming",Air,Continuous,langleys per day,28,day,106,0.5
+NTRDV_H,"Radiation, net",Air,Continuous,watts per square meter,33,hour,103,1
+PRCP_D,Precipitation,Precipitation,Incremental,international inch,49,day,104,1
+PRCP_H,Precipitation,Precipitation,Incremental,international inch,49,hour,103,1
+PRCP_m,Precipitation,Precipitation,Incremental,international inch,49,month,106,1
+PRCP_sm,Precipitation,Precipitation,Incremental,international inch,49,day,106,0.5
+PRCP_wy,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PRCP_y,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PRCPSA_D,Precipitation,Precipitation,Incremental,international inch,49,day,104,1
+PRCPSA_m,Precipitation,Precipitation,Incremental,international inch,49,month,106,1
+PRCPSA_sm,Precipitation,Precipitation,Incremental,international inch,49,day,106,0.5
+PRCPSA_wy,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PRCPSA_y,Precipitation,Precipitation,Incremental,international inch,49,common year (365 days),107,1
+PREC_D,Precipitation,Precipitation,Cumulative,international inch,49,day,104,1
+PREC_H,Precipitation,Precipitation,Cumulative,international inch,49,hour,103,1
+PREC_m,Precipitation,Precipitation,Cumulative,international inch,49,month,106,1
+PREC_sm,Precipitation,Precipitation,Cumulative,international inch,49,day,106,0.5
+PREC_wy,Precipitation,Precipitation,Cumulative,international inch,49,common year (365 days),107,1
+PRES_D,Barometric pressure,Air,Continuous,inch of mercury,84,day,104,1
+PRES_H,Barometric pressure,Air,Continuous,inch of mercury,84,hour,103,1
+PVPV_H,Vapor pressure,Air,Continuous,kilopascal,170,hour,103,1
+RDC_D,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D11in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D12in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D14in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D16in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D18in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D20in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D24in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D2in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D32in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D37in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D39in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D3in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D40in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D4in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_D_D8in,Real dielectric constant,Soil,Continuous,dimensionless,137,day,104,1
+RDC_H,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D11in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D12in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D14in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D16in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D18in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D20in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D24in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D2in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D32in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D37in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D39in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D3in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D40in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D4in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RDC_H_D8in,Real dielectric constant,Soil,Continuous,dimensionless,137,hour,103,1
+RHENC_D,Relative humidity,Air,Continuous,percent,1,day,104,1
+RHENC_m,Relative humidity,Air,Continuous,percent,1,month,106,1
+RHENC_sm,Relative humidity,Air,Continuous,percent,1,month,106,0.5
+RHUM_D,Relative humidity,Air,Continuous,percent,1,day,104,1
+RHUM_H,Relative humidity,Air,Continuous,percent,1,hour,103,1
+RHUMN_D,Relative humidity,Air,Minimum,percent,1,day,104,1
+RHUMN_H,Relative humidity,Air,Minimum,percent,1,hour,103,1
+RHUMN_m,Relative humidity,Air,Minimum,percent,1,month,106,1
+RHUMN_sm,Relative humidity,Air,Minimum,percent,1,month,106,0.5
+RHUMV_D,Relative humidity,Air,Average,percent,1,day,104,1
+RHUMV_H,Relative humidity,Air,Average,percent,1,hour,103,1
+RHUMV_m,Relative humidity,Air,Average,percent,1,month,106,1
+RHUMV_sm,Relative humidity,Air,Average,percent,1,month,106,0.5
+RHUMX_D,Relative humidity,Air,Maximum,percent,1,day,104,1
+RHUMX_H,Relative humidity,Air,Maximum,percent,1,hour,103,1
+RHUMX_m,Relative humidity,Air,Maximum,percent,1,month,106,1
+RHUMX_sm,Relative humidity,Air,Maximum,percent,1,month,106,0.5
+SAL_D,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D11in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D12in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D14in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D16in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D18in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D20in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D24in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D2in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D32in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D37in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D39in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D3in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D40in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D4in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_D_D8in,Salinity,Soil water,Continuous,grams per liter,202,day,104,1
+SAL_H,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D11in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D12in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D14in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D16in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D18in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D20in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D24in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D2in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D32in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D37in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D39in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D3in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D40in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D4in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SAL_H_D8in,Salinity,Soil water,Continuous,grams per liter,202,hour,103,1
+SMS_D,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D11in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D12in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D14in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D16in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D18in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D20in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D24in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D2in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D32in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D37in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D39in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D3in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D40in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D4in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_D_D8in,Volumetric water content ,Soil,Continuous,percent,1,day,104,1
+SMS_H,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D11in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D12in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D14in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D16in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D18in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D20in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D24in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D2in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D32in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D37in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D39in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D3in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D40in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D4in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_H_D8in,Volumetric water content ,Soil,Continuous,percent,1,hour,103,1
+SMS_m,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D11in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D12in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D14in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D16in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D18in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D20in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D24in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D2in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D32in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D37in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D39in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D3in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D40in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D4in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_m_D8in,Volumetric water content ,Soil,Continuous,percent,1,month,106,1
+SMS_sm,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D11in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D12in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D14in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D16in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D18in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D20in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D24in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D2in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D32in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D37in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D39in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D3in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D40in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D4in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SMS_sm_D8in,Volumetric water content ,Soil,Continuous,percent,1,month,106,0.5
+SNWD_D,Snow depth,Snow,Continuous,international inch,49,day,104,1
+SNWD_H,Snow depth,Snow,Continuous,international inch,49,hour,103,1
+SNWD_m,Snow depth,Snow,Continuous,international inch,49,month,106,1
+SNWD_sm,Snow depth,Snow,Continuous,international inch,49,month,106,0.5
+SRAD_D,Global Radiation,Air,Continuous,watts per square meter,33,day,104,1
+SRAD_H,Global Radiation,Air,Continuous,watts per square meter,33,hour,103,1
+SRADN_D,Global Radiation,Air,Minimum,watts per square meter,33,day,104,1
+SRADN_m,Global Radiation,Air,Minimum,watts per square meter,33,hour,103,1
+SRADN_sm,Global Radiation,Air,Minimum,watts per square meter,33,month,106,0.5
+SRADV_D,Global Radiation,Air,Average,watts per square meter,33,day,104,1
+SRADV_H,Global Radiation,Air,Average,watts per square meter,33,hour,103,1
+SRADV_m,Global Radiation,Air,Average,watts per square meter,33,month,106,1
+SRADV_sm,Global Radiation,Air,Average,watts per square meter,33,month,106,0.5
+SRADX_D,Global Radiation,Air,Maximum,watts per square meter,33,day,104,1
+SRADX_H,Global Radiation,Air,Maximum,watts per square meter,33,hour,103,1
+SRADX_m,Global Radiation,Air,Maximum,watts per square meter,33,month,106,1
+SRADX_sm,Global Radiation,Air,Maximum,watts per square meter,33,month,106,0.5
+SRMN_H,Gage height,Surface water,Minimum,international foot,48,hour,103,1
+SRMO_D,Gage height,Surface water,Continuous,international foot,48,day,104,1
+SRMO_H,Gage height,Surface water,Continuous,international foot,48,hour,103,1
+SRMV_H,Gage height,Surface water,Average,international foot,48,hour,103,1
+SRMX_H,Gage height,Surface water,Maximum,international foot,48,hour,103,1
+STO_D,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D11in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D12in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D14in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D16in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D18in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D20in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D24in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D2in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D32in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D37in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D39in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D3in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D40in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D4in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_D_D8in,Temperature,Soil,Continuous,degree fahrenheit,97,day,104,1
+STO_H,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D11in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D12in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D14in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D16in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D18in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D20in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D24in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D2in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D32in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D37in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D39in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D3in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D40in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D4in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_H_D8in,Temperature,Soil,Continuous,degree fahrenheit,97,hour,103,1
+STO_m,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D11in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D12in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D14in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D16in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D18in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D20in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D24in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D2in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D32in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D37in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D39in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D3in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D40in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D4in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_m_D8in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,1
+STO_sm,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D11in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D12in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D14in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D16in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D18in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D20in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D24in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D2in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D32in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D37in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D39in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D3in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D40in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D4in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+STO_sm_D8in,Temperature,Soil,Continuous,degree fahrenheit,97,month,106,0.5
+SVPV_H,Vapor pressure,Air,Average,kilopascal,170,hour,103,1
+TAVG_D,Temperature,Air,Average,degree fahrenheit,97,day,104,1
+TAVG_H,Temperature,Air,Average,degree fahrenheit,97,hour,103,1
+TAVG_m,Temperature,Air,Average,degree fahrenheit,97,month,106,1
+TAVG_sm,Temperature,Air,Average,degree fahrenheit,97,month,106,0.5
+TAVG_wy,Temperature,Air,Average,degree fahrenheit,97,common year (365 days),107,1
+TAVG_y,Temperature,Air,Average,degree fahrenheit,97,common year (365 days),107,1
+TMAX_D,Temperature,Air,Maximum,degree fahrenheit,97,day,104,1
+TMAX_H,Temperature,Air,Maximum,degree fahrenheit,97,hour,103,1
+TMAX_m,Temperature,Air,Maximum,degree fahrenheit,97,month,106,1
+TMAX_sm,Temperature,Air,Maximum,degree fahrenheit,97,month,106,0.5
+TMAX_wy,Temperature,Air,Maximum,degree fahrenheit,97,common year (365 days),107,1
+TMAX_y,Temperature,Air,Maximum,degree fahrenheit,97,common year (365 days),107,1
+TMIN_D,Temperature,Air,Minimum,degree fahrenheit,97,day,104,1
+TMIN_H,Temperature,Air,Minimum,degree fahrenheit,97,hour,103,1
+TMIN_m,Temperature,Air,Minimum,degree fahrenheit,97,month,106,1
+TMIN_sm,Temperature,Air,Minimum,degree fahrenheit,97,month,106,0.5
+TMIN_wy,Temperature,Air,Minimum,degree fahrenheit,97,common year (365 days),107,1
+TMIN_y,Temperature,Air,Minimum,degree fahrenheit,97,common year (365 days),107,1
+TOBS_D,Temperature,Air,Continuous,degree fahrenheit,97,day,104,1
+TOBS_H,Temperature,Air,Continuous,degree fahrenheit,97,hour,103,1
+TOBS_m,Temperature,Air,Continuous,degree fahrenheit,97,month,106,1
+TOBS_sm,Temperature,Air,Continuous,degree fahrenheit,97,month,106,0.5
+WDIRV_D,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_D_H132in,Wind direction,Air,Average,degree,2,day,104,1
+WDIRV_H,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H132in,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_H_H240in,Wind direction,Air,Average,degree,2,hour,103,1
+WDIRV_m,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_m_H132in,Wind direction,Air,Average,degree,2,month,106,1
+WDIRV_sm,Wind direction,Air,Average,degree,2,month,106,0.5
+WDIRV_sm_H132in,Wind direction,Air,Average,degree,2,month,106,0.5
+WSPDV_D,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_D_H132in,Wind speed,Air,Average,miles per hour,120,day,104,1
+WSPDV_H,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H132in,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_H_H240in,Wind speed,Air,Average,miles per hour,120,hour,103,1
+WSPDV_m,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_m_H132in,Wind speed,Air,Average,miles per hour,120,month,106,1
+WSPDV_sm,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDV_sm_H132in,Wind speed,Air,Average,miles per hour,120,month,106,0.5
+WSPDX_D,Wind speed,Air,Maximum,miles per hour,120,day,104,1
+WSPDX_H,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H132in,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_H_H240in,Wind speed,Air,Maximum,miles per hour,120,hour,103,1
+WSPDX_m,Wind speed,Air,Maximum,miles per hour,120,month,106,1
+WSPDX_sm,Wind speed,Air,Maximum,miles per hour,120,month,106,0.5
+WTAVG_H,Temperature,Surface water,Average,degree fahrenheit,97,hour,103,1
+WTEQ_D,Snow water equivalent,Snow,Continuous,international inch,49,day,104,1
+WTEQ_H,Snow water equivalent,Snow,Continuous,international inch,49,hour,103,1
+WTEQ_m,Snow water equivalent,Snow,Continuous,international inch,49,month,106,1
+WTEQ_sm,Snow water equivalent,Snow,Continuous,international inch,49,month,106,0.5
+WTMAX_H,Temperature,Surface water,Maximum,degree fahrenheit,97,hour,103,1
+WTMIN_H,Temperature,Surface water,Minimum,degree fahrenheit,97,hour,103,1
+ZDUM_D,,,,,,,,
+ZDUM_H,,,,,,,,
