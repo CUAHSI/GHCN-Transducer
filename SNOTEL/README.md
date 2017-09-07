@@ -21,7 +21,6 @@ The transducer contains two parts:
 | DPTP      | DEW POINT TEMPERATURE                     | degF          | Temperature, dew point   | Continuous        |
 | LRADT     | SOLAR RADIATION/LANGLEY TOTAL             | langley       | Radiation, total incoming| Continuous        |
 | NTRDV     | NET SOLAR RADIATION AVERAGE               | watt/m2       | Radiation, net           | Average           |
-| PARV      | PHOTOSYNTHETICALLY ACTIVE RADIATION (PAR) | micromole/m2/s| Radiation, incoming PAR  | Continuous        |
 | PRCP      | PRECIPITATION INCREMENT                   | inches        | Precipitation            | Incremental       |
 | PRCPSA    | PRECIPITATION INCREMENT – SNOW-ADJUSTED   | inches        | Precipitation            | Incremental       |
 | PREC      | PRECIPITATION ACCUMULATION                | inches        | Precipitation            | Cumulative        |
@@ -36,21 +35,27 @@ The transducer contains two parts:
 | SAL       | SALINITY                                  | gram/l        | Salinity                 | Continuous        |
 | SMS       | SOIL MOISTURE PERCENT                     | pct           | Volumetric water content | Continuous        |
 | SNWD      | SNOW DEPTH                                | inches        | Snow depth               | Continuous        |
-| SRADV     | SOLAR RADIATION AVERAGE                   | watt/m2       | Radiation, incoming      | Average           |
+| SRAD      | SOLAR RADIATION                           | watt/m2       | Global Radiation         | Continuous        |
+| SRADV     | SOLAR RADIATION AVERAGE                   | watt/m2       | Global Radiation         | Average           |
+| SRADN     | SOLAR RADIATION MINIMUM                   | watt/m2       | Global Radiation         | Minimum           |
+| SRADX     | SOLAR RADIATION MAXIMUM                   | watt/m2       | Global Radiation         | Maximum           |
+| SRMN      | WATER LEVEL                               | inches        | Gage height              | Minimum           |
+| SRMO      | WATER LEVEL                               | inches        | Gage height              | Continuous        |
+| SRMV      | WATER LEVEL                               | inches        | Gage height              | Average           |
+| SRMX      | WATER LEVEL                               | inches        | Gage height              | Maximum           |
 | STN       | SOIL TEMPERATURE MINIMUM                  | degF          | Temperature              | Minimum           |
 | STO       | SOIL TEMPERATURE OBSERVED                 | degF          | Temperature              | Continuous        |
-| STV       | SOIL TEMPERATURE AVERAGE                  | degF          | Temperature              | Average           |
-| STX       | SOIL TEMPERATURE MAXIMUM                  | degF          | Temperature              | Maximum           |
 | SVPV      | VAPOR PRESSURE - SATURATED                | kPa           | Vapor pressure           | Continuous        |
 | TAVG      | AIR TEMPERATURE AVERAGE                   | degF          | Temperature              | Average           |
 | TMAX      | AIR TEMPERATURE MAXIMUM                   | degF          | Temperature              | Maximum           |
 | TMIN      | AIR TEMPERATURE MINIMUM                   | degF          | Temperature              | Minimum           |
 | TOBS      | AIR TEMPERATURE OBSERVED                  | degF          | Temperature, sensor      | Continuous        |
 | WDIRV     | WIND DIRECTION AVERAGE                    | degree        | Wind direction           | Average           |
-| WDIRZ     | WIND DIRECTION STANDARD DEVIATION         | degree        | Wind direction           | StandardDeviation |           
-| WDMVT     | WIND MOVEMENT TOTAL                       | mile          | Wind Run                 | Continuous        |
 | WSPDV     | WIND SPEED AVERAGE                        | mph           | Wind speed               | Average           |
 | WSPDX     | WIND SPEED MAXIMUM                        | mph           | Wind speed               | Maximum           |
+| WTAVG     | WATER TEMPERATURE                         | degF          | Temperature              | Average           |
+| WTMAX     | WATER TEMPERATURE                         | degF          | Temperature              | Maximum           |
+| WTMIN     | WATER TEMPERATURE                         | degF          | Temperature              | Minimum           |
 | WTEQ      | SNOW WATER EQUIVALENT                     | inches        | Snow water equivalent    | Continuous        |
 | ZDUM      | DUMMY LABEL                               | volt          | ?                        | ?                 |
 
@@ -93,16 +98,22 @@ of qualifier codes see the table below:
 | WATER_YEAR      | wy                        | year             | 1                         |
 | CALENDAR_YEAR   | y                         | year             | 1                         |
 
-## SNOTEL Heights and Depths 
-- SNOTEL observations are recorded at different heights above ground or depths below ground surface. The height or depth value is always in inches. Negative value indicates a subsurface sensor (in the soil profile). Positive values are used for wind sensors at different heights above ground. The WaterOneFlow service represents the heights and depths using the VariableCode, Method and Offset. For example the CUAHSI variable code **SMS_H_D2** means "Volumetric water content measured hourly at 2 inches depth" or the CUAHSI variable code **WSPDV_D_H40** means "Average wind speed (daily) at 40 inches height".
+## Excluding time-aggregated SNOTEL Variables
+- A special setting in the **appsettings.config** file of **SnotelWebService** allows excluding variables with selected duration
+from the WaterML web service response. By default, all durations are included.
 
-## Resulting CUAHSI variable code
+## SNOTEL Heights and Depths 
+- SNOTEL observations may be recorded at different heights above ground or depths below ground surface. The height or depth value is always in inches. Negative value indicates a subsurface sensor (in the soil profile). Positive values are used for wind sensors at different heights above ground. The WaterOneFlow service represents the heights and depths using the VariableCode, Method and Offset. For example the CUAHSI variable code **SMS_H_D2** means "Volumetric water content measured hourly at 2 inches depth" or the CUAHSI variable code **WSPDV_D_H40** means "Average wind speed (daily) at 40 inches height".
+
+## Resulting CUAHSI variable code, method element and offset value
 - The resulting CUAHSI variable code consists of two or three parts separated by the **underscore** character. 
 - The first part is the SNOTEL element code (for example WTEQ, SNWD, PRCP ...)
 - The second part is the time support abbreviation (H, D, sm, m, season, a, wy, y) - see table above
 - The third part is only included if the variable can be measured at multiple heights or depths (for example D40, D2, H60, H120 ...) The "D" means depth below ground surface and the "H" means height above ground surface.
 - For example the CUAHSI variable code **SMS_D_D40** means "Volumetric water content (daily) at depth of 40 inches
 - another example: The CUAHSI variable code **TMAX_m** means "Maximum air temperature (monthly) with no specified height or depth.
+- For each time series with a specified height or depth, a specific **method** is assigned in the WaterML *GetSiteInfo* response.
+- For each data value with a specified height or depth, a specific **OffsetValue** is assigned in the WaterML *GetValues* response.
 
 
 ## Setup Instructions for SNOTEL Harvester
@@ -118,5 +129,6 @@ of qualifier codes see the table below:
 1. Setup and run SNOTELHarvester as described above
 2. Open the solution SNOTELWebService.sln in Visual Studio
 3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
-4. Build the solution
-5. Copy the whole content of the "SNOTELWebService" folder to your a folder on IIS Web server where you want to publish the web service
+4. If required, edit the file appsettings.config and uncomment or edit the setting <add key="exclude_durations" value="WATER_YEAR, CALENDAR_YEAR, YEARLY, SEASONAL, MONTHLY, SEMIMONTHLY"/> to exclude any time-aggregated variables from the WaterML response.
+5. Build the solution
+6. Copy the whole content of the "SNOTELWebService" folder to your a folder on IIS Web server where you want to publish the web service
