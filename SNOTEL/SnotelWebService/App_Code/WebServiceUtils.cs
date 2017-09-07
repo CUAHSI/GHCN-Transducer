@@ -12,6 +12,7 @@ using System.Data;
 using WaterOneFlowImpl.geom;
 using System.Net;
 using System.IO;
+using System.Linq;
 
 namespace WaterOneFlow.odws
 {
@@ -1336,6 +1337,15 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         val.Value = vals[i].value;
                     }
 
+                    // qualifier (if relevant)
+                    var flag = vals[i].flag;
+                    val.qualifiers = vals[i].flag;
+                    if (!usedQualifiers.ContainsKey(flag))
+                    {
+                        QualifierType qual = FlagToQualifier(flag);
+                        usedQualifiers.Add(flag, qual);
+                    }
+
                     valuesList.Add(val);
                 }
 
@@ -1344,7 +1354,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 // daily, semimonthly, monthly, seasonal or yearly data
 
-                Awdb.data[] valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, false, beginDateStr, endDateStr, false);
+                Awdb.data[] valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, true, beginDateStr, endDateStr, false);
 
                 // getting parameters
                 var vals0 = valuesObj[0];
@@ -1352,6 +1362,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 DateTime endDate = Convert.ToDateTime(vals0.endDate);
 
                 decimal?[] vals = vals0.values;
+                string[] flags = vals0.flags;
 
                 for (int i = 0; i < vals.Length; i++)
                 {
@@ -1404,16 +1415,98 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         val.Value = Convert.ToDecimal(vals[i]);
                     }
 
+                    // flag -> qualifier code
+                    var flag = flags[i];
+                    val.qualifiers = flag;
+                    if (!usedQualifiers.ContainsKey(flag))
+                    {
+                        QualifierType qual = FlagToQualifier(flag);
+                        usedQualifiers.Add(flag, qual);
+                    }
+
                     valuesList.Add(val);
                 }
 
             }
 
-            
-
             s.value = valuesList.ToArray();
 
+            // adding qualifiers
+            QualifierType[] usedQuals = usedQualifiers.Values.ToArray();
+            s.qualifier = usedQuals;
+
             return s;
+        }
+
+        private static QualifierType FlagToQualifier(string flag)
+        {
+            switch(flag.ToLower())
+            {
+                case "v":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 1,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "Validated Data"
+                    };
+                case "n":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 2,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "No profile for automated validation"
+                    };
+                case "e":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 3,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "Edit, minor adjustment for sensor noise"
+                    };
+                case "b":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 4,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "Regression-based estimate for homogenizing collocated Snow Course and Snow Pillow data sets"
+                    };
+                case "k":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 5,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "Estimate"
+                    };
+                case "x":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 6,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "External estimate"
+                    };
+                case "s":
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 7,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "Suspect data"
+                    };
+                default:
+                    return new QualifierType
+                    {
+                        qualifierCode = flag,
+                        qualifierID = 0,
+                        qualifierIDSpecified = false,
+                        qualifierDescription = "Unknown"
+                    };
+            }
         }
 
         private static Decimal convertValue(object val, int varId) 
