@@ -574,7 +574,13 @@ WHERE v.VariableCode = @variableCode";
                         //variable name
                         varInfo.variableName = (string)dr["VariableName"];
 
-                        variablesList.Add(varInfo);
+                        // checking if variable is in exclude list
+                        List<string> excludeList = FindExcludedDurations();
+                        string duration = VariableCodeToDuration(varInfo.variableCode[0].Value);
+                        if (!excludeList.Contains(duration))
+                        {
+                            variablesList.Add(varInfo);
+                        }
 
                     }
                     conn.Close();
@@ -589,6 +595,8 @@ WHERE v.VariableCode = @variableCode";
             string cnn = GetConnectionString();
             string serviceCode = ConfigurationManager.AppSettings["network"];
             List<VariableInfoType> variablesList = new List<VariableInfoType>();
+
+            List<string> excludeList = FindExcludedDurations();
 
             using (SqlConnection conn = new SqlConnection(cnn))
             {
@@ -650,7 +658,12 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         //variable name
                         varInfo.variableName = (string)dr["VariableName"];
 
-                        variablesList.Add(varInfo);
+                        // only add variable if it is not in the "exclude_durations" list
+                        var duration = VariableCodeToDuration(varInfo.variableCode[0].Value);
+                        if (!excludeList.Contains(duration))
+                        {
+                            variablesList.Add(varInfo);
+                        }
 
                     }
                     conn.Close();
@@ -1038,6 +1051,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             string serviceCode = ConfigurationManager.AppSettings["network"];
             List<string> variableCodeList = new List<string>();
 
+            List<string> excluded = FindExcludedDurations();
+
             using (SqlConnection conn = new SqlConnection(cnn))
             {
                 using (SqlCommand cmd = new SqlCommand())
@@ -1055,8 +1070,11 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         if (dr.HasRows)
                         {
                             string varCode = Convert.ToString(dr["VariableCode"]);
-                            if (!variableCodeList.Contains(varCode))
+                            string duration = VariableCodeToDuration(varCode);
+                            if (!variableCodeList.Contains(varCode) && !excluded.Contains(duration))
+                            {
                                 variableCodeList.Add(varCode);
+                            }
                         }
                     }
                 }
@@ -1064,7 +1082,65 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             return variableCodeList;
         }
 
-        
+
+        private static string VariableCodeToDuration(string variableCode)
+        {
+            string[] vcSplit = variableCode.Split('_');
+            string durationCode = vcSplit[1];
+            string duration = "HOURLY";
+
+            switch (durationCode)
+            {
+                case "H":
+                    duration = "HOURLY";
+                    break;
+                case "D":
+                    duration = "DAILY";
+                    break;
+                case "sm":
+                    duration = "SEMIMONTHLY";
+                    break;
+                case "m":
+                    duration = "MONTHLY";
+                    break;
+                case "season":
+                    duration = "SEASONAL";
+                    break;
+                case "wy":
+                    duration = "WATER_YEAR";
+                    break;
+                case "y":
+                    duration = "CALENDAR_YEAR";
+                    break;
+                case "a":
+                    duration = "ANNUAL";
+                    break;
+                default:
+                    duration = "HOURLY";
+                    break;
+            }
+            return duration;
+        }
+
+
+        private static List<string> FindExcludedDurations()
+        {
+            string exclude_durations_str = ConfigurationManager.AppSettings["exclude_durations"];
+
+            var exclude_durations = new string[] { "" };
+            var durationsToExclude = new List<string>();
+            if (exclude_durations_str != null)
+            {
+                exclude_durations = exclude_durations_str.Split(',');
+                for (int j = 0; j < exclude_durations.Length; j++)
+                {
+                    durationsToExclude.Add(exclude_durations[j].Trim());
+                }
+            }
+            return durationsToExclude;
+        }
+
+
 
         /// <summary>
         /// Get the values, from the online .dly file

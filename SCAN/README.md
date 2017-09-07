@@ -70,6 +70,10 @@ The transducer contains two parts:
 | WATER_YEAR    | wy                        | year             | 1                         |
 | CALENDAR_YEAR | y                         | year             | 1                         |
 
+## Excluding time-aggregated SCAN Variables
+- A special setting in the **appsettings.config** file of **SnotelWebService** allows excluding variables with selected duration
+from the WaterML web service response. By default, all durations are included.
+
 ## SCAN Heights and Depths 
 - SCAN observations are recorded at different heights above ground or depths below ground surface. The height or depth value is always in inches. Negative value indicates a subsurface sensor (in the soil profile). Positive values are used for wind sensors at different heights above ground. The WaterOneFlow service represents the heights and depths using the VariableCode, Method and Offset. For example the CUAHSI variable code **SMS_H_D2** means "Volumetric water content measured hourly at 2 inches depth" or the CUAHSI variable code **WSPDV_D_H40** means "Average wind speed (daily) at 40 inches height".
 
@@ -80,6 +84,8 @@ The transducer contains two parts:
 - The third part is only included if the variable can be measured at multiple heights or depths (for example D40, D2, H60, H120 ...) The "D" means depth below ground surface and the "H" means height above ground surface.
 - For example the CUAHSI variable code **SMS_D_D40** means "Volumetric water content (daily) at depth of 40 inches
 - another example: The CUAHSI variable code **TMAX_m** means "Maximum air temperature (monthly) with no specified height or depth.
+- For each time series with a specified height or depth, a specific **method** is assigned in the WaterML *GetSiteInfo* response.
+- For each data value with a specified height or depth, a specific **OffsetValue** is assigned in the WaterML *GetValues* response.
 
 
 ## Setup Instructions for SCAN Harvester
@@ -95,5 +101,6 @@ The transducer contains two parts:
 1. Setup and run SCANharvester as described above
 2. Open the solution SCANWebService.sln in Visual Studio
 3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
-4. Build the solution
-5. Copy the whole content of the "SCANWebService" folder to your a folder on IIS Web server where you want to publish the web service
+4. If required, edit the file appsettings.config and uncomment or edit the setting <add key="exclude_durations" value="WATER_YEAR, CALENDAR_YEAR, YEARLY, SEASONAL, MONTHLY, SEMIMONTHLY"/> to exclude any time-aggregated variables from the WaterML response.
+5. Build the solution
+6. Copy the whole content of the "SCANWebService" folder to your a folder on IIS Web server where you want to publish the web service
