@@ -85,7 +85,8 @@ namespace SCANHarvester
                                 newMethod = new MethodInfo
                                 {
                                     MethodLink = methodCode,
-                                    MethodDescription = methodDesc
+                                    MethodDescription = methodDesc,
+                                    MethodCode = methodCode
                                 };
 
                                 if (!methodLookup.ContainsKey(methodCode))
@@ -139,12 +140,13 @@ namespace SCANHarvester
             {
                 //update the method
                 meth.MethodID = Convert.ToInt32(methodIDResult);
-                using (SqlCommand cmd = new SqlCommand("UPDATE Methods SET MethodDescription = @desc, MethodLink = @link WHERE MethodID = @id", connection))
+                using (SqlCommand cmd = new SqlCommand("UPDATE Methods SET MethodDescription = @desc, MethodLink = @link, MethodCode = @code WHERE MethodID = @id", connection))
                 {
                     cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
                     cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
                     cmd.Parameters.Add(new SqlParameter("@id", meth.MethodID));
-                    
+                    cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
+
                     connection.Open();
                     cmd.ExecuteNonQuery();
                     connection.Close();
@@ -154,12 +156,13 @@ namespace SCANHarvester
             else
             {
                 //save the method
-                string sql = "INSERT INTO Methods(MethodDescription, MethodLink) VALUES (@desc, @link)";
+                string sql = "INSERT INTO Methods(MethodDescription, MethodLink, MethodCode) VALUES (@desc, @link,@code)";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
                     connection.Open();
                     cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
                     cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
+                    cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
 
                     // to get the inserted method id
                     SqlParameter param = new SqlParameter("@MethodID", SqlDbType.Int);

@@ -1,0 +1,1 @@
+git update-index --assume-unchanged C:\Repos\GHCN-Transducer\SCAN\SCANHarvester\ConnectionStrings.config
