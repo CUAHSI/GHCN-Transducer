@@ -21,7 +21,6 @@ namespace SCANHarvester
         {
             try
             {
-
                 int metadataID = SaveOrUpdateMetadata();
                 Source source = new Source
                 {
@@ -39,7 +38,6 @@ namespace SCANHarvester
                     SourceCode = "NRCS-WCC-SCAN",
                     MetadataID = metadataID
                 };
-
 
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))

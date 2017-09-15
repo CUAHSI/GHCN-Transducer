@@ -264,14 +264,13 @@
     </None>
     <None Include="ConnectionStrings.config">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <None Include="settings\variables.csv" />
     <None Include="settings\variables.xlsx" />
-    <None Include="settings\variables2.csv" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
@@ -290,9 +289,6 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="settings\variables.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

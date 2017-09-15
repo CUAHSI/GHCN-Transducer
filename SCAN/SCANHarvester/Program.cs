@@ -22,13 +22,12 @@ namespace SCANHarvester
             srcM.UpdateSources();
 
             // (4) updating qualifiers
-            //var qualM = new QualifierManager(logger);
-            //qualM.UpdateQualifiers();
+            var qualM = new QualifierManager(logger);
+            qualM.UpdateQualifiers();
 
             // (4) updating sites
             var siteM = new SiteManager(logger);
             siteM.UpdateSites_fast();
-            // siteM.UpdateSites_fast();
 
             // (5) updating the series catalog
             SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);

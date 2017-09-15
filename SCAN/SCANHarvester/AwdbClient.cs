@@ -138,6 +138,8 @@ namespace SCANHarvester
                     return "Wisconsin";
                 case "56":
                     return "Wyoming";
+                case "72":
+                    return "Puerto Rico";
                 default:
                     return fipsStateNumber;
             }
@@ -417,8 +419,9 @@ namespace SCANHarvester
             string[] stationTriplets = LoadStationTriplets(wsc);
             var stationCount = stationTriplets.Length;
             _logger.LogWrite("Retrieved SCAN Station codes from AWDB service: found " + stationTriplets.Length.ToString() + " stations.");
-            
-            foreach(string stationTriplet in stationTriplets)
+            _logger.LogWrite("Searching SCAN Station metadata ... ");
+
+            foreach (string stationTriplet in stationTriplets)
             {
                 // call method "getStationMetadata"
                 var metadata = wsc.getStationMetadata(stationTriplet);
@@ -447,65 +450,6 @@ namespace SCANHarvester
 
             return siteList;
 
-        }
-
-        public void GetSitesOld()
-        {
-            // necessary to prevent the "Bad Gateway" error
-            System.Net.ServicePointManager.Expect100Continue = false;
-
-            var request = (HttpWebRequest)WebRequest.Create(_serviceUrl);
-
-            string postData = 
-@"<?xml version=""1.0"" encoding=""UTF-8""?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:q0=""http://www.wcc.nrcs.usda.gov/ns/awdbWebService"" xmlns:xsd = ""http://www.w3.org/2001/XMLSchema"" xmlns:xsi =""http://www.w3.org/2001/XMLSchema-instance"">
-<SOAP-ENV:Body>
-<q0:getStations>
-<networkCds>SCAN</networkCds>
-<logicalAnd>true</logicalAnd>
-</q0:getStations>
-</SOAP-ENV:Body>
-</SOAP-ENV:Envelope>";
-
-            var data = Encoding.UTF8.GetBytes(postData); // or UTF8
-
-            request.Method = "POST";
-            request.Accept = "*/*";
-            request.UserAgent = "runscope/0.1";
-            request.ContentLength = data.Length;
-
-            var newStream = request.GetRequestStream();
-            newStream.Write(data, 0, data.Length);
-            newStream.Close();
-
-            // try sending the SOAP request ...
-            try
-            {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    var statusCode = (int)response.StatusCode;
-
-                    if (statusCode == 200)
-                    {
-                        using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                        {
-                            var xmlDoc = XDocument.Load(reader);
-                            var root = xmlDoc.Root;
-                        }
-                    }
-                }
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    WebResponse resp = e.Response;
-                    using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
-                    {
-                        string msg = sr.ReadToEnd();
-                    }
-                }
-            }
         }
     }
 }

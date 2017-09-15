@@ -84,6 +84,7 @@ namespace SCANHarvester
                     }
                 }
                 _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
+                _log.LogWrite(String.Format("Updating {0} variables...", variables.Count));
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
