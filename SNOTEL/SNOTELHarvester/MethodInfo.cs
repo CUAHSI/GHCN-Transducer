@@ -11,5 +11,6 @@ namespace SNOTELHarvester
         public int MethodID { get; set; }
         public string MethodDescription { get; set; }
         public string MethodLink { get; set; }
+        public string MethodCode { get; set; }
     }
 }

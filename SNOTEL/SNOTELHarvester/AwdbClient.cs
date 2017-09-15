@@ -138,6 +138,8 @@ namespace SNOTELHarvester
                     return "Wisconsin";
                 case "56":
                     return "Wyoming";
+                case "72":
+                    return "Puerto Rico";
                 default:
                     return fipsStateNumber;
             }
@@ -151,7 +153,7 @@ namespace SNOTELHarvester
             var wsc = new Awdb.AwdbWebServiceClient();
 
             // download a list of all SCAN station triplets
-            string[] stationTriplets = LoadStationTriplets(wsc);
+            string[] stationTriplets = LoadStationTriplets(wsc, "SNTL");
 
             foreach (string stationTriplet in stationTriplets)
             {
@@ -241,8 +243,8 @@ namespace SNOTELHarvester
             // using auto-generated class from AWDB SOAP service reference
             var wsc = new Awdb.AwdbWebServiceClient();
 
-            // download a list of all SCAN station triplets
-            string[] stationTriplets = LoadStationTriplets(wsc);
+            // download a list of all SNOTEL station triplets
+            string[] stationTriplets = LoadStationTriplets(wsc, "SNTL");
 
             foreach (string stationTriplet in stationTriplets)
             {
@@ -286,11 +288,11 @@ namespace SNOTELHarvester
             return uniqueElements.ToArray();
         }
 
-        private string[] LoadStationTriplets(Awdb.AwdbWebServiceClient wsc)
+        private string[] LoadStationTriplets(Awdb.AwdbWebServiceClient wsc, string networkCode)
         {
             var stationIds = new string[] { };
             var stateCds = new string[] { };
-            var networkCds = new string[] { "SNTL" };
+            var networkCds = new string[] { networkCode };
             var hucs = new string[] { };
             var countyNames = new string[] { };
             var minLatitude = -90;
@@ -316,7 +318,7 @@ namespace SNOTELHarvester
             List<Series> seriesList = new List<Series>();
 
             var wsc = new Awdb.AwdbWebServiceClient();
-            string[] stationTriplets = LoadStationTriplets(wsc);
+            string[] stationTriplets = LoadStationTriplets(wsc, "SNTL");
             var stationCount = stationTriplets.Length;
             _logger.LogWrite("Retrieving series catalog for " + stationTriplets.Length.ToString() + " stations.");
 
@@ -413,12 +415,14 @@ namespace SNOTELHarvester
             // using auto-generated class from AWDB SOAP service reference
             var wsc = new Awdb.AwdbWebServiceClient();
 
-            // download a list of all SCAN station triplets
-            string[] stationTriplets = LoadStationTriplets(wsc);
+            // download a list of all SNOTEL station triplets
+            string[] stationTriplets = LoadStationTriplets(wsc, "SNTL");
             var stationCount = stationTriplets.Length;
-            _logger.LogWrite("Retrieved SCAN Station codes from AWDB service: found " + stationTriplets.Length.ToString() + " stations.");
-            
-            foreach(string stationTriplet in stationTriplets)
+            _logger.LogWrite("Retrieved SNOTEL Station codes from AWDB service: found " + stationTriplets.Length.ToString() + " stations.");
+
+            _logger.LogWrite("Downloading metadata for " + stationTriplets.Length.ToString() + " stations...");
+
+            foreach (string stationTriplet in stationTriplets)
             {
                 // call method "getStationMetadata"
                 var metadata = wsc.getStationMetadata(stationTriplet);
@@ -442,70 +446,9 @@ namespace SNOTELHarvester
                     StationTriplet = metadata.stationTriplet
                 };
                 siteList.Add(site);
-
             }
 
             return siteList;
-
-        }
-
-        public void GetSitesOld()
-        {
-            // necessary to prevent the "Bad Gateway" error
-            System.Net.ServicePointManager.Expect100Continue = false;
-
-            var request = (HttpWebRequest)WebRequest.Create(_serviceUrl);
-
-            string postData = 
-@"<?xml version=""1.0"" encoding=""UTF-8""?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:q0=""http://www.wcc.nrcs.usda.gov/ns/awdbWebService"" xmlns:xsd = ""http://www.w3.org/2001/XMLSchema"" xmlns:xsi =""http://www.w3.org/2001/XMLSchema-instance"">
-<SOAP-ENV:Body>
-<q0:getStations>
-<networkCds>SCAN</networkCds>
-<logicalAnd>true</logicalAnd>
-</q0:getStations>
-</SOAP-ENV:Body>
-</SOAP-ENV:Envelope>";
-
-            var data = Encoding.UTF8.GetBytes(postData); // or UTF8
-
-            request.Method = "POST";
-            request.Accept = "*/*";
-            request.UserAgent = "runscope/0.1";
-            request.ContentLength = data.Length;
-
-            var newStream = request.GetRequestStream();
-            newStream.Write(data, 0, data.Length);
-            newStream.Close();
-
-            // try sending the SOAP request ...
-            try
-            {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    var statusCode = (int)response.StatusCode;
-
-                    if (statusCode == 200)
-                    {
-                        using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                        {
-                            var xmlDoc = XDocument.Load(reader);
-                            var root = xmlDoc.Root;
-                        }
-                    }
-                }
-            }
-            catch (WebException e)
-            {
-                if (e.Status == WebExceptionStatus.ProtocolError)
-                {
-                    WebResponse resp = e.Response;
-                    using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
-                    {
-                        string msg = sr.ReadToEnd();
-                    }
-                }
-            }
         }
     }
 }

@@ -262,9 +262,13 @@
     <None Include="Connected Services\Awdb\SNOTELHarvester.Awdb.unit.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="ConnectionStrings.config" />
+    <None Include="ConnectionStrings.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="settings\snotel_variables.xlsx" />
+    <None Include="settings\unique_elements.csv" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
