@@ -214,89 +214,6 @@ namespace WaterOneFlow.odws
             return siteList.ToArray();
         }
 
-        public static string VariableIDToCode(int variableID) 
-        {
-            string prefix = ConfigurationManager.AppSettings["vocabulary"];
-            return prefix + ":" + VariableIDToShortCode(variableID);
-        }
-
-        public static string VariableIDToShortCode(int variableID) {
-            switch (variableID)
-            {
-                case 1:
-                    return "SRAZKY";
-                case 4:
-                    return "VODSTAV";
-                case 5:
-                    return "PRUTOK";
-                case 8:
-                    return "SNIH";
-                case 16:
-                    return "TEPLOTA";
-                case 17:
-                    return "TMIN";
-                case 18:
-                    return "TMAX";
-                default:
-                    return "UNKNOWN";
-            }
-        }
-
-        public static int VariableCodeToID(string variableCode) 
-        {
-            string prefix = ConfigurationManager.AppSettings["vocabulary"];
-            string varCode = variableCode;
-            if (variableCode.StartsWith(prefix))
-            {
-                varCode = varCode.Substring(prefix.Length + 1);
-            }
-            switch (varCode)
-            {
-                case "SRAZKY":
-                    return 1;
-                case "VODSTAV":
-                    return 4;
-                case "PRUTOK":
-                    return 5;
-                case "SNIH":
-                    return 8;
-                case "TEPLOTA":
-                    return 16;
-                case "TMIN":
-                    return 17;
-                case "TMAX":
-                    return 18;
-                default:
-                    return 0;
-            }
-        }
-
-        private static string GetTableName(int variableId)
-        {
-            switch(variableId)
-            {
-                case 1:
-                    return "rain_hourly";
-                    
-                case 4:
-                    return "stage";
-                    
-                case 5:
-                    return "discharge";
-                    
-                case 8:
-                    return "snow";
-                    
-                case 16:
-                case 17:
-                case 18:
-                    return "temperature";
-                    
-                default:
-                    return "rain_hourly";
-            }
-        }
-
         public static seriesCatalogTypeSeries GetSeriesCatalogFromDb(int siteId, string variableCode)
         {
             VariableInfoType v = GetVariableInfoFromDb(variableCode);
@@ -334,11 +251,18 @@ namespace WaterOneFlow.odws
                     s.variableTimeInterval.beginDateTimeUTC = Convert.ToDateTime(dr["BeginDateTime"]); ;
                     s.variableTimeInterval.beginDateTimeUTCSpecified = false;
 
-                    s.variableTimeInterval.endDateTime = Convert.ToDateTime(dr["EndDateTime"]);
-                    s.variableTimeInterval.endDateTimeUTC = Convert.ToDateTime(dr["EndDateTime"]);
+                    // end time: if series is active, the original source shows endTime=2100-01-01
+                    // in that case we set endTime to today's date
+                    DateTime endTime = Convert.ToDateTime(dr["EndDateTime"]);
+                    if (endTime > DateTime.Now.Date)
+                    {
+                        endTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    }
+                    s.variableTimeInterval.endDateTime = endTime;
+                    s.variableTimeInterval.endDateTimeUTC = endTime;
                     s.variableTimeInterval.endDateTimeUTCSpecified = false;
 
-                    
+
                     s.valueCount = new seriesCatalogTypeSeriesValueCount();
                     s.valueCount.Value = Convert.ToInt32(dr["ValueCount"]);
 
@@ -731,202 +655,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             return s;
         }
 
-        internal static void SetVariableProperties(int var_id, VariableInfoType varInfo)
-        {
-            //time support and time unit (same for all variables here)
-            varInfo.timeScale = new VariableInfoTypeTimeScale();
-            varInfo.timeScale.isRegular = true;
-            varInfo.timeScale.timeSpacingSpecified = false;
-            varInfo.timeScale.timeSupport = 1.0f;
-            varInfo.timeScale.timeSupportSpecified = true;
-            varInfo.timeScale.unit = new UnitsType();
-            varInfo.timeScale.unit.unitAbbreviation = "hr";
-            varInfo.timeScale.unit.unitCode = "103";
-            varInfo.timeScale.unit.unitID = 103;
-            varInfo.timeScale.unit.unitName = "hour";
-            varInfo.timeScale.unit.unitType = "Time";
-
-            //variable code (same computation for all variables here)
-            varInfo.valueType = "Field Observation";
-
-            varInfo.variableCode = new VariableInfoTypeVariableCode[1];
-            varInfo.variableCode[0] = new VariableInfoTypeVariableCode();
-            varInfo.variableCode[0].@default = true;
-            varInfo.variableCode[0].defaultSpecified = true;
-            varInfo.variableCode[0].Value = VariableIDToShortCode(var_id);
-            varInfo.variableCode[0].vocabulary = ConfigurationManager.AppSettings["vocabulary"];
-            varInfo.variableCode[0].variableID = var_id;
-            
-            switch(var_id)
-            {
-                case 1:
-                    //precipitation
-                    varInfo.dataType = "Incremental";
-                    varInfo.generalCategory = "Climate";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Precipitation";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "mm";
-                    varInfo.unit.unitCode = "54";
-                    varInfo.unit.unitDescription = "millimeter";
-                    varInfo.unit.unitID = 1;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "millimeter";
-                    varInfo.unit.unitType = "Length";
-                    varInfo.variableName = "Precipitation";
-                    break;
-                case 4:
-                    //water level
-                    varInfo.dataType = "Average";
-                    varInfo.generalCategory = "Hydrology";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Surface water";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit - centimeter
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "cm";
-                    varInfo.unit.unitCode = "47";
-                    varInfo.unit.unitDescription = "centimeter";
-                    varInfo.unit.unitID = 47;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "centimeter";
-                    varInfo.unit.unitType = "Length";
-
-                    //variable value type and name
-                    varInfo.valueType = "Field Observation";
-                    varInfo.variableName = "Gage height";
-                    break;
-                case 5:
-                    //discharge
-                    varInfo.dataType = "Average";
-                    varInfo.generalCategory = "Hydrology";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Surface water";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit - cubic meter per second
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "m^3/s";
-                    varInfo.unit.unitCode = "36";
-                    varInfo.unit.unitDescription = "cubic meters per second";
-                    varInfo.unit.unitID = 36;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "cubic meters per second";
-                    varInfo.unit.unitType = "Flow";
-                    
-                    //variable value type and name
-                    varInfo.valueType = "Field Observation";
-                    varInfo.variableName = "Discharge";
-                    break;
-                case 8:
-                    //snow
-                    varInfo.dataType = "Average";
-                    varInfo.generalCategory = "Climate";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Snow";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "cm";
-                    varInfo.unit.unitCode = "47";
-                    varInfo.unit.unitDescription = "centimeter";
-                    varInfo.unit.unitID = 47;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "centimeter";
-                    varInfo.unit.unitType = "Length";
-
-                    //variable value type and name
-                    varInfo.valueType = "Field Observation";
-                    varInfo.variableName = "Snow depth";
-                    break;
-                case 16:
-                    //temperature
-                    varInfo.dataType = "Average";
-                    varInfo.generalCategory = "Climate";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Air";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "degC";
-                    varInfo.unit.unitCode = "96";
-                    varInfo.unit.unitDescription = "degree celsius";
-                    varInfo.unit.unitID = 96;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "degree celsius";
-                    varInfo.unit.unitType = "Temperature";
-
-                    //variable code
-                    varInfo.valueType = "Field Observation";
-                    varInfo.variableName = "Temperature";
-                    break;
-                case 17:
-                    //temperature min
-                    varInfo.dataType = "Minimum";
-                    varInfo.generalCategory = "Climate";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Air";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "degC";
-                    varInfo.unit.unitCode = "96";
-                    varInfo.unit.unitDescription = "degree celsius";
-                    varInfo.unit.unitID = 96;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "degree celsius";
-                    varInfo.unit.unitType = "Temperature";
-
-                    //variable code
-                    varInfo.valueType = "Field Observation";
-                    varInfo.variableName = "Temperature";
-                    break;
-                case 18:
-                    //temperature
-                    varInfo.dataType = "Maximum";
-                    varInfo.generalCategory = "Climate";
-                    varInfo.metadataTimeSpecified = false;
-                    varInfo.noDataValue = -9999.0;
-                    varInfo.noDataValueSpecified = true;
-                    varInfo.sampleMedium = "Air";
-                    varInfo.speciation = "Not Applicable";
-
-                    //variable unit
-                    varInfo.unit = new UnitsType();
-                    varInfo.unit.unitAbbreviation = "degC";
-                    varInfo.unit.unitCode = "96";
-                    varInfo.unit.unitDescription = "degree celsius";
-                    varInfo.unit.unitID = 96;
-                    varInfo.unit.unitIDSpecified = true;
-                    varInfo.unit.unitName = "degree celsius";
-                    varInfo.unit.unitType = "Temperature";
-
-                    //variable code
-                    varInfo.valueType = "Field Observation";
-                    varInfo.variableName = "Temperature";
-                    break;
-            }
-        }
-
+        
 
          public static SiteInfoType GetSiteFromDb2(string siteCode)
         {
@@ -1142,10 +871,6 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             int qcID = 1;
             int sourceID = 1;
             
-            
-            //numeric variable id
-            int varId = VariableCodeToID(variableCode);
-            
             //to get values, from the db
             TsValuesSingleVariableType s = new TsValuesSingleVariableType();
             s.censorCode = new CensorCodeType[1];
@@ -1204,6 +929,10 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
             // connecting to the AWDB web service
             Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
+
+            // !!! necessary configuration to prevent MaxReceivedMessageSize error
+            System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
+            httpBinding.MaxReceivedMessageSize = int.MaxValue;
 
             // the AWDB station parameter must be in form ID:STATE:NETWORK
             string[] stationTriplets = new string[] { siteCode.Replace("_", ":") };
