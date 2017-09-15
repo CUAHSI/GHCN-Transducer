@@ -329,12 +329,20 @@ namespace WaterOneFlow.odws
                     dr.Read();
 
                     s.variableTimeInterval = new TimeIntervalType();
-                    s.variableTimeInterval.beginDateTime = Convert.ToDateTime(dr["BeginDateTime"]);
-                    s.variableTimeInterval.beginDateTimeUTC = Convert.ToDateTime(dr["BeginDateTime"]); ;
+                    DateTime begTime = Convert.ToDateTime(dr["BeginDateTime"]);
+                    s.variableTimeInterval.beginDateTime = begTime;
+                    s.variableTimeInterval.beginDateTimeUTC = begTime;
                     s.variableTimeInterval.beginDateTimeUTCSpecified = false;
 
-                    s.variableTimeInterval.endDateTime = Convert.ToDateTime(dr["EndDateTime"]);
-                    s.variableTimeInterval.endDateTimeUTC = Convert.ToDateTime(dr["EndDateTime"]);
+                    // end time: if series is active, the original source shows endTime=2100-01-01
+                    // in that case we set endTime to today's date
+                    DateTime endTime = Convert.ToDateTime(dr["EndDateTime"]);
+                    if(endTime > DateTime.Now.Date)
+                    {
+                        endTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    }
+                    s.variableTimeInterval.endDateTime = endTime;
+                    s.variableTimeInterval.endDateTimeUTC = endTime;
                     s.variableTimeInterval.endDateTimeUTCSpecified = false;
 
                     
@@ -1237,9 +1245,14 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             // !!! necessary configuration to prevent the "Bad Gateway" error
             // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
             System.Net.ServicePointManager.Expect100Continue = false;
+            
 
             // connecting to the AWDB web service
             Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
+
+            // !!! necessary configuration to prevent MaxRecievedMessageSize error
+            System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
+            httpBinding.MaxReceivedMessageSize = int.MaxValue;
 
             // the AWDB station parameter must be in form ID:STATE:NETWORK
             string[] stationTriplets = new string[] { siteCode.Replace("_", ":") };
