@@ -1103,6 +1103,9 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         case Awdb.duration.DAILY:
                             val.dateTime = begDate.AddDays(i);
                             break;
+                        case Awdb.duration.SEMIMONTHLY:
+                            val.dateTime = begDate.AddDays(i * 15);
+                            break;
                         case Awdb.duration.MONTHLY:
                             val.dateTime = begDate.AddMonths(i);
                             break;
