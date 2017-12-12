@@ -267,7 +267,9 @@
     </None>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="settings\snotel_variables.xlsx" />
+    <AdditionalFiles Include="settings\snotel_variables.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AdditionalFiles>
     <None Include="settings\unique_elements.csv" />
   </ItemGroup>
   <ItemGroup>

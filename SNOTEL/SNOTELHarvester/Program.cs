@@ -11,7 +11,7 @@ namespace SNOTELHarvester
 
             // (1) updating sites
             var siteM = new SiteManager(logger);
-            siteM.UpdateSites_fast();
+            //siteM.UpdateSites_fast();
 
             // (2) updating variables
             var varM = new VariableManager(logger);

@@ -8,6 +8,7 @@ using System.Net;
 using System.Globalization;
 using OfficeOpenXml;
 using System.Linq;
+using System.Reflection;
 
 namespace SNOTELHarvester
 {
@@ -25,69 +26,68 @@ namespace SNOTELHarvester
 
         public void UpdateVariables()
         {
-            
-            string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
+            // reading the variables from the EXCEL file
+            // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
+            string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string variablesFile = Path.Combine(executableLocation, "snotel_variables.xlsx");
+
+            // in previous version variables were read from the Github URL
+            //string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
+
             var variables = new List<Variable>();
-            _log.LogWrite("Read Variables from URL " + variablesUrl);
+
+            _log.LogWrite("Read Variables from File " + variablesFile);
             int rowNum = 0;
             object timeUnitsObj = "timeUnitsObj";
             try
             {
-                var webRequest = HttpWebRequest.Create(variablesUrl) as HttpWebRequest;
-                var webResponse = webRequest.GetResponse();
-
-                using (var webResponseStream = webResponse.GetResponseStream())
+                var variablesFileInfo = new FileInfo(variablesFile);
+                using(var package = new ExcelPackage(variablesFileInfo))
                 {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        webResponseStream.CopyTo(memoryStream);
-                        using (var package = new ExcelPackage(memoryStream))
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
+                    var start = worksheet.Dimension.Start;
+                    var end = worksheet.Dimension.End;
+                    for (int row = start.Row; row <= end.Row; row++)
+                    { // Row by row..
+                        rowNum++;
+                        string code = Convert.ToString(worksheet.Cells[row, 1].Value);
+                        if (code.EndsWith("in"))
                         {
-                            ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
-                            var start = worksheet.Dimension.Start;
-                            var end = worksheet.Dimension.End;
-                            for (int row = start.Row; row <= end.Row; row++)
-                            { // Row by row..
-                                rowNum++;
-                                string code = Convert.ToString(worksheet.Cells[row, 1].Value);
-                                if (code.EndsWith("in"))
-                                {
-                                    code = code.Substring(0, code.Length - 2);
-                                }
-                                if (code == "VariableCode")
-                                {
-                                    continue;
-                                }
-                                string name = Convert.ToString(worksheet.Cells[row, 2].Value);
-                                if (name == "x")
-                                {
-                                    continue;
-                                }
-                                string sampleMedium = Convert.ToString(worksheet.Cells[row, 3].Value);
-                                string dataType = Convert.ToString(worksheet.Cells[row, 4].Value);
-                                string unitsName = Convert.ToString(worksheet.Cells[row, 5].Value);
-                                int unitsID = Convert.ToInt32(worksheet.Cells[row, 6].Value);
-                                string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
-                                timeUnitsObj = worksheet.Cells[row, 8].Value;
-                                int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
-                                float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
-
-                                Variable v = new Variable
-                                {
-                                    VariableCode = code,
-                                    VariableName = name,
-                                    VariableUnitsID = unitsID,
-                                    VariableUnitsName = unitsName,
-                                    DataType = dataType,
-                                    SampleMedium = sampleMedium,
-                                    TimeUnitsID = timeUnitsID,
-                                    TimeSupport = timeSupport
-                                };
-                                variables.Add(v);
-                            }
+                            code = code.Substring(0, code.Length - 2);
                         }
+                        if (code == "VariableCode")
+                        {
+                            continue;
+                        }
+                        string name = Convert.ToString(worksheet.Cells[row, 2].Value);
+                        if (name == "x")
+                        {
+                            continue;
+                        }
+                        string sampleMedium = Convert.ToString(worksheet.Cells[row, 3].Value);
+                        string dataType = Convert.ToString(worksheet.Cells[row, 4].Value);
+                        string unitsName = Convert.ToString(worksheet.Cells[row, 5].Value);
+                        int unitsID = Convert.ToInt32(worksheet.Cells[row, 6].Value);
+                        string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
+                        timeUnitsObj = worksheet.Cells[row, 8].Value;
+                        int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
+                        float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
+
+                        Variable v = new Variable
+                        {
+                            VariableCode = code,
+                            VariableName = name,
+                            VariableUnitsID = unitsID,
+                            VariableUnitsName = unitsName,
+                            DataType = dataType,
+                            SampleMedium = sampleMedium,
+                            TimeUnitsID = timeUnitsID,
+                            TimeSupport = timeSupport
+                        };
+                        variables.Add(v);
                     }
                 }
+
                 _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
 
