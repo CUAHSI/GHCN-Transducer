@@ -56,7 +56,6 @@
     <Compile Include="ISOMetadata.cs" />
     <Compile Include="MethodInfo.cs" />
     <Compile Include="MethodManager.cs" />
-    <Compile Include="NeonProduct.cs" />
     <Compile Include="NeonSite.cs" />
     <Compile Include="Qualifier.cs" />
     <Compile Include="Series.cs" />
