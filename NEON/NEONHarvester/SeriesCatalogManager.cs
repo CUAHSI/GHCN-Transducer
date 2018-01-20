@@ -184,8 +184,7 @@ namespace NEONHarvester
             var methodLookup = getMethodLookup();
             var source = getSource();
 
-            var wsClient = new AwdbClient(_log);
-            List<Series> seriesList = wsClient.GetAllSeries();
+            List<Series> seriesList = new List<Series>();
             
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 

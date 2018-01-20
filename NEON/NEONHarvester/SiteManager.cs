@@ -108,9 +108,9 @@ namespace NEONHarvester
             }
         }
 
-        public List<Site> ReadSitesFromWeb()
+        public NeonSiteCollection ReadSitesFromApi()
         {
-            var sites = new List<Site>();
+            var neonSites = new NeonSiteCollection();
             try
             {
                 string url = "http://data.neonscience.org/api/v0/sites";
@@ -120,15 +120,14 @@ namespace NEONHarvester
                 {
                     var jsonData = client.DownloadString(url);
 
-                    var jsonSites = JsonConvert.DeserializeObject<List<NeonSite>>(jsonData);
-                    
+                    neonSites = JsonConvert.DeserializeObject<NeonSiteCollection>(jsonData);
                 }
             }
             catch (Exception ex)
             {
-                _log.LogWrite("ReadStates ERROR: " + ex.Message);
+                _log.LogWrite("ReadSitesFromApi ERROR: " + ex.Message);
             }
-            return (sites);
+            return (neonSites);
         }
 
         /// <summary>
@@ -136,9 +135,10 @@ namespace NEONHarvester
         /// </summary>
         public void UpdateSites_fast()
         {
-            List<Site> siteList = ReadSitesFromWeb();
+            NeonSiteCollection neonSites = ReadSitesFromApi();
 
-            _log.LogWrite("UpdateSites for " + siteList.Count.ToString() + " sites ...");
+            int numSitesFromApi = neonSites.data.Count;
+            _log.LogWrite("UpdateSites for " + numSitesFromApi.ToString() + " sites ...");
 
             try
             {
@@ -169,14 +169,15 @@ namespace NEONHarvester
 
                     // delete old entries from "sites" table
                     // using batch delete 
-                    DeleteOldSites(siteList.Count, connection);
+                    DeleteOldSites(numSitesFromApi, connection);
                     
 
                     // to be adjusted
                     int batchSize = 500;
                     long siteID = 0L;
 
-                    int numBatches = (siteList.Count / batchSize) + 1;
+                    var siteList = neonSites.data;
+                    int numBatches = (numSitesFromApi / batchSize) + 1;
                     for (int b = 0; b < numBatches; b++)
                     {
                         // prepare for bulk insert
@@ -201,30 +202,30 @@ namespace NEONHarvester
 
                         int batchStart = b * batchSize;
                         int batchEnd = batchStart + batchSize;
-                        if (batchEnd >= siteList.Count)
+                        if (batchEnd >= numSitesFromApi)
                         {
-                            batchEnd = siteList.Count;
+                            batchEnd = numSitesFromApi;
                         }
                         for (int i = batchStart; i < batchEnd; i++)
                         {
                             siteID = siteID + 1;
                             var row = bulkTable.NewRow();
                             row["SiteID"] = siteID;
-                            row["SiteCode"] = siteList[i].SiteCode;
-                            row["SiteName"] = siteList[i].SiteName;
-                            row["Latitude"] = siteList[i].Latitude;
-                            row["Longitude"] = siteList[i].Longitude;
+                            row["SiteCode"] = siteList[i].siteCode;
+                            row["SiteName"] = siteList[i].siteName;
+                            row["Latitude"] = siteList[i].siteLatitude;
+                            row["Longitude"] = siteList[i].siteLongitude;
                             row["LatLongDatumID"] = 3; // WGS1984
-                            row["Elevation_m"] = siteList[i].Elevation;
+                            row["Elevation_m"] = DBNull.Value;
                             row["VerticalDatum"] = "Unknown";
                             row["LocalX"] = 0.0f;
                             row["LocalY"] = 0.0f;
                             row["LocalProjectionID"] = DBNull.Value;
                             row["PosAccuracy_m"] = 0.0f;
-                            row["State"] = siteList[i].State;
-                            row["County"] = siteList[i].County;
-                            row["Comments"] = siteList[i].Comments;
-                            row["SiteType"] = "Soil hole"; // from CUAHSI SiteTypeCV controlled vocabulary
+                            row["State"] = siteList[i].stateName;
+                            row["County"] = DBNull.Value;
+                            row["Comments"] = siteList[i].siteDescription + " " + siteList[i].siteCode;
+                            row["SiteType"] = "Atmosphere"; // from CUAHSI SiteTypeCV controlled vocabulary
                             bulkTable.Rows.Add(row);
                         }
                         SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
@@ -235,7 +236,7 @@ namespace NEONHarvester
                         Console.WriteLine("Sites inserted row " + batchEnd.ToString());
                     }
                 }
-                _log.LogWrite("UpdateSites: " + siteList.Count.ToString() + " sites updated.");
+                _log.LogWrite("UpdateSites: " + numSitesFromApi.ToString() + " sites updated.");
             }
             catch(Exception ex)
             {

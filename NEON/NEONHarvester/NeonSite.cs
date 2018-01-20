@@ -20,4 +20,9 @@ namespace NEONHarvester
         public List<object> dataProducts { get; set; }
         public string siteName { get; set; }
     }
+
+    public class NeonSiteCollection
+    {
+        public List<NeonSite> data { get; set; }
+    }
 }
