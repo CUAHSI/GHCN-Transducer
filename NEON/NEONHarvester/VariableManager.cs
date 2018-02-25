@@ -9,9 +9,20 @@ using System.Globalization;
 using OfficeOpenXml;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 
 namespace NEONHarvester
 {
+    class ProductInfo
+    {
+        public string ProductCode { get; set; }
+        public string ProductName { get; set; }
+        public string ProductStatus { get; set; }
+        public int NumSites { get; set; }
+        public int NumMonths { get; set; }
+    }
+    
+    
     /// <summary>
     /// Responsible for updating the Variables table in the ODM
     /// </summary>
@@ -24,15 +35,82 @@ namespace NEONHarvester
             _log = log;
         }
 
+
+        public NeonProductCollection ReadProductsFromApi()
+        {
+            var neonProducts = new NeonProductCollection();
+            try
+            {
+                string url = "http://data.neonscience.org/api/v0/products";
+                var client = new WebClient();
+                using (var stream = client.OpenRead(url))
+                using (var reader = new StreamReader(stream))
+                {
+                    var jsonData = client.DownloadString(url);
+
+                    neonProducts = JsonConvert.DeserializeObject<NeonProductCollection>(jsonData);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("ReadSitesFromApi ERROR: " + ex.Message);
+            }
+            return (neonProducts);
+        }
+
+
+        public void WriteProductTable()
+        {
+            var products = ReadProductsFromApi();
+
+            var productInfos = new List<ProductInfo>();
+            foreach (var prod in products.data)
+            {
+                var p = new ProductInfo();
+                p.ProductCode = prod.productCode;
+                p.ProductName = prod.productName;
+                p.ProductStatus = prod.productStatus;
+                if (prod.siteCodes is null)
+                {
+                    p.NumSites = 0;
+                    p.NumMonths = 0;
+                }
+                else
+                {
+                    p.NumSites = prod.siteCodes.Count;
+                    p.NumMonths = 0;
+                    foreach (var sc in prod.siteCodes)
+                    {
+                        foreach (var m in sc.availableMonths)
+                        {
+                            p.NumMonths += 1;
+                        }
+                    }
+                }
+                productInfos.Add(p);                
+            }
+
+            var file = new FileInfo("neon_products.xlsx");
+            using (ExcelPackage package = new ExcelPackage(file))
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("test");
+
+                worksheet.Cells["A1"].LoadFromCollection(productInfos, true, OfficeOpenXml.Table.TableStyles.Medium1);
+
+                package.Save();
+            }
+
+
+            
+        }
+            
+
         public void UpdateVariables()
         {
             // reading the variables from the EXCEL file
             // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
             string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string variablesFile = Path.Combine(executableLocation, "snotel_variables.xlsx");
-
-            // in previous version variables were read from the Github URL
-            //string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
+            string variablesFile = Path.Combine(executableLocation, "neon_variables.xlsx");
 
             var variables = new List<Variable>();
 
@@ -55,7 +133,7 @@ namespace NEONHarvester
                         {
                             code = code.Substring(0, code.Length - 2);
                         }
-                        if (code == "VariableCode")
+                        if (code == "NeonVariableCode")
                         {
                             continue;
                         }

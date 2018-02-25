@@ -1,0 +1,8 @@
+NeonProductCode,NeonProductName,NeonTable,NeonField,CuahsiVariableCode,CuahsiVariableName,SampleMedium,DataType,UnitsName,UnitsID,TimeUnitsName,TimeUnitsID,TimeSupport
+DP1.00001.001,2D wind speed and direction ,2DWSD_30min,windSpeedMean,windSpeedMean_2DWSD_30min_00001_001,Wind speed,Air,Average,miles per hour,120,day,104,1
+DP1.00001.001,2D wind speed and direction ,2DWSD_30min,windDirMean,windDirMean_2DWSD_30min_00001_001,Wind direction,Air,Average,,,,,
+DP1.00002.001,Single aspirated air temperature ,SAAT_30min,tempSingleMean,tempSingleMean_2DWSD_30min_00002_001,Temperature,Air,Average,degree celsius,,minute,,30
+DP1.00003.001,Triple aspirated air temperature ,TAAT_30min,tempTripleMean,tempTripleMean_TAAT_30min_00003_001,Temperature,Air,Average,degree celsius,,minute,,
+DP1.00004.001,Barometric pressure,BP_30min,staPresMean,staPresMean_BP_30min_00004_001,"Pressure, gauge",Air,Average,,,,,
+DP1.00004.001,Barometric pressure,BP_30min,corPresMean,corPresMean_BP_30min_00004_001,Barometric pressure,Air,Average,,,,,
+DP1.00001.001,,,,,,,,,,,,
