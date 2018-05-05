@@ -11,13 +11,14 @@ namespace NEONHarvester
 
             // (1) updating variables from NEON data product info
             var varM = new VariableManager(logger);
+
             //var products = varM.ReadProductsFromApi();
 
-            varM.WriteProductTable();
+            // varM.WriteProductTable();
 
-            //varM.UpdateVariables();
+            varM.UpdateVariables();
 
-            // (2) updating methods
+            // (2) updating methods, based on variables lookup
             //var methM = new MethodManager(logger);
             //methM.UpdateMethods();
 

@@ -78,9 +78,9 @@
     </None>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <AdditionalFiles Include="settings\neon_variables.xlsx">
+    <None Include="settings\neon_variables_lookup_example.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AdditionalFiles>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

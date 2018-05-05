@@ -21,8 +21,8 @@ namespace NEONHarvester
         public int NumSites { get; set; }
         public int NumMonths { get; set; }
     }
-    
-    
+
+
     /// <summary>
     /// Responsible for updating the Variables table in the ODM
     /// </summary>
@@ -87,7 +87,7 @@ namespace NEONHarvester
                         }
                     }
                 }
-                productInfos.Add(p);                
+                productInfos.Add(p);
             }
 
             var file = new FileInfo("neon_products.xlsx");
@@ -99,20 +99,18 @@ namespace NEONHarvester
 
                 package.Save();
             }
-
-
-            
         }
-            
+
 
         public void UpdateVariables()
         {
             // reading the variables from the EXCEL file
             // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
             string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string variablesFile = Path.Combine(executableLocation, "neon_variables.xlsx");
+            string variablesFile = Path.Combine(executableLocation, "settings", "neon_variables_lookup_example.xlsx");
 
             var variables = new List<Variable>();
+            var methods = new Dictionary<string, MethodInfo>();
 
             _log.LogWrite("Read Variables from File " + variablesFile);
             int rowNum = 0;
@@ -128,39 +126,40 @@ namespace NEONHarvester
                     for (int row = start.Row; row <= end.Row; row++)
                     { // Row by row..
                         rowNum++;
-                        string code = Convert.ToString(worksheet.Cells[row, 1].Value);
-                        if (code.EndsWith("in"))
+                        string productCode = Convert.ToString(worksheet.Cells[row, 1].Value);
+                        if (productCode == "ProductCode")
                         {
-                            code = code.Substring(0, code.Length - 2);
+                            continue;
                         }
-                        if (code == "NeonVariableCode")
+                        string used = Convert.ToString(worksheet.Cells[row, 7].Value);
+                        if (used != "yes")
                         {
                             continue;
                         }
                         string name = Convert.ToString(worksheet.Cells[row, 2].Value);
-                        if (name == "x")
-                        {
-                            continue;
-                        }
-                        string sampleMedium = Convert.ToString(worksheet.Cells[row, 3].Value);
-                        string dataType = Convert.ToString(worksheet.Cells[row, 4].Value);
-                        string unitsName = Convert.ToString(worksheet.Cells[row, 5].Value);
-                        int unitsID = Convert.ToInt32(worksheet.Cells[row, 6].Value);
-                        string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
-                        timeUnitsObj = worksheet.Cells[row, 8].Value;
-                        int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
-                        float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
-
+                        string productStatus = Convert.ToString(worksheet.Cells[row, 3].Value);
+                        string neonTable = Convert.ToString(worksheet.Cells[row, 4].Value);
+                        string neonAttribute = Convert.ToString(worksheet.Cells[row, 5].Value);
+                        string neonDocument = Convert.ToString(worksheet.Cells[row, 6].Value);
+                        string cuahsiVariableCode = Convert.ToString(worksheet.Cells[row, 8].Value);
+                        string cuahsiVariableName = Convert.ToString(worksheet.Cells[row, 9].Value);
+                        string generalCategory = Convert.ToString(worksheet.Cells[row, 10].Value);
+                        string sampleMedium = Convert.ToString(worksheet.Cells[row, 11].Value);
+                        string dataType = Convert.ToString(worksheet.Cells[row, 12].Value);
+                        string unitsName = Convert.ToString(worksheet.Cells[row, 13].Value);
+                        int unitsID = Convert.ToInt32(worksheet.Cells[row, 14].Value);
+                        
                         Variable v = new Variable
                         {
-                            VariableCode = code,
-                            VariableName = name,
+                            VariableCode = cuahsiVariableCode,
+                            VariableName = cuahsiVariableName,
                             VariableUnitsID = unitsID,
                             VariableUnitsName = unitsName,
                             DataType = dataType,
+                            GeneralCategory = generalCategory,
                             SampleMedium = sampleMedium,
-                            TimeUnitsID = timeUnitsID,
-                            TimeSupport = timeSupport
+                            TimeUnitsID = 102, // minute
+                            TimeSupport = 30.0f
                         };
                         variables.Add(v);
                     }

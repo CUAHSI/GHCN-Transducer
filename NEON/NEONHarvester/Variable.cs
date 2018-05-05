@@ -22,7 +22,7 @@ namespace NEONHarvester
         public bool IsRegular { get { return true; } }
 
         public string Speciation { get { return ("Not Applicable"); } }
-        public string GeneralCategory { get { return "Soil"; } }
+        public string GeneralCategory { get; set; }
         public double NoDataValue { get { return -9999.0; } }
 
     }
