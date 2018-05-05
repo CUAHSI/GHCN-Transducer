@@ -36,6 +36,30 @@ namespace NEONHarvester
         }
 
 
+        public NeonProduct ReadProductFromApi(string productCode)
+        {
+            var neonProduct = new NeonProduct();
+
+            try
+            {
+                string url = "http://data.neonscience.org/api/v0/products/" + productCode;
+                var client = new WebClient();
+                using (var stream = client.OpenRead(url))
+                using (var reader = new StreamReader(stream))
+                {
+                    var jsonData = client.DownloadString(url);
+
+                    var neonProductData = JsonConvert.DeserializeObject<NeonProductData>(jsonData);
+                    neonProduct = neonProductData.data;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
+            }
+            return (neonProduct);
+        }
+
         public NeonProductCollection ReadProductsFromApi()
         {
             var neonProducts = new NeonProductCollection();
@@ -53,7 +77,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
-                _log.LogWrite("ReadSitesFromApi ERROR: " + ex.Message);
+                _log.LogWrite("ReadProductsFromApi ERROR: " + ex.Message);
             }
             return (neonProducts);
         }
@@ -102,68 +126,101 @@ namespace NEONHarvester
         }
 
 
+        private object SaveOrUpdateMethod(MethodInfo meth, SqlConnection connection)
+        {
+            object methodIDResult = null;
+
+            using (SqlCommand cmd = new SqlCommand("SELECT MethodID FROM Methods WHERE MethodDescription = @desc", connection))
+            {
+                cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
+                connection.Open();
+                methodIDResult = cmd.ExecuteScalar();
+                connection.Close();
+            }
+
+            if (methodIDResult != null)
+            {
+                //update the method
+                meth.MethodID = Convert.ToInt32(methodIDResult);
+                using (SqlCommand cmd = new SqlCommand("UPDATE Methods SET MethodDescription = @desc, MethodLink = @link, MethodCode = @code WHERE MethodID = @id", connection))
+                {
+                    cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
+                    cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
+                    cmd.Parameters.Add(new SqlParameter("@id", meth.MethodID));
+                    cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
+
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                }
+            }
+            else
+            {
+                //save the method
+                string sql = "INSERT INTO Methods(MethodDescription, MethodLink, MethodCode) VALUES (@desc, @link, @code)";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    connection.Open();
+                    cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
+                    cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
+                    cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
+
+                    // to get the inserted method id
+                    SqlParameter param = new SqlParameter("@MethodID", SqlDbType.Int);
+                    param.Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add(param);
+
+                    cmd.ExecuteNonQuery();
+                    methodIDResult = cmd.Parameters["@MethodID"].Value;
+                    connection.Close();
+                }
+            }
+            return methodIDResult;
+        }
+
+
+        public void UpdateMethods()
+        {
+            LookupFileReader xlsReader = new LookupFileReader(_log);
+
+            Dictionary<string, MethodInfo> methodLookup = xlsReader.ReadMethodsFromExcel();
+
+            foreach(string productCode in methodLookup.Keys)
+            {
+                var productInfo = ReadProductFromApi(productCode);
+                var productDesc = productInfo.productDescription;
+                methodLookup[productCode].MethodDescription = productDesc;
+            }
+
+            _log.LogWrite(String.Format("Found {0} distinct methods.", methodLookup.Count));
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                foreach (MethodInfo meth in methodLookup.Values)
+                {
+                    try
+                    {
+                        object methodID = SaveOrUpdateMethod(meth, connection);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWrite("error updating method: " + meth.MethodDescription + " " + ex.Message);
+                    }
+
+                }
+            }
+            _log.LogWrite("UpdateMethods OK: " + methodLookup.Count.ToString() + " methods.");
+        }
+
+
         public void UpdateVariables()
         {
-            // reading the variables from the EXCEL file
-            // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
-            string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string variablesFile = Path.Combine(executableLocation, "settings", "neon_variables_lookup_example.xlsx");
-
-            var variables = new List<Variable>();
-            var methods = new Dictionary<string, MethodInfo>();
-
-            _log.LogWrite("Read Variables from File " + variablesFile);
-            int rowNum = 0;
-            object timeUnitsObj = "timeUnitsObj";
             try
             {
-                var variablesFileInfo = new FileInfo(variablesFile);
-                using(var package = new ExcelPackage(variablesFileInfo))
-                {
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
-                    var start = worksheet.Dimension.Start;
-                    var end = worksheet.Dimension.End;
-                    for (int row = start.Row; row <= end.Row; row++)
-                    { // Row by row..
-                        rowNum++;
-                        string productCode = Convert.ToString(worksheet.Cells[row, 1].Value);
-                        if (productCode == "ProductCode")
-                        {
-                            continue;
-                        }
-                        string used = Convert.ToString(worksheet.Cells[row, 7].Value);
-                        if (used != "yes")
-                        {
-                            continue;
-                        }
-                        string name = Convert.ToString(worksheet.Cells[row, 2].Value);
-                        string productStatus = Convert.ToString(worksheet.Cells[row, 3].Value);
-                        string neonTable = Convert.ToString(worksheet.Cells[row, 4].Value);
-                        string neonAttribute = Convert.ToString(worksheet.Cells[row, 5].Value);
-                        string neonDocument = Convert.ToString(worksheet.Cells[row, 6].Value);
-                        string cuahsiVariableCode = Convert.ToString(worksheet.Cells[row, 8].Value);
-                        string cuahsiVariableName = Convert.ToString(worksheet.Cells[row, 9].Value);
-                        string generalCategory = Convert.ToString(worksheet.Cells[row, 10].Value);
-                        string sampleMedium = Convert.ToString(worksheet.Cells[row, 11].Value);
-                        string dataType = Convert.ToString(worksheet.Cells[row, 12].Value);
-                        string unitsName = Convert.ToString(worksheet.Cells[row, 13].Value);
-                        int unitsID = Convert.ToInt32(worksheet.Cells[row, 14].Value);
-                        
-                        Variable v = new Variable
-                        {
-                            VariableCode = cuahsiVariableCode,
-                            VariableName = cuahsiVariableName,
-                            VariableUnitsID = unitsID,
-                            VariableUnitsName = unitsName,
-                            DataType = dataType,
-                            GeneralCategory = generalCategory,
-                            SampleMedium = sampleMedium,
-                            TimeUnitsID = 102, // minute
-                            TimeSupport = 30.0f
-                        };
-                        variables.Add(v);
-                    }
-                }
+                LookupFileReader xlsReader = new LookupFileReader(_log);
+
+                var variables = xlsReader.ReadVariablesFromExcel();
 
                 _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -191,7 +248,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
-                _log.LogWrite("UpdateVariables ERROR on row: " + timeUnitsObj.ToString() + " "  + rowNum + " " + ex.Message);
+                _log.LogWrite("UpdateVariables ERROR on row: "  + " " + ex.Message);
             }
 
         }
@@ -349,6 +406,7 @@ namespace NEONHarvester
                 }
             }
             return variableIDResult;
-        }
+}
     }
+
 }

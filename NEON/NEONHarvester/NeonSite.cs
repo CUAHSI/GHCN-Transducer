@@ -61,6 +61,10 @@ namespace NEONHarvester
         public List<NeonProduct> data { get; set; }
     }
 
+    public class NeonProductData
+    {
+        public NeonProduct data { get; set; }
+    }
 
     public class NeonProductInfo
     {

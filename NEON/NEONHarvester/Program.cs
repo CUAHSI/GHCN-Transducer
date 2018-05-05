@@ -20,7 +20,7 @@ namespace NEONHarvester
 
             // (2) updating methods, based on variables lookup
             //var methM = new MethodManager(logger);
-            //methM.UpdateMethods();
+            varM.UpdateMethods();
 
 
             // (3) updating sites

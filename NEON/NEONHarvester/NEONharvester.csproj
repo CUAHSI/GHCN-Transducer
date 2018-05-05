@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ISOMetadata.cs" />
+    <Compile Include="LookupFileReader.cs" />
     <Compile Include="MethodInfo.cs" />
     <Compile Include="MethodManager.cs" />
     <Compile Include="NeonSite.cs" />

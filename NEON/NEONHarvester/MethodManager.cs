@@ -25,6 +25,9 @@ namespace NEONHarvester
 
         public void UpdateMethods()
         {
+
+
+
             string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
             var methodLookup = new Dictionary<string, MethodInfo>();
             var methodCodes = new List<string>();
@@ -33,6 +36,9 @@ namespace NEONHarvester
             object timeUnitsObj = "timeUnitsObj";
             try
             {
+                LookupFileReader xlsReader = new LookupFileReader(_log);
+                var methods = xlsReader.ReadMethodsFromExcel();
+
                 var webRequest = HttpWebRequest.Create(variablesUrl) as HttpWebRequest;
                 var webResponse = webRequest.GetResponse();
 
