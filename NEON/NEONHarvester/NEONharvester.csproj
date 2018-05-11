@@ -57,8 +57,10 @@
     <Compile Include="LookupFileReader.cs" />
     <Compile Include="MethodInfo.cs" />
     <Compile Include="MethodManager.cs" />
+    <Compile Include="NeonSensorPosition.cs" />
     <Compile Include="NeonSite.cs" />
     <Compile Include="Qualifier.cs" />
+    <Compile Include="SensorPositionReader.cs" />
     <Compile Include="Series.cs" />
     <Compile Include="Site.cs" />
     <Compile Include="Source.cs" />

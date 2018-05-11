@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NEONHarvester
 {
+
+
+
     public class ChangeLog
     {
         public int id { get; set; }
@@ -93,5 +96,23 @@ namespace NEONHarvester
     public class NeonSiteCollection
     {
         public List<NeonSite> data { get; set; }
+    }
+
+    public class NeonFile
+    {
+        public string crc32 { get; set; }
+        public string name { get; set; }
+        public string size { get; set; }
+        public string url { get; set; }
+    }
+
+    public class NeonFileCollection
+    {
+        public List<NeonFile> files { get; set; }
+    }
+
+    public class NeonFileData
+    {
+        public NeonFileCollection data { get; set; }
     }
 }

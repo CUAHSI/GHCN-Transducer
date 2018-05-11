@@ -9,21 +9,15 @@ namespace NEONHarvester
             // (0) setup progress logging with writing to console and log file
             var logger = new LogWriter(true);
 
-            // (1) updating variables from NEON data product info
+            // (1) updating variables and methods from NEON data product info
             var varM = new VariableManager(logger);
-
-            //var products = varM.ReadProductsFromApi();
-
-            // varM.WriteProductTable();
-
             varM.UpdateVariables();
-
-            // (2) updating methods, based on variables lookup
-            //var methM = new MethodManager(logger);
             varM.UpdateMethods();
 
 
             // (3) updating sites
+            varM.GetSitePositions();
+
             var siteM = new SiteManager(logger);
             siteM.UpdateSites_fast();
 

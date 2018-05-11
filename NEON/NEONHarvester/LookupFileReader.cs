@@ -89,6 +89,50 @@ namespace NEONHarvester
         }
 
 
+        public List<string> ReadProductCodesFromExcel()
+        {
+            // reading the product codes from the EXCEL file
+            // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
+            string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string variablesFile = Path.Combine(executableLocation, "settings", "neon_variables_lookup_example.xlsx");
+
+            var productCodes = new List<String>();
+
+            _log.LogWrite("Read product codes from File " + variablesFile);
+            int rowNum = 0;
+            object timeUnitsObj = "timeUnitsObj";
+
+            var variablesFileInfo = new FileInfo(variablesFile);
+            using (var package = new ExcelPackage(variablesFileInfo))
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
+                var start = worksheet.Dimension.Start;
+                var end = worksheet.Dimension.End;
+                for (int row = start.Row; row <= end.Row; row++)
+                { // Row by row..
+                    rowNum++;
+                    string productCode = Convert.ToString(worksheet.Cells[row, 1].Value);
+                    if (productCode == "ProductCode")
+                    {
+                        continue;
+                    }
+                    string used = Convert.ToString(worksheet.Cells[row, 7].Value);
+                    if (used != "yes")
+                    {
+                        continue;
+                    }
+                    if (!productCodes.Contains(productCode))
+                    {
+                        productCodes.Add(productCode);
+                    }
+                }
+                    
+            }
+
+            return productCodes;
+        }
+
+
         public Dictionary<string, MethodInfo> ReadMethodsFromExcel()
         {
             // reading the methods from the EXCEL file

@@ -36,6 +36,95 @@ namespace NEONHarvester
         }
 
 
+        public Dictionary<string, NeonSensorPosition> GetSitePositions()
+        {
+            var siteLookup = new Dictionary<string, NeonSensorPosition>();
+
+            var senPosReader = new SensorPositionReader(_log);
+
+            List<string> supportedProductCodes = new List<string>();
+            var lookupReader = new LookupFileReader(_log);
+            supportedProductCodes = lookupReader.ReadProductCodesFromExcel();
+            
+            foreach (string productCode in supportedProductCodes)
+            {
+                var siteDataUrls = new Dictionary<string, string>();
+                siteDataUrls = GetSitesForProduct(productCode);
+
+                foreach(var siteCode in siteDataUrls.Keys)
+                {
+                    var dataUrl = siteDataUrls[siteCode];
+                    var dataFiles = ReadNeonFilesFromApi(dataUrl);
+                    foreach(var dataFile in dataFiles.files)
+                    {
+                        if (dataFile.name.Contains("sensor_positions"))
+                        {
+                            Console.WriteLine(dataFile.name);
+                            var sensorPositionUrl = dataFile.url;
+
+                            var sensorPositions = senPosReader.ReadSensorPositionsFromUrl(sensorPositionUrl);
+                            foreach(var senPos in sensorPositions)
+                            {
+                                string fullSiteCode = siteCode + "_" + senPos.HorVerCode;
+                                if (!siteLookup.ContainsKey(fullSiteCode))
+                                {
+                                    siteLookup.Add(fullSiteCode, senPos);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return siteLookup;
+        }
+
+
+        /// <summary>
+        /// Returns a dictionary with entries: Neon short site code: latest data URL
+        /// </summary>
+        /// <param name="productCode"></param>
+        /// <returns></returns>
+        public Dictionary<string, string> GetSitesForProduct(string productCode)
+        {
+            var neonProduct = ReadProductFromApi(productCode);
+            var productSiteCodes = neonProduct.siteCodes;
+
+            var siteDataUrls = new Dictionary<string, string>();
+            foreach(var siteCode in productSiteCodes)
+            {
+                var shortCode = siteCode.siteCode;
+                var dataUrls = siteCode.availableDataUrls;
+                var lastDataUrl = dataUrls.Last();
+                siteDataUrls.Add(shortCode, lastDataUrl);
+            }
+            return siteDataUrls;
+        }
+
+
+        public NeonFileCollection ReadNeonFilesFromApi(string filesUrl)
+        {
+            var neonFiles = new NeonFileCollection();
+
+            try
+            {
+                var client = new WebClient();
+                using (var stream = client.OpenRead(filesUrl))
+                using (var reader = new StreamReader(stream))
+                {
+                    var jsonData = client.DownloadString(filesUrl);
+
+                    var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
+                    neonFiles = neonFileData.data;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
+            }
+            return (neonFiles);
+        }
+
+
         public NeonProduct ReadProductFromApi(string productCode)
         {
             var neonProduct = new NeonProduct();
