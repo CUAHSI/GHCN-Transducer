@@ -57,6 +57,7 @@
     <Compile Include="LookupFileReader.cs" />
     <Compile Include="MethodInfo.cs" />
     <Compile Include="MethodManager.cs" />
+    <Compile Include="NeonApiReader.cs" />
     <Compile Include="NeonSensorPosition.cs" />
     <Compile Include="NeonSite.cs" />
     <Compile Include="Qualifier.cs" />

@@ -12,17 +12,17 @@ namespace NEONHarvester
             // (1) updating variables and methods from NEON data product info
             var varM = new VariableManager(logger);
             varM.UpdateVariables();
-            varM.UpdateMethods();
+
+            // (2) updating methods from xlsx lookup table + product info
+            var methodM = new MethodManager(logger);
+            methodM.UpdateMethods();
 
 
             // (3) updating sites
-            varM.GetSitePositions();
-
             var siteM = new SiteManager(logger);
-            siteM.UpdateSites_fast();
+            siteM.UpdateSites();
 
             
-
             // (4) updating sources
             var srcM = new SourceManager(logger);
             srcM.UpdateSources();

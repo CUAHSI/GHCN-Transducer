@@ -29,152 +29,18 @@ namespace NEONHarvester
     class VariableManager
     {
         private LogWriter _log;
+        private NeonApiReader _apiReader;
 
         public VariableManager(LogWriter log)
         {
             _log = log;
-        }
-
-
-        public Dictionary<string, NeonSensorPosition> GetSitePositions()
-        {
-            var siteLookup = new Dictionary<string, NeonSensorPosition>();
-
-            var senPosReader = new SensorPositionReader(_log);
-
-            List<string> supportedProductCodes = new List<string>();
-            var lookupReader = new LookupFileReader(_log);
-            supportedProductCodes = lookupReader.ReadProductCodesFromExcel();
-            
-            foreach (string productCode in supportedProductCodes)
-            {
-                var siteDataUrls = new Dictionary<string, string>();
-                siteDataUrls = GetSitesForProduct(productCode);
-
-                foreach(var siteCode in siteDataUrls.Keys)
-                {
-                    var dataUrl = siteDataUrls[siteCode];
-                    var dataFiles = ReadNeonFilesFromApi(dataUrl);
-                    foreach(var dataFile in dataFiles.files)
-                    {
-                        if (dataFile.name.Contains("sensor_positions"))
-                        {
-                            Console.WriteLine(dataFile.name);
-                            var sensorPositionUrl = dataFile.url;
-
-                            var sensorPositions = senPosReader.ReadSensorPositionsFromUrl(sensorPositionUrl);
-                            foreach(var senPos in sensorPositions)
-                            {
-                                string fullSiteCode = siteCode + "_" + senPos.HorVerCode;
-                                if (!siteLookup.ContainsKey(fullSiteCode))
-                                {
-                                    siteLookup.Add(fullSiteCode, senPos);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return siteLookup;
-        }
-
-
-        /// <summary>
-        /// Returns a dictionary with entries: Neon short site code: latest data URL
-        /// </summary>
-        /// <param name="productCode"></param>
-        /// <returns></returns>
-        public Dictionary<string, string> GetSitesForProduct(string productCode)
-        {
-            var neonProduct = ReadProductFromApi(productCode);
-            var productSiteCodes = neonProduct.siteCodes;
-
-            var siteDataUrls = new Dictionary<string, string>();
-            foreach(var siteCode in productSiteCodes)
-            {
-                var shortCode = siteCode.siteCode;
-                var dataUrls = siteCode.availableDataUrls;
-                var lastDataUrl = dataUrls.Last();
-                siteDataUrls.Add(shortCode, lastDataUrl);
-            }
-            return siteDataUrls;
-        }
-
-
-        public NeonFileCollection ReadNeonFilesFromApi(string filesUrl)
-        {
-            var neonFiles = new NeonFileCollection();
-
-            try
-            {
-                var client = new WebClient();
-                using (var stream = client.OpenRead(filesUrl))
-                using (var reader = new StreamReader(stream))
-                {
-                    var jsonData = client.DownloadString(filesUrl);
-
-                    var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
-                    neonFiles = neonFileData.data;
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
-            }
-            return (neonFiles);
-        }
-
-
-        public NeonProduct ReadProductFromApi(string productCode)
-        {
-            var neonProduct = new NeonProduct();
-
-            try
-            {
-                string url = "http://data.neonscience.org/api/v0/products/" + productCode;
-                var client = new WebClient();
-                using (var stream = client.OpenRead(url))
-                using (var reader = new StreamReader(stream))
-                {
-                    var jsonData = client.DownloadString(url);
-
-                    var neonProductData = JsonConvert.DeserializeObject<NeonProductData>(jsonData);
-                    neonProduct = neonProductData.data;
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
-            }
-            return (neonProduct);
-        }
-
-        public NeonProductCollection ReadProductsFromApi()
-        {
-            var neonProducts = new NeonProductCollection();
-            try
-            {
-                string url = "http://data.neonscience.org/api/v0/products";
-                var client = new WebClient();
-                using (var stream = client.OpenRead(url))
-                using (var reader = new StreamReader(stream))
-                {
-                    var jsonData = client.DownloadString(url);
-
-                    neonProducts = JsonConvert.DeserializeObject<NeonProductCollection>(jsonData);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadProductsFromApi ERROR: " + ex.Message);
-            }
-            return (neonProducts);
+            _apiReader = new NeonApiReader(log);
         }
 
 
         public void WriteProductTable()
         {
-            var products = ReadProductsFromApi();
+            var products = _apiReader.ReadProductsFromApi();
 
             var productInfos = new List<ProductInfo>();
             foreach (var prod in products.data)
@@ -215,93 +81,7 @@ namespace NEONHarvester
         }
 
 
-        private object SaveOrUpdateMethod(MethodInfo meth, SqlConnection connection)
-        {
-            object methodIDResult = null;
-
-            using (SqlCommand cmd = new SqlCommand("SELECT MethodID FROM Methods WHERE MethodDescription = @desc", connection))
-            {
-                cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
-                connection.Open();
-                methodIDResult = cmd.ExecuteScalar();
-                connection.Close();
-            }
-
-            if (methodIDResult != null)
-            {
-                //update the method
-                meth.MethodID = Convert.ToInt32(methodIDResult);
-                using (SqlCommand cmd = new SqlCommand("UPDATE Methods SET MethodDescription = @desc, MethodLink = @link, MethodCode = @code WHERE MethodID = @id", connection))
-                {
-                    cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
-                    cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
-                    cmd.Parameters.Add(new SqlParameter("@id", meth.MethodID));
-                    cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
-
-                    connection.Open();
-                    cmd.ExecuteNonQuery();
-                    connection.Close();
-
-                }
-            }
-            else
-            {
-                //save the method
-                string sql = "INSERT INTO Methods(MethodDescription, MethodLink, MethodCode) VALUES (@desc, @link, @code)";
-                using (SqlCommand cmd = new SqlCommand(sql, connection))
-                {
-                    connection.Open();
-                    cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
-                    cmd.Parameters.Add(new SqlParameter("@link", meth.MethodLink));
-                    cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
-
-                    // to get the inserted method id
-                    SqlParameter param = new SqlParameter("@MethodID", SqlDbType.Int);
-                    param.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(param);
-
-                    cmd.ExecuteNonQuery();
-                    methodIDResult = cmd.Parameters["@MethodID"].Value;
-                    connection.Close();
-                }
-            }
-            return methodIDResult;
-        }
-
-
-        public void UpdateMethods()
-        {
-            LookupFileReader xlsReader = new LookupFileReader(_log);
-
-            Dictionary<string, MethodInfo> methodLookup = xlsReader.ReadMethodsFromExcel();
-
-            foreach(string productCode in methodLookup.Keys)
-            {
-                var productInfo = ReadProductFromApi(productCode);
-                var productDesc = productInfo.productDescription;
-                methodLookup[productCode].MethodDescription = productDesc;
-            }
-
-            _log.LogWrite(String.Format("Found {0} distinct methods.", methodLookup.Count));
-            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(connString))
-            {
-                foreach (MethodInfo meth in methodLookup.Values)
-                {
-                    try
-                    {
-                        object methodID = SaveOrUpdateMethod(meth, connection);
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.LogWrite("error updating method: " + meth.MethodDescription + " " + ex.Message);
-                    }
-
-                }
-            }
-            _log.LogWrite("UpdateMethods OK: " + methodLookup.Count.ToString() + " methods.");
-        }
-
+        
 
         public void UpdateVariables()
         {

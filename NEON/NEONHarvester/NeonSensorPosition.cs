@@ -27,5 +27,7 @@ namespace NEONHarvester
         public double ReferenceLongitude { get; set; }
 
         public double ReferenceElevation { get; set; }
+
+        public NeonSite ParentSite { get; set; }
     }
 }

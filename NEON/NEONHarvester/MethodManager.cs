@@ -17,122 +17,14 @@ namespace NEONHarvester
     class MethodManager
     {
         private LogWriter _log;
+        private NeonApiReader _apiReader;
 
         public MethodManager(LogWriter log)
         {
             _log = log;
+            _apiReader = new NeonApiReader(_log);
         }
 
-        public void UpdateMethods()
-        {
-
-
-
-            string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
-            var methodLookup = new Dictionary<string, MethodInfo>();
-            var methodCodes = new List<string>();
-            _log.LogWrite("Read Method Codes from URL " + variablesUrl);
-            int rowNum = 0;
-            object timeUnitsObj = "timeUnitsObj";
-            try
-            {
-                LookupFileReader xlsReader = new LookupFileReader(_log);
-                var methods = xlsReader.ReadMethodsFromExcel();
-
-                var webRequest = HttpWebRequest.Create(variablesUrl) as HttpWebRequest;
-                var webResponse = webRequest.GetResponse();
-
-                using (var webResponseStream = webResponse.GetResponseStream())
-                {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        webResponseStream.CopyTo(memoryStream);
-                        using (var package = new ExcelPackage(memoryStream))
-                        {
-                            ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
-                            var start = worksheet.Dimension.Start;
-                            var end = worksheet.Dimension.End;
-                            for (int row = start.Row; row <= end.Row; row++)
-                            { // Row by row..
-                                rowNum++;
-                                string code = Convert.ToString(worksheet.Cells[row, 1].Value);
-                                if (code.EndsWith("in"))
-                                {
-                                    code = code.Substring(0, code.Length - 2);
-                                }
-                                if (code == "VariableCode")
-                                {
-                                    continue;
-                                }
-                                string name = Convert.ToString(worksheet.Cells[row, 2].Value);
-                                if (name == "x")
-                                {
-                                    continue;
-                                }
-                                // extract the method code from the name
-                                string[] codeSplit = code.Split('_');
-                                string methodCode = "NOTSPECIFIED";
-                                string methodDesc = "No method specified";
-                                MethodInfo newMethod;
-                                if (codeSplit.Length > 2)
-                                {
-                                    methodCode = codeSplit[2];
-
-                                    if (methodCode.StartsWith("D"))
-                                    {
-                                        methodDesc = String.Format("Measured at {0} inches depth below ground surface", methodCode.Substring(1));
-                                    }
-                                    else
-                                    {
-                                        methodDesc = String.Format("Measured at {0} feet height above ground surface", methodCode.Substring(1));
-                                    }
-                                }
-                                else
-                                {
-                                    methodCode = "NOTSPECIFIED";
-                                }
-
-                                newMethod = new MethodInfo
-                                {
-                                    MethodLink = methodCode,
-                                    MethodCode = methodCode,
-                                    MethodDescription = methodDesc
-                                };
-
-                                if (!methodLookup.ContainsKey(methodCode))
-                                {
-                                    methodLookup.Add(methodCode, newMethod);
-                                }
-                            }
-                        }
-                    }
-                }
-                _log.LogWrite(String.Format("Found {0} distinct methods.", methodLookup.Count));
-                string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-                using (SqlConnection connection = new SqlConnection(connString))
-                {
-                    foreach (MethodInfo meth in methodLookup.Values)
-                    {
-                        try
-                        {
-                            object methodID = SaveOrUpdateMethod(meth, connection);
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.LogWrite("error updating method: " + meth.MethodDescription + " " + ex.Message);
-                        }
-
-                    }
-                }
-                _log.LogWrite("UpdateMethods OK: " + methodLookup.Count.ToString() + " methods.");
-
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite("UpdateMethods ERROR: "  + " " + ex.Message);
-            }
-
-        }
 
         private object SaveOrUpdateMethod(MethodInfo meth, SqlConnection connection)
         {
@@ -185,6 +77,40 @@ namespace NEONHarvester
                 }
             }
             return methodIDResult;
+        }
+
+
+        public void UpdateMethods()
+        {
+            LookupFileReader xlsReader = new LookupFileReader(_log);
+
+            Dictionary<string, MethodInfo> methodLookup = xlsReader.ReadMethodsFromExcel();
+
+            foreach (string productCode in methodLookup.Keys)
+            {
+                var productInfo = _apiReader.ReadProductFromApi(productCode);
+                var productDesc = productInfo.productDescription;
+                methodLookup[productCode].MethodDescription = productDesc;
+            }
+
+            _log.LogWrite(String.Format("Found {0} distinct methods.", methodLookup.Count));
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                foreach (MethodInfo meth in methodLookup.Values)
+                {
+                    try
+                    {
+                        object methodID = SaveOrUpdateMethod(meth, connection);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWrite("error updating method: " + meth.MethodDescription + " " + ex.Message);
+                    }
+
+                }
+            }
+            _log.LogWrite("UpdateMethods OK: " + methodLookup.Count.ToString() + " methods.");
         }
     }
 }

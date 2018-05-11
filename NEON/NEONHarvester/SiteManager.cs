@@ -21,10 +21,12 @@ namespace NEONHarvester
     class SiteManager
     {
         private LogWriter _log;
+        private NeonApiReader _apiReader;
 
         public SiteManager(LogWriter log)
         {
             _log = log;
+            _apiReader = new NeonApiReader(log);
         }
 
         public void DeleteOldSites(int siteCount, SqlConnection connection)
@@ -108,36 +110,92 @@ namespace NEONHarvester
             }
         }
 
-        public NeonSiteCollection ReadSitesFromApi()
-        {
-            var neonSites = new NeonSiteCollection();
-            try
-            {
-                string url = "http://data.neonscience.org/api/v0/sites";
-                var client = new WebClient();
-                using (var stream = client.OpenRead(url))
-                using (var reader = new StreamReader(stream))
-                {
-                    var jsonData = client.DownloadString(url);
 
-                    neonSites = JsonConvert.DeserializeObject<NeonSiteCollection>(jsonData);
+        public Dictionary<string, NeonSensorPosition> GetSensorPositions()
+        {
+            var siteInfoList = _apiReader.ReadSitesFromApi().data;
+            var siteInfoLookup = new Dictionary<string, NeonSite>();
+            foreach(NeonSite neonSite in siteInfoList)
+            {
+                siteInfoLookup.Add(neonSite.siteCode, neonSite);
+            }
+
+            var sensorSiteLookup = new Dictionary<string, NeonSensorPosition>();
+
+            var senPosReader = new SensorPositionReader(_log);
+
+            List<string> supportedProductCodes = new List<string>();
+            var lookupReader = new LookupFileReader(_log);
+            supportedProductCodes = lookupReader.ReadProductCodesFromExcel();
+
+            foreach (string productCode in supportedProductCodes)
+            {
+                var siteDataUrls = new Dictionary<string, string>();
+                siteDataUrls = GetSitesForProduct(productCode);
+
+                foreach (var siteCode in siteDataUrls.Keys)
+                {
+                    var dataUrl = siteDataUrls[siteCode];
+                    var dataFiles = _apiReader.ReadNeonFilesFromApi(dataUrl);
+                    foreach (var dataFile in dataFiles.files)
+                    {
+                        if (dataFile.name.Contains("sensor_positions"))
+                        {
+                            Console.WriteLine(dataFile.name);
+                            var sensorPositionUrl = dataFile.url;
+
+                            var sensorPositions = senPosReader.ReadSensorPositionsFromUrl(sensorPositionUrl);
+                            foreach (var senPos in sensorPositions)
+                            {
+                                string fullSiteCode = siteCode + "_" + senPos.HorVerCode;
+                                
+                                if (!sensorSiteLookup.ContainsKey(fullSiteCode))
+                                {
+                                    senPos.ParentSite = siteInfoLookup[siteCode];
+                                    sensorSiteLookup.Add(fullSiteCode, senPos);
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                _log.LogWrite("ReadSitesFromApi ERROR: " + ex.Message);
-            }
-            return (neonSites);
+            return sensorSiteLookup;
         }
+
+
+        /// <summary>
+        /// Returns a dictionary with entries: Neon short site code: latest data URL
+        /// </summary>
+        /// <param name="productCode"></param>
+        /// <returns></returns>
+        public Dictionary<string, string> GetSitesForProduct(string productCode)
+        {
+            var neonProduct = _apiReader.ReadProductFromApi(productCode);
+            var productSiteCodes = neonProduct.siteCodes;
+
+            var siteDataUrls = new Dictionary<string, string>();
+            foreach (var siteCode in productSiteCodes)
+            {
+                var shortCode = siteCode.siteCode;
+                var dataUrls = siteCode.availableDataUrls;
+                var lastDataUrl = dataUrls.Last();
+                siteDataUrls.Add(shortCode, lastDataUrl);
+            }
+            return siteDataUrls;
+        }
+
+
 
         /// <summary>
         /// Updates the NEON Sites using the NEON JSON Data API
         /// </summary>
-        public void UpdateSites_fast()
+        public void UpdateSites()
         {
-            NeonSiteCollection neonSites = ReadSitesFromApi();
+            var neonSiteSensors = GetSensorPositions();
 
-            int numSitesFromApi = neonSites.data.Count;
+            NeonSiteCollection neonSites = _apiReader.ReadSitesFromApi();
+
+            int numSitesFromApi = neonSiteSensors.Keys.Count;
             _log.LogWrite("UpdateSites for " + numSitesFromApi.ToString() + " sites ...");
 
             try
