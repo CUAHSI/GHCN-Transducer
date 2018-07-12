@@ -231,7 +231,7 @@ namespace NEONHarvester
                     
 
                     // to be adjusted
-                    int batchSize = 500;
+                    int batchSize = 10000;
                     long siteID = 0L;
 
                     var siteList = neonSites.data;
@@ -264,28 +264,34 @@ namespace NEONHarvester
                         {
                             batchEnd = numSitesFromApi;
                         }
-                        for (int i = batchStart; i < batchEnd; i++)
+
+                        int i = 0;
+                        foreach(var sensorKey in neonSiteSensors.Keys)
                         {
-                            siteID = siteID + 1;
+                            siteID = siteID + i;
                             var row = bulkTable.NewRow();
+
+                            var siteSensorCode = sensorKey;
+                            var siteSensor = neonSiteSensors[sensorKey];
                             row["SiteID"] = siteID;
-                            row["SiteCode"] = siteList[i].siteCode;
-                            row["SiteName"] = siteList[i].siteName;
-                            row["Latitude"] = siteList[i].siteLatitude;
-                            row["Longitude"] = siteList[i].siteLongitude;
+                            row["SiteCode"] = siteSensorCode;
+                            row["SiteName"] = siteSensor.ParentSite.siteName;
+                            row["Latitude"] = siteSensor.ReferenceLatitude;
+                            row["Longitude"] = siteSensor.ReferenceLongitude;
                             row["LatLongDatumID"] = 3; // WGS1984
-                            row["Elevation_m"] = DBNull.Value;
+                            row["Elevation_m"] = siteSensor.ReferenceElevation;
                             row["VerticalDatum"] = "Unknown";
-                            row["LocalX"] = 0.0f;
-                            row["LocalY"] = 0.0f;
+                            row["LocalX"] = siteSensor.xOffset;
+                            row["LocalY"] = siteSensor.yOffset;
                             row["LocalProjectionID"] = DBNull.Value;
-                            row["PosAccuracy_m"] = 0.0f;
-                            row["State"] = siteList[i].stateName;
+                            row["PosAccuracy_m"] = 1.0f;
+                            row["State"] = siteSensor.ParentSite.stateName;
                             row["County"] = DBNull.Value;
-                            row["Comments"] = siteList[i].siteDescription + " " + siteList[i].siteCode;
+                            row["Comments"] = siteSensor.ParentSite.siteDescription;
                             row["SiteType"] = "Atmosphere"; // from CUAHSI SiteTypeCV controlled vocabulary
                             bulkTable.Rows.Add(row);
                         }
+                        
                         SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
                         bulkCopy.DestinationTableName = "dbo.Sites";
                         connection.Open();

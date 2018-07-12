@@ -25,18 +25,18 @@ namespace NEONHarvester
                 int metadataID = SaveOrUpdateMetadata();
                 Source source = new Source
                 {
-                    Organization = "United States Department of Agriculture Natural Resources Conservation Service",
-                    SourceDescription = "Snow Telemetry (SNOTEL)",
-                    SourceLink = "www.wcc.nrcs.usda.gov/about/mon_automate.html",
-                    ContactName = "Deb Harms",
-                    Phone = "503-414-3050",
-                    Email = "deb.harms@por.usda.gov",
+                    Organization = "NEON",
+                    SourceDescription = "NEON",
+                    SourceLink = "http://data.neonscience.org",
+                    ContactName = "2017 Battelle",
+                    Phone = "",
+                    Email = "unknown",
                     Address = "",
                     City = "",
                     State = "",
                     ZipCode = "",
-                    Citation = @"USDA NRCS Snow Telemetry (SNOTEL) Network",
-                    SourceCode = "NRCS-WCC-SNOTEL",
+                    Citation = @"National Ecological Observatory Network. 2016. Provisional data downloaded from http://data.neonscience.org on 26 May 2018. Battelle, Boulder, CO, USA",
+                    SourceCode = "NEON",
                     MetadataID = metadataID
                 };
 

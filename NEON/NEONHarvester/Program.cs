@@ -27,9 +27,9 @@ namespace NEONHarvester
             var srcM = new SourceManager(logger);
             srcM.UpdateSources();
 
-            // (4) updating qualifiers
-            var qualM = new QualifierManager(logger);
-            qualM.UpdateQualifiers();
+            // (4) updating qualifiers (not used now)
+            // var qualM = new QualifierManager(logger);
+            // qualM.UpdateQualifiers();
 
             // (5) updating the series catalog
             SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
