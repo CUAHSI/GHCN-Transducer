@@ -405,10 +405,17 @@ namespace NEONHarvester
                     var supportedMethods = GetProductMethodLookupFromDb(connection);
                     var source = GetSourceFromDB(connection);
 
+                    var i = 0;
                     foreach (Site site in sitesFromDB)
                     {
+                        _log.LogWrite("Harvesting series for site: " + i.ToString() + " " + site.SiteCode);
                         List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, supportedVariables, supportedMethods, source);
                         fullSeriesList.AddRange(siteSeriesList);
+                        //if (i == 10)
+                        //{
+                        //    break;
+                        //}
+                        i++;
                     }
                 }
             }
