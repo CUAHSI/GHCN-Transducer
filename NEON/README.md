@@ -1,4 +1,4 @@
-# GHCN-Transducer
+# NEON-Transducer
 Transducer to enable integrate NEON data into the CUAHSI catalog
 
 The transducer contains two parts:
