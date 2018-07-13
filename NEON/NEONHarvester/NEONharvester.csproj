@@ -7,8 +7,8 @@
     <ProjectGuid>{BADC8814-6893-4259-9AAD-4D39A56F4B93}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SNOTELHarvester</RootNamespace>
-    <AssemblyName>SNOTELHarvester</AssemblyName>
+    <RootNamespace>NEONHarvester</RootNamespace>
+    <AssemblyName>NEONHarvester</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CuahsiTimeSeries.cs" />
     <Compile Include="ISOMetadata.cs" />
     <Compile Include="LookupFileReader.cs" />
     <Compile Include="MethodInfo.cs" />
@@ -60,6 +61,9 @@
     <Compile Include="NeonApiReader.cs" />
     <Compile Include="NeonSensorPosition.cs" />
     <Compile Include="NeonSite.cs" />
+    <Compile Include="NeonTimeSeries.cs" />
+    <Compile Include="ProductMethodLookup.cs" />
+    <Compile Include="ProductVariableLookup.cs" />
     <Compile Include="Qualifier.cs" />
     <Compile Include="SensorPositionReader.cs" />
     <Compile Include="Series.cs" />

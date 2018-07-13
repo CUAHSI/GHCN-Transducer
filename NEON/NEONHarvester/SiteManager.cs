@@ -29,6 +29,46 @@ namespace NEONHarvester
             _apiReader = new NeonApiReader(log);
         }
 
+        public List<Site> GetSitesFromDB(SqlConnection connection)
+        {
+            var siteList = new List<Site>();
+            string sqlQuery = "SELECT * FROM dbo.Sites";
+            using (var cmd = new SqlCommand(sqlQuery, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while(reader.Read())
+                        {
+                            var site = new Site();
+                            site.SiteID = Convert.ToInt64(reader["SiteID"]);
+                            site.SiteCode = Convert.ToString(reader["SiteCode"]);
+                            site.Latitude = Convert.ToDecimal(reader["Latitude"]);
+                            site.Longitude = Convert.ToDecimal(reader["Longitude"]);
+                            site.Elevation = Convert.ToDecimal(reader["Elevation_m"]);
+                            siteList.Add(site);
+                        }
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+                    var msg = "ERROR reading sites from DB: " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return siteList;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            return siteList;
+        }
+
         public void DeleteOldSites(int siteCount, SqlConnection connection)
         {
             string sqlCount = "SELECT COUNT(*) FROM dbo.Sites";
@@ -160,6 +200,442 @@ namespace NEONHarvester
                 }
             }
             return sensorSiteLookup;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="neonMonth">For example 2017-11</param>
+        /// <returns>For example 2017-11-01T00:00:00Z</returns>
+        private DateTime BeginTimeFromNeonMonth(string neonMonth)
+        {
+            var year = Convert.ToInt32(neonMonth.Split('-')[0]);
+            var month = Convert.ToInt32(neonMonth.Split('-')[1]);
+            return new DateTime(year, month, 1);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="neonMonth">For example 2017-11</param>
+        /// <returns>For example 2017-11-01T00:00:00Z</returns>
+        private DateTime EndTimeFromNeonMonth(string neonMonth)
+        {
+            var year = Convert.ToInt32(neonMonth.Split('-')[0]);
+            var month = Convert.ToInt32(neonMonth.Split('-')[1]);
+            return new DateTime(year, month, 28); //TODO need better method to find the 
+        }
+
+
+        public Source GetSourceFromDB(SqlConnection connection)
+        {
+            var s = new Source();
+
+            string sqlQuery = "SELECT * FROM dbo.Sources";
+            using (var cmd = new SqlCommand(sqlQuery, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            s.SourceID = Convert.ToInt32(reader["SourceID"]);
+                            s.SourceCode = Convert.ToString(reader["SourceCode"]);
+                            s.Citation = Convert.ToString(reader["Citation"]);
+                            s.Organization = Convert.ToString(reader["Organization"]);
+                            s.SourceDescription = Convert.ToString(reader["SourceDescription"]);
+
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    var msg = "ERROR reading source from DB: " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return null;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            return s;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns>A dictionary of dictionaries NEONProductCode -> { CUAHSIVariableCode: CuahsiVariable }</returns>
+        public ProductVariableLookup GetProductVariableLookupFromDb(SqlConnection connection)
+        {
+            var lookup = new Dictionary<string, Dictionary<string, Variable>>();
+
+            var variableList = new List<Variable>();
+            string sqlQuery = "SELECT * FROM dbo.Variables";
+            using (var cmd = new SqlCommand(sqlQuery, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            var v = new Variable();
+                            v.VariableID = Convert.ToInt32(reader["VariableID"]);
+                            v.VariableCode = Convert.ToString(reader["VariableCode"]);
+                            v.VariableName = Convert.ToString(reader["VariableName"]);
+                            // sample medium, etc..
+
+                            var neonProductCode = v.GetNeonProductCode();
+                            if (lookup.ContainsKey(neonProductCode))
+                            {
+                                // insert variable into the nested dictionary ...
+                                var productVariables = lookup[neonProductCode];
+                                if (!(productVariables.ContainsKey(v.VariableCode)))
+                                {
+                                    productVariables.Add(v.VariableCode, v);
+                                }
+                            }
+                            else
+                            {
+                                // insert new product into the top-level dictionary
+                                var productVariables = new Dictionary<string, Variable>();
+                                productVariables.Add(v.VariableCode, v);
+                                lookup.Add(neonProductCode, productVariables);
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    var msg = "ERROR reading product-variable lookup from DB: " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return null;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            var result = new ProductVariableLookup();
+            result.Lookup = lookup;
+            return result;
+        }
+
+
+        /// <summary>
+        /// Get a lookup NEON Product -> Cuahsi Method from the database for all supported products.
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public ProductMethodLookup GetProductMethodLookupFromDb(SqlConnection connection)
+        {
+            var lookup = new Dictionary<string, MethodInfo>();
+
+            var methodList = new List<MethodInfo>();
+            string sqlQuery = "SELECT * FROM dbo.Methods";
+            using (var cmd = new SqlCommand(sqlQuery, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            var m = new MethodInfo();
+                            m.MethodID = Convert.ToInt32(reader["MethodID"]);
+                            m.MethodCode = Convert.ToString(reader["MethodCode"]);
+                            m.MethodLink = Convert.ToString(reader["MethodLink"]);
+                            m.MethodDescription = Convert.ToString(reader["MethodDescription"]);
+
+                            var neonProductCode = m.MethodCode;
+                            if (!lookup.ContainsKey(neonProductCode))
+                            {
+                                lookup.Add(neonProductCode, m);
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    var msg = "ERROR reading product-variable lookup from DB: " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return null;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            var result = new ProductMethodLookup();
+            result.Lookup = lookup;
+            return result;
+        }
+
+
+
+        public void UpdateSeriesCatalog()
+        {
+            List<CuahsiTimeSeries> fullSeriesList = new List<CuahsiTimeSeries>();
+
+            try
+            {
+                
+
+                string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    var sitesFromDB = GetSitesFromDB(connection);
+                    var supportedVariables = GetProductVariableLookupFromDb(connection);
+                    var supportedMethods = GetProductMethodLookupFromDb(connection);
+                    var source = GetSourceFromDB(connection);
+
+                    foreach (Site site in sitesFromDB)
+                    {
+                        List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, supportedVariables, supportedMethods, source);
+                        fullSeriesList.AddRange(siteSeriesList);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                _log.LogWrite("UpdateSeriesCatalog ERROR" + ex.Message);
+            }
+
+            Console.WriteLine("updating series catalog for " + fullSeriesList.Count.ToString() + " series ...");
+
+            using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString))
+            {
+                // delete old entries from series catalog
+                string sql = "TRUNCATE TABLE dbo.SeriesCatalog";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine("deleted old series from SeriesCatalog");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("error deleting old series from SeriesCatalog");
+                        _log.LogWrite("UpdateSeriesCatalog: error deleting old series from SeriesCatalog");
+                        return;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+
+                int batchSize = 500;
+                int numBatches = (fullSeriesList.Count / batchSize) + 1;
+                long seriesID = 0L;
+
+                try
+                {
+                    for (int b = 0; b < numBatches; b++)
+                    {
+                        // prepare for bulk insert
+                        DataTable bulkTable = new DataTable();
+                        bulkTable.Columns.Add("SeriesID", typeof(long));
+                        bulkTable.Columns.Add("SiteID", typeof(long));
+                        bulkTable.Columns.Add("SiteCode", typeof(string));
+                        bulkTable.Columns.Add("SiteName", typeof(string));
+                        bulkTable.Columns.Add("SiteType", typeof(string));
+                        bulkTable.Columns.Add("VariableID", typeof(int));
+                        bulkTable.Columns.Add("VariableCode", typeof(string));
+                        bulkTable.Columns.Add("VariableName", typeof(string));
+                        bulkTable.Columns.Add("Speciation", typeof(string));
+                        bulkTable.Columns.Add("VariableUnitsID", typeof(int));
+                        bulkTable.Columns.Add("VariableUnitsName", typeof(string));
+                        bulkTable.Columns.Add("SampleMedium", typeof(string));
+                        bulkTable.Columns.Add("ValueType", typeof(string));
+                        bulkTable.Columns.Add("TimeSupport", typeof(float));
+                        bulkTable.Columns.Add("TimeUnitsID", typeof(int));
+                        bulkTable.Columns.Add("TimeUnitsName", typeof(string));
+                        bulkTable.Columns.Add("DataType", typeof(string));
+                        bulkTable.Columns.Add("GeneralCategory", typeof(string));
+                        bulkTable.Columns.Add("MethodID", typeof(int));
+                        bulkTable.Columns.Add("MethodDescription", typeof(string));
+                        bulkTable.Columns.Add("SourceID", typeof(int));
+                        bulkTable.Columns.Add("Organization", typeof(string));
+                        bulkTable.Columns.Add("SourceDescription", typeof(string));
+                        bulkTable.Columns.Add("Citation", typeof(string));
+                        bulkTable.Columns.Add("QualityControlLevelID", typeof(int));
+                        bulkTable.Columns.Add("QualityControlLevelCode", typeof(string));
+                        bulkTable.Columns.Add("BeginDateTime", typeof(DateTime));
+                        bulkTable.Columns.Add("EndDateTime", typeof(DateTime));
+                        bulkTable.Columns.Add("BeginDateTimeUTC", typeof(DateTime));
+                        bulkTable.Columns.Add("EndDateTimeUTC", typeof(DateTime));
+                        bulkTable.Columns.Add("ValueCount", typeof(int));
+
+                        int batchStart = b * batchSize;
+                        int batchEnd = batchStart + batchSize;
+                        if (batchEnd >= fullSeriesList.Count)
+                        {
+                            batchEnd = fullSeriesList.Count;
+                        }
+                        for (int i = batchStart; i < batchEnd; i++)
+                        {
+                            try
+                            {
+                                var s = fullSeriesList[i];
+                                var variableCode = s.VariableCode;
+                                var siteCode = s.SiteCode;
+                                var methodCode = s.MethodCode;
+
+                                var row = bulkTable.NewRow();
+                                seriesID = seriesID + 1;
+
+                                row["SeriesID"] = seriesID;
+                                row["SiteID"] = s.SiteID;
+                                row["SiteCode"] = s.SiteCode;
+                                row["SiteName"] = s.SiteName;
+                                row["SiteType"] = "Atmosphere";
+                                row["VariableID"] = s.VariableID;
+                                row["VariableCode"] = s.VariableCode;
+                                row["VariableName"] = s.VariableName;
+                                row["Speciation"] = s.Speciation;
+                                row["VariableUnitsID"] = s.VariableUnitsID;
+                                row["VariableUnitsName"] = s.VariableUnitsName;
+                                row["SampleMedium"] = s.SampleMedium;
+                                row["ValueType"] = s.ValueType;
+                                row["TimeSupport"] = s.TimeSupport;
+                                row["TimeUnitsID"] = s.TimeUnitsID;
+                                row["TimeUnitsName"] = "Day"; // todo get from DB !!!
+                                row["DataType"] = s.DataType;
+                                row["GeneralCategory"] = s.GeneralCategory;
+                                row["MethodID"] = s.MethodID;
+                                row["MethodDescription"] = s.MethodDescription;
+                                row["SourceID"] = s.SourceID;
+                                row["Organization"] = s.Organization;
+                                row["SourceDescription"] = s.SourceDescription;
+                                row["Citation"] = s.Citation;
+                                row["QualityControlLevelID"] = 1;
+                                row["QualityControlLevelCode"] = "1";
+                                row["BeginDateTime"] = s.BeginDateTime;
+                                row["EndDateTime"] = s.EndDateTime;
+                                row["BeginDateTimeUTC"] = s.BeginDateTime;
+                                row["EndDateTimeUTC"] = s.EndDateTime;
+                                row["ValueCount"] = s.ValueCount;
+                                bulkTable.Rows.Add(row);
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+                        SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
+                        bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
+                        connection.Open();
+                        bulkCopy.WriteToServer(bulkTable);
+                        connection.Close();
+                        Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
+                    }
+                    Console.WriteLine("UpdateSeriesCatalog: " + fullSeriesList.Count.ToString() + " series updated.");
+                    _log.LogWrite("UpdateSeriesCatalog: " + fullSeriesList.Count.ToString() + " series updated.");
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a list of available time serieses for a CUAHSI site.
+        /// </summary>
+        /// <param name="cuahsiSite">The CUAHSI site object from the ODM database with SiteID and SiteCode.</param>
+        /// <param name="supportedProductCodes">A list of ALL NEON product codes supported by CUAHSI (from the XLSX lookup table)</param>
+        /// <returns>Series List</returns>
+        public List<CuahsiTimeSeries> GetListOfSeriesForSite(Site cuahsiSite, ProductVariableLookup supportedProducts, ProductMethodLookup supportedMethods, Source source)
+        {
+            var seriesList = new List<CuahsiTimeSeries>();
+            
+            // Get NEON site Code
+            var neonSiteCode = cuahsiSite.GetNeonSiteCode();
+
+            // Read Site info from NEON API
+            NeonSite neonSite = _apiReader.ReadSiteFromApi(neonSiteCode);
+
+            // Filter products available at a NEON site by products supported by CUAHSI
+
+            // supportedProductCodes can be read by a dedicated function VariableManager.GetProductVariableLookupFromDb
+
+            //List<string> supportedProductCodes = new List<string>();
+            //var lookupReader = new LookupFileReader(_log);
+            //supportedProductCodes = lookupReader.ReadProductCodesFromExcel();
+
+            var siteDataProducts = neonSite.dataProducts;
+
+            foreach(NeonProductInfo siteProduct in siteDataProducts)
+            {
+                string productCode = siteProduct.dataProductCode;
+                if (supportedProducts.Lookup.ContainsKey(productCode) && supportedMethods.Lookup.ContainsKey(productCode))
+                {
+                    // get available months
+                    var availableMonths = siteProduct.availableMonths;
+
+                    Dictionary<string, Variable> supportedVariables = supportedProducts.Lookup[productCode];
+                    foreach (Variable v in supportedVariables.Values)
+                    {
+                        var s = new CuahsiTimeSeries();
+                        s.SiteID = cuahsiSite.SiteID;
+                        s.SiteCode = cuahsiSite.SiteCode;
+                        s.SiteName = cuahsiSite.SiteName;
+                        s.SiteType = "Atmosphere";
+                        s.VariableID = v.VariableID;
+                        s.VariableCode = v.VariableCode;
+                        s.VariableName = v.VariableName;
+                        s.VariableUnitsID = v.VariableUnitsID;
+                        s.VariableUnitsName = v.VariableUnitsName;
+                        s.TimeUnitsID = v.TimeUnitsID;
+                        s.TimeUnitsName = v.TimeUnitsName;
+                        s.SampleMedium = v.SampleMedium;
+                        s.GeneralCategory = v.GeneralCategory;
+                        s.TimeSupport = v.TimeSupport;
+
+                        var productMethod = supportedMethods.Lookup[productCode];
+                        s.MethodID = productMethod.MethodID;
+                        s.MethodCode = productMethod.MethodCode;
+                        s.MethodDescription = productMethod.MethodDescription;
+
+                        s.SourceID = source.SourceID;
+                        s.Organization = source.Organization;
+                        s.Citation = source.Citation;
+                        s.SourceDescription = source.SourceDescription;
+
+                        s.QualityControlLevelID = 1;
+                        s.QualityControlLevelCode = "1"; //quality controlled data
+
+                        s.BeginDateTime = BeginTimeFromNeonMonth(availableMonths[0]);
+                        s.EndDateTime = EndTimeFromNeonMonth(availableMonths[1]);
+
+                        s.BeginDateTimeUTC = s.BeginDateTime;
+                        s.EndDateTimeUTC = s.EndDateTime;
+
+                        seriesList.Add(s);
+                    }
+                }              
+            }
+            return seriesList;
         }
 
 

@@ -80,7 +80,7 @@ namespace NEONHarvester
             }
         }
 
-
+        
         
 
         public void UpdateVariables()

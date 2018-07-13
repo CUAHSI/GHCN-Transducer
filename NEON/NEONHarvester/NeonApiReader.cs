@@ -111,5 +111,20 @@ namespace NEONHarvester
             return (neonSites);
         }
 
+
+        public NeonSite ReadSiteFromApi(string neonSiteCode)
+        {
+            var allSites = ReadSitesFromApi();
+            foreach(NeonSite neonSite in allSites.data)
+            {
+                if (neonSite.siteCode == neonSiteCode)
+                {
+                    _log.LogWrite("processing site: " + neonSiteCode);
+                    return neonSite;
+                }
+            }
+            return null;
+        }
+
     }
 }

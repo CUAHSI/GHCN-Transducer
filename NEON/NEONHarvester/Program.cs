@@ -19,8 +19,9 @@ namespace NEONHarvester
 
 
             // (3) updating sites
+
             var siteM = new SiteManager(logger);
-            siteM.UpdateSites();
+            //siteM.UpdateSites();
 
             
             // (4) updating sources
@@ -32,8 +33,13 @@ namespace NEONHarvester
             // qualM.UpdateQualifiers();
 
             // (5) updating the series catalog
-            SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-            seriesM.UpdateSeriesCatalog_fast();
+
+            siteM.UpdateSeriesCatalog();
+
+            //var sites = siteM.GetSitesFromDB()
+            //siteM.GetListOfSeriesForSite(site, supportedProducts, supportedMethods, source);
+            //SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
+            //seriesM.UpdateSeriesCatalog_fast();
         }
     }
 }
