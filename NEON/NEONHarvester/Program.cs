@@ -28,18 +28,10 @@ namespace NEONHarvester
             var srcM = new SourceManager(logger);
             srcM.UpdateSources();
 
-            // (4) updating qualifiers (not used now)
-            // var qualM = new QualifierManager(logger);
-            // qualM.UpdateQualifiers();
 
             // (5) updating the series catalog
-
             siteM.UpdateSeriesCatalog();
 
-            //var sites = siteM.GetSitesFromDB()
-            //siteM.GetListOfSeriesForSite(site, supportedProducts, supportedMethods, source);
-            //SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-            //seriesM.UpdateSeriesCatalog_fast();
         }
     }
 }

@@ -98,6 +98,11 @@ namespace NEONHarvester
         public List<NeonSite> data { get; set; }
     }
 
+    public class NeonSiteItem
+    {
+        public NeonSite data { get; set; }
+    }
+
     public class NeonFile
     {
         public string crc32 { get; set; }

@@ -114,16 +114,26 @@ namespace NEONHarvester
 
         public NeonSite ReadSiteFromApi(string neonSiteCode)
         {
-            var allSites = ReadSitesFromApi();
-            foreach(NeonSite neonSite in allSites.data)
+            var neonSite = new NeonSite();
+            try
             {
-                if (neonSite.siteCode == neonSiteCode)
+                string url = "http://data.neonscience.org/api/v0/sites/" + neonSiteCode;
+                var client = new WebClient();
+                using (var stream = client.OpenRead(url))
+                using (var reader = new StreamReader(stream))
                 {
-                    _log.LogWrite("processing site: " + neonSiteCode);
-                    return neonSite;
+                    var jsonData = client.DownloadString(url);
+
+                    NeonSiteItem siteData = JsonConvert.DeserializeObject<NeonSiteItem>(jsonData);
+                    return siteData.data;
                 }
             }
-            return null;
+            catch (Exception ex)
+            {
+                _log.LogWrite("ReadSitesFromApi ERROR for site " + neonSiteCode + ": " + ex.Message);
+            }
+            return (null);
+            
         }
 
     }

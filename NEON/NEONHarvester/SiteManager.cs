@@ -391,7 +391,7 @@ namespace NEONHarvester
 
         public void UpdateSeriesCatalog()
         {
-            List<CuahsiTimeSeries> fullSeriesList = new List<CuahsiTimeSeries>();
+            List<CuahsiTimeSeries> fullSeriesList = new List<CuahsiTimeSeries>(1000);
 
             try
             {
@@ -407,15 +407,19 @@ namespace NEONHarvester
 
                     var i = 0;
                     foreach (Site site in sitesFromDB)
-                    {
+                    { 
+                    
                         _log.LogWrite("Harvesting series for site: " + i.ToString() + " " + site.SiteCode);
-                        List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, supportedVariables, supportedMethods, source);
-                        fullSeriesList.AddRange(siteSeriesList);
-                        //if (i == 10)
-                        //{
-                        //    break;
-                        //}
-                        i++;
+                        try
+                        {
+                            List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, supportedVariables, supportedMethods, source);
+                            fullSeriesList.AddRange(siteSeriesList);
+                            i++;
+                        }
+                        catch (Exception ex)
+                        {
+                        _log.LogWrite("ERROR harvesting series for site " + site.SiteCode + " " + ex.Message);
+                        }
                     }
                 }
             }
@@ -632,13 +636,20 @@ namespace NEONHarvester
                         s.QualityControlLevelID = 1;
                         s.QualityControlLevelCode = "1"; //quality controlled data
 
-                        s.BeginDateTime = BeginTimeFromNeonMonth(availableMonths[0]);
-                        s.EndDateTime = EndTimeFromNeonMonth(availableMonths[1]);
+                        if (availableMonths.Count == 0)
+                        {
+                            _log.LogWrite(string.Format("ERROR harvesting site {0}, product {1}. No available months from NEON API.", s.SiteCode, productCode));
+                        }
+                        else
+                        {
+                            s.BeginDateTime = BeginTimeFromNeonMonth(availableMonths.First());
+                            s.EndDateTime = EndTimeFromNeonMonth(availableMonths.Last());
 
-                        s.BeginDateTimeUTC = s.BeginDateTime;
-                        s.EndDateTimeUTC = s.EndDateTime;
+                            s.BeginDateTimeUTC = s.BeginDateTime;
+                            s.EndDateTimeUTC = s.EndDateTime;
 
-                        seriesList.Add(s);
+                            seriesList.Add(s);
+                        }
                     }
                 }              
             }
