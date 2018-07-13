@@ -21,7 +21,7 @@ namespace NEONHarvester
             // (3) updating sites
 
             var siteM = new SiteManager(logger);
-            //siteM.UpdateSites();
+            siteM.UpdateSites();
 
             
             // (4) updating sources
