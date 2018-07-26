@@ -13,6 +13,8 @@ using WaterOneFlowImpl.geom;
 using System.Net;
 using System.IO;
 using System.Linq;
+using NEONHarvester;
+using Newtonsoft.Json;
 
 namespace WaterOneFlow.odws
 {
@@ -845,6 +847,67 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         /// <returns></returns>
         internal static TsValuesSingleVariableType GetValuesFromDb(string siteCode, string variableCode, DateTime startDateTime, DateTime endDateTime)
         {
+            // site: using NEON SiteCode
+            string neonSiteCode = siteCode.Split('_')[0];
+            string productCode = variableCode.Split('_')[0];
+
+            //LogWriter log = new LogWriter();
+            //var apiReader = new NeonApiReader();
+            var neonSite = new NeonSite();
+
+            string url = "http://data.neonscience.org/api/v0/sites/" + neonSiteCode;
+            var client = new WebClient();
+            using (var stream = client.OpenRead(url))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    var jsonData = client.DownloadString(url);
+                    NeonSiteItem siteData = JsonConvert.DeserializeObject<NeonSiteItem>(jsonData);
+
+                    var dataProducts = siteData.data.dataProducts;
+                    
+                    foreach(var product in dataProducts)
+                    {
+                        if (product.dataProductCode == productCode)
+                        {
+                            var dataUrls = product.availableDataUrls;
+                            foreach(var dataUrl in dataUrls)
+                            {
+                                //retrieve hyperlinks to data files
+                                var neonFiles = new NeonFileCollection();
+
+                                var client2 = new WebClient();
+                                using (var stream2 = client2.OpenRead(dataUrl))
+                                using (var reader2 = new StreamReader(stream))
+                                {
+                                    var jsonData2 = client2.DownloadString(dataUrl);
+
+                                    var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData2);
+                                    neonFiles = neonFileData.data;
+                                }
+
+                                var usedNeonFiles = new NeonFileCollection();
+                                foreach(var neonFile in neonFiles.files)
+                                {
+                                    if(neonFile.name.Contains("basic") && neonFile.name.Contains("_30min"))
+                                    {
+                                        var validName = neonFile.name;
+
+                                        // valid file has been found.
+                                        var validUrl = neonFile.url;
+
+                                        // TODO: download data from the URL, parse CSV and add values to output array
+                                        // TODO: dataURL's should be ordered by time.
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
+            
+
             // for storing heightDepth value
             int heightDepthVal = 0;
             
@@ -915,97 +978,18 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             s.source = new SourceType[1];
             s.source[0] = GetSourceFromDb();
 
-            //qualifiers - not used by SCAN
+            //qualifiers - not used by NEON for now
             s.qualifier = new QualifierType[3];
             s.qualifier[0] = new QualifierType();
             Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
             var usedQualifiers = new Dictionary<string, QualifierType>();
 
-            //values: get from AWDB web service
-            
-            // !!! necessary configuration to prevent the "Bad Gateway" error
-            // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
-            System.Net.ServicePointManager.Expect100Continue = false;
+            //values: get from NEON API           
 
-            // connecting to the AWDB web service
-            Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
 
-            // !!! necessary configuration to prevent MaxReceivedMessageSize error
-            System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
-            httpBinding.MaxReceivedMessageSize = int.MaxValue;
-
-            // the AWDB station parameter must be in form ID:STATE:NETWORK
-            string[] stationTriplets = new string[] { siteCode.Replace("_", ":") };
 
             // selecting the duration parameter
-            Awdb.duration duration = Awdb.duration.HOURLY;
-            string durationCode = vcSplit[1];
-            int hourIncrement = 1;
-            switch (durationCode)
-            {
-                case "H":
-                    duration = Awdb.duration.HOURLY;
-                    hourIncrement = 1;
-                    break;
-                case "D":
-                    duration = Awdb.duration.DAILY;
-                    hourIncrement = 24;
-                    break;
-                case "sm":
-                    duration = Awdb.duration.SEMIMONTHLY;
-                    hourIncrement = 24 * 15;
-                    break;
-                case "m":
-                    duration = Awdb.duration.MONTHLY;
-                    hourIncrement = 24 * 30;
-                    break;
-                case "season":
-                    duration = Awdb.duration.SEASONAL;
-                    hourIncrement = 24 * 30 * 3;
-                    break;
-                case "wy":
-                    duration = Awdb.duration.WATER_YEAR;
-                    hourIncrement = 24 * 365;
-                    break;
-                case "y":
-                    duration = Awdb.duration.CALENDAR_YEAR;
-                    hourIncrement = 24 * 365;
-                    break;
-                case "a":
-                    duration = Awdb.duration.ANNUAL;
-                    hourIncrement = 24 * 365;
-                    break;
-                default:
-                    duration = Awdb.duration.HOURLY;
-                    hourIncrement = 1;
-                    break;
-            }
 
-            // selecting the heightDepth parameter and offset
-            Awdb.heightDepth heightDepth = null;
-            if (heightDepthVal != 0)
-            {
-                heightDepth = new Awdb.heightDepth();
-                heightDepth.unitCd = "in";
-                heightDepth.value = heightDepthVal;
-                heightDepth.valueSpecified = true;
-
-                s.offset = new OffsetType[1];
-                s.offset[0] = new OffsetType();
-                s.offset[0].offsetDescription = s.method[0].methodDescription;
-                s.offset[0].offsetIsVertical = true;
-                s.offset[0].offsetTypeCode = offsetTypeCode;
-                s.offset[0].offsetTypeID = offsetTypeID;
-                s.offset[0].offsetTypeIDSpecified = true;
-                s.offset[0].offsetValue = heightDepthVal;
-                s.offset[0].unit = new UnitsType();
-                s.offset[0].unit.unitAbbreviation = "in";
-                s.offset[0].unit.unitName = "international inch";
-                s.offset[0].unit.unitCode = "49";
-                s.offset[0].unit.unitType = "Length";
-                s.offset[0].unit.unitID = 49;
-                s.offset[0].unit.unitIDSpecified = true;
-            }
 
             // ordinal parameter - should be set to 1 ...
             var ordinal = 1;
@@ -1013,153 +997,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             string beginDateStr = startDateTime.ToString("yyyy-MM-dd HH:mm:ss");
             string endDateStr = endDateTime.ToString("yyyy-MM-dd HH:mm:ss");
 
-            // increasing AWDB SOAP service timeout ...
-            wc.Endpoint.Binding.CloseTimeout = new TimeSpan(1);
-            wc.Endpoint.Binding.ReceiveTimeout = new TimeSpan(1);
-            wc.Endpoint.Binding.OpenTimeout = new TimeSpan(1);
-
             List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
 
-            if (duration == Awdb.duration.HOURLY)
-            {
-                // hourly data
-
-                beginDateStr = startDateTime.ToString("yyyy-MM-dd");
-                endDateStr = endDateTime.ToString("yyyy-MM-dd");
-                int beginHour = startDateTime.Hour;
-                int endHour = endDateTime.Hour;
-                Awdb.hourlyData[] valuesObjH = wc.getHourlyData(stationTriplets, elementCd, ordinal, heightDepth, beginDateStr, endDateStr, beginHour, endHour);
-
-                var vals0 = valuesObjH[0];
-                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-                DateTime endDate = Convert.ToDateTime(vals0.endDate);
-                Awdb.hourlyDataValue[] vals = vals0.values;
-
-                for (int i = 0; i < vals.Length; i++)
-                {
-                    ValueSingleVariable val = new ValueSingleVariable();
-                    val.censorCode = "nc";
-
-                    val.dateTime = begDate.AddHours(i);
-                    val.dateTimeUTC = val.dateTime;
-                    //val.timeOffset = "00:00";
-                    //val.timeOffsetSpecified = false;
-                    val.methodCode = methodID.ToString();
-                    val.methodID = methodID.ToString();
-
-                    // offset value (if relevant)
-                    if (heightDepthVal != 0)
-                    {
-                        val.offsetValueSpecified = true;
-                        val.offsetValue = heightDepthVal;
-                        val.offsetTypeID = offsetTypeID.ToString();
-                        val.offsetTypeCode = offsetTypeCode;
-                    }
-                    val.qualityControlLevelCode = qcID.ToString();
-                    val.sourceCode = sourceID.ToString();
-                    if (vals[i] == null)
-                    {
-                        val.Value = -9999.0M;
-                    }
-                    else
-                    {
-                        val.Value = vals[i].value;
-                    }
-
-                    // qualifier (if relevant)
-                    var flag = vals[i].flag;
-                    val.qualifiers = vals[i].flag;
-                    if (!usedQualifiers.ContainsKey(flag))
-                    {
-                        QualifierType qual = FlagToQualifier(flag);
-                        usedQualifiers.Add(flag, qual);
-                    }
-
-                    valuesList.Add(val);
-                }
-
-            }
-            else
-            {
-                // daily, semimonthly, monthly, seasonal or yearly data
-
-                Awdb.data[] valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, true, beginDateStr, endDateStr, false);
-
-                // getting parameters
-                var vals0 = valuesObj[0];
-                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-                DateTime endDate = Convert.ToDateTime(vals0.endDate);
-
-                decimal?[] vals = vals0.values;
-                string[] flags = vals0.flags;
-
-                for (int i = 0; i < vals.Length; i++)
-                {
-                    ValueSingleVariable val = new ValueSingleVariable();
-                    val.censorCode = "nc";
-                    
-                    switch(duration)
-                    {
-                        case Awdb.duration.DAILY:
-                            val.dateTime = begDate.AddDays(i);
-                            break;
-                        case Awdb.duration.SEMIMONTHLY:
-                            val.dateTime = begDate.AddDays(i * 15);
-                            break;
-                        case Awdb.duration.MONTHLY:
-                            val.dateTime = begDate.AddMonths(i);
-                            break;
-                        case Awdb.duration.SEASONAL:
-                            val.dateTime = begDate.AddMonths(i * 3);
-                            break;
-                        case Awdb.duration.ANNUAL:
-                        case Awdb.duration.CALENDAR_YEAR:
-                        case Awdb.duration.WATER_YEAR:
-                            val.dateTime = begDate.AddYears(i);
-                            break;
-                        default:
-                            val.dateTime = begDate.AddHours(hourIncrement);
-                            break;
-                    }
-                    
-                    val.dateTimeUTC = val.dateTime;
-                    //val.timeOffset = "00:00";
-                    //val.timeOffsetSpecified = false;
-                    val.methodCode = methodID.ToString();
-                    val.methodID = methodID.ToString();
-
-                    // offset value
-                    if (heightDepthVal != 0)
-                    {
-                        val.offsetValueSpecified = true;
-                        val.offsetValue = heightDepthVal;
-                        val.offsetTypeID = offsetTypeID.ToString();
-                        val.offsetTypeCode = offsetTypeCode;
-                    }
-                    val.qualityControlLevelCode = qcID.ToString();
-                    val.sourceCode = sourceID.ToString();
-                    if (vals[i] == null)
-                    {
-                        val.Value = -9999.0M;
-                    }
-                    else
-                    {
-                        val.Value = Convert.ToDecimal(vals[i]);
-                    }
-
-                    // flag -> qualifier code
-                    var flag = flags[i];
-                    val.qualifiers = flag;
-                    if (!usedQualifiers.ContainsKey(flag))
-                    {
-                        QualifierType qual = FlagToQualifier(flag);
-                        usedQualifiers.Add(flag, qual);
-                    }
-
-                    valuesList.Add(val);
-                }
-
-            }
 
             s.value = valuesList.ToArray();
 
