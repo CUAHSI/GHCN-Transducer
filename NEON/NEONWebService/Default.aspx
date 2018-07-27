@@ -49,8 +49,8 @@
        <div class="intro">
             This web page describes <a href="http://his.cuahsi.org/" target="_blank">
                 <span style="color: #0000ff">CUAHSI WaterOneFlow web services</span></a> developed
-            to provide access to data from the <a href="https://cocorahs.org/"
-                target="_blank"><span style="color: #0000ff">Snow Telemetry (SNOTEL)</span></a><br />
+            to provide access to data from the <a href="http://data.neonscience.org/"
+                target="_blank"><span style="color: #0000ff">National Ecological Observatory Network (NEON)</span></a><br />
            <strong>
                 <br />
             </strong>
