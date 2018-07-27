@@ -790,6 +790,11 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         /// <returns></returns>
         internal static TsValuesSingleVariableType GetValuesFromDb(string siteCode, string variableCode, DateTime startDateTime, DateTime endDateTime)
         {
+            // Extract short codes:
+            string neonSiteCode = siteCode.Split('_').First();
+            string productCode = variableCode.Split('_').First();
+            string attributeName = variableCode.Split('_').Last();
+
             // Variable Info (from DB)
             VariableInfoType v = GetVariableInfoFromDb(variableCode);
 
@@ -806,27 +811,22 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 using (SqlCommand cmd = new SqlCommand())
                 {
-                    string sql = @"SELECT BeginDateTime, EndDateTime, ValueCount, MethodID, MethodDescription FROM dbo.SeriesCatalog 
-                                    WHERE SiteCode = @SiteCode AND VariableCode = @VariableCode";
+                    string sql = @"SELECT MethodID, MethodCode, MethodDescription, MethodLink FROM dbo.Methods WHERE MethodCode = @MethodCode";
                     cmd.CommandText = sql;
                     cmd.Connection = conn;
-                    cmd.Parameters.Add(new SqlParameter("@SiteCode", siteCode));
-                    cmd.Parameters.Add(new SqlParameter("@VariableCode", variableCode));
+                    cmd.Parameters.Add(new SqlParameter("@MethodCode", productCode));
                     conn.Open();
                     SqlDataReader dr = cmd.ExecuteReader();
                     dr.Read();
 
-                    meth.methodCode = Convert.ToString(dr["MethodID"]);
-                    meth.methodID = Convert.ToInt32(dr["MethodCode"]);
+                    meth.methodCode = Convert.ToString(dr["MethodCode"]);
+                    meth.methodID = Convert.ToInt32(dr["MethodID"]);
                     meth.methodDescription = Convert.ToString(dr["MethodDescription"]);
-                    //m.methodLink = Convert.ToString(dr["MethodLink"]);
+                    meth.methodLink = Convert.ToString(dr["MethodLink"]);
                 }
             }
 
-            // site: using NEON SiteCode
-            string neonSiteCode = siteCode.Split('_').First();
-            string productCode = variableCode.Split('_').First();
-            string attributeName = variableCode.Split('_').Last();
+            
 
             //LogWriter log = new LogWriter();
             //var apiReader = new NeonApiReader();
@@ -866,18 +866,33 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             // The URL's are filtered by the startDate and endDate if startDate or endDate are specified.
 
             var validMonths = new List<string>();
-            var firstMonth = "1990-01";
-            var lastMonth = "2100-12";
+            var firstMonth = new DateTime(startDateTime.Year, startDateTime.Month, 1);
+            var lastMonth = new DateTime(endDateTime.Year, endDateTime.Month, 1);
 
             // TODO limit by selected months
 
+            var productDataUrls = new List<string>();
             var dataFileUrls = new List<string>();
 
-            client = new WebClient();
-            foreach (var dataUrl in dataProduct.availableDataUrls)
+            // Filter data URL's by user-specified <startDate, endDate range>
+            var dataMonthIndex = 0;
+            foreach (var dataMonth in dataProduct.availableMonths)
             {
-                //retrieve hyperlinks to data files
-                
+                // for example 2017-11 becomes 2017-11-01
+                var dataMonthFirstDay = DateTime.Parse(dataMonth + "-01", CultureInfo.InvariantCulture);
+                if (dataMonthFirstDay >= firstMonth && dataMonthFirstDay <= lastMonth)
+                {
+                    string dataUrl = dataProduct.availableDataUrls[dataMonthIndex];
+                    productDataUrls.Add(dataUrl);
+                }
+                dataMonthIndex += 1;
+            }
+
+            // Retrieve links to NEON CSV data files.
+            client = new WebClient();
+            foreach (var dataUrl in productDataUrls)
+            {
+                //limit dataUrl by month               
                 var neonFiles = new NeonFileCollection();
 
                 using (var stream = client.OpenRead(dataUrl))
@@ -897,14 +912,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     // always use the csv file containing basic and _30min.
                     if (neonFile.name.Contains("basic") && neonFile.name.Contains("_30min"))
                     {
-                        var validName = neonFile.name;
-
-                        // A valid file has been found. now we can parse the data.
                         var validUrl = neonFile.url;
                         dataFileUrls.Add(validUrl);
-
-                        // TODO: download data from the URL, parse CSV and add values to output array
-                        // TODO: dataURL's should be ordered by time.
                     }
                 }
             }
@@ -950,26 +959,30 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
                                 var dt = DateTime.Parse(dateTimeStr.Replace("\"", ""), CultureInfo.InvariantCulture);
 
-                                var newValue = new ValueSingleVariable();
-                                newValue.censorCode = "nc";
-                                newValue.dateTime = dt.ToUniversalTime();
-                                newValue.dateTimeUTC = dt.ToUniversalTime();
-                                newValue.methodCode = meth.methodCode;
-                                newValue.methodID = Convert.ToString(meth.methodID);
-                                newValue.sourceCode = "1";
-                                newValue.sourceID = "1";
-                                newValue.qualityControlLevelCode = "1";
+                                if (dt >= startDateTime && dt <= endDateTime)
+                                {
+                                    // create a WaterML value object and add it to TimeSeries list.
+                                    var newValue = new ValueSingleVariable();
+                                    newValue.censorCode = "nc";
+                                    newValue.dateTime = dt.ToUniversalTime();
+                                    newValue.dateTimeUTC = dt.ToUniversalTime();
+                                    newValue.methodCode = meth.methodCode;
+                                    newValue.methodID = Convert.ToString(meth.methodID);
+                                    newValue.sourceCode = "1";
+                                    newValue.sourceID = "1";
+                                    newValue.qualityControlLevelCode = "1";
 
-                                // assign dataValue
-                                if (dataValueStr == "")
-                                {
-                                    newValue.Value = Convert.ToDecimal(v.noDataValue);
+                                    // assign dataValue
+                                    if (dataValueStr == "")
+                                    {
+                                        newValue.Value = Convert.ToDecimal(v.noDataValue);
+                                    }
+                                    else
+                                    {
+                                        newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
+                                    }
+                                    valuesList.Add(newValue);
                                 }
-                                else
-                                {
-                                    newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
-                                }
-                                valuesList.Add(newValue);
                             }
                         }
                     }
