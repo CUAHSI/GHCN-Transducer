@@ -86,7 +86,7 @@
     </None>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="settings\neon_variables_lookup_example.xlsx">
+    <None Include="settings\neon_variables_lookup.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
