@@ -321,10 +321,7 @@ namespace WaterOneFlow.odws
                 //get siteId, variableId
                 string siteId = SiteNumber.Substring(SiteNumber.LastIndexOf(":") + 1);
                 string variableId = Variable.Substring(Variable.LastIndexOf(":") + 1);
-
-                
-
-                
+               
                 DateTime startDateTime = new DateTime(2000, 1, 1);
                 DateTime endDateTime = DateTime.Now;
 
