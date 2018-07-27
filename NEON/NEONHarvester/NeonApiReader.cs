@@ -20,10 +20,11 @@ namespace NEONHarvester
         public NeonProduct ReadProductFromApi(string productCode)
         {
             var neonProduct = new NeonProduct();
+            string url = "http://data.neonscience.org/api/v0/products/" + productCode;
 
             try
             {
-                string url = "http://data.neonscience.org/api/v0/products/" + productCode;
+                
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))
@@ -36,7 +37,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
-                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
+                _log.LogWrite(string.Format("ReadProductFromApi ERROR for url {0}: ", url) + ex.Message);
             }
             return (neonProduct);
         }
