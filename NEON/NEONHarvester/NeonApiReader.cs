@@ -84,7 +84,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
-                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
+                _log.LogWrite(string.Format("ReadNeonFilesFromApi ERROR for URL {0}: ", filesUrl) + ex.Message);
             }
             return (neonFiles);
         }
