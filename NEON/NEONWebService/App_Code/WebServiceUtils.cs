@@ -13,6 +13,9 @@ using WaterOneFlowImpl.geom;
 using System.Net;
 using System.IO;
 using System.Linq;
+using NEONHarvester;
+using Newtonsoft.Json;
+using System.Globalization;
 
 namespace WaterOneFlow.odws
 {
@@ -498,15 +501,8 @@ WHERE v.VariableCode = @variableCode";
 
                         //variable name
                         varInfo.variableName = (string)dr["VariableName"];
-
-                        // checking if variable is in exclude list
-                        List<string> excludeList = FindExcludedDurations();
-                        string duration = VariableCodeToDuration(varInfo.variableCode[0].Value);
-                        if (!excludeList.Contains(duration))
-                        {
-                            variablesList.Add(varInfo);
-                        }
-
+                        variablesList.Add(varInfo);
+                        
                     }
                     conn.Close();
                 }
@@ -600,17 +596,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
                         //variable name
                         varInfo.variableName = (string)dr["VariableName"];
-
-                        // only add variable if it is not in the "exclude_durations" list
-                        var duration = VariableCodeToDuration(varInfo.variableCode[0].Value);
-                        if (!excludeList.Contains(duration))
-                        {
-                            variablesList.Add(varInfo);
-                        }
-                        else
-                        {
-                            var msg = "This variable is excluded!";
-                        }
+                        variablesList.Add(varInfo);
+   
                     }
                     conn.Close();
                 }
@@ -618,46 +605,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             return variablesList.ToArray();
         }
 
-        internal static SourceType GetSourceForSite(int siteId) 
-        {
-            SourceType s = new SourceType();
-            s.citation = "CHMI";
-            s.organization = "CHMI";
-            s.sourceCode = "1";
-            s.sourceDescription = " measured by CHMI professional stations";
-            s.sourceID = 1;
-            s.sourceIDSpecified = true;
-            
-            string sql = "SELECT op.id, op.name, op.url FROM plaveninycz.operator op " +
-                String.Format("INNER JOIN plaveninycz.stations s ON op.id = s.operator_id WHERE s.st_id = {0}", siteId);
-            string connStr = GetConnectionString();
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    conn.Open();
-                    
-                    SqlDataReader dr = cmd.ExecuteReader();
-                    if (dr.HasRows)
-                    {
-                        dr.Read();
-                        s.citation = Convert.ToString(dr["name"]);
-                        s.organization = Convert.ToString(dr["name"]);
-                        s.sourceCode = Convert.ToString(dr["id"]);
-                        s.sourceLink = new string[1];
-                        s.sourceLink[0] = Convert.ToString(dr["url"]);
-                        s.sourceID = Convert.ToInt32(dr["id"]);
-                    }
-                    s.sourceLink = new string[1];
-                    s.sourceLink[0] = "http://hydrodata.info/";
-                }
-            }            
-            return s;
-        }
-
         
-
-         public static SiteInfoType GetSiteFromDb2(string siteCode)
+        public static SiteInfoType GetSiteFromDb2(string siteCode)
         {
             string cnn = GetConnectionString();
             string serviceCode = ConfigurationManager.AppSettings["network"];
@@ -821,11 +770,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         if (dr.HasRows)
                         {
                             string varCode = Convert.ToString(dr["VariableCode"]);
-                            string duration = VariableCodeToDuration(varCode);
-                            if (!variableCodeList.Contains(varCode) && !excluded.Contains(duration))
-                            {
-                                variableCodeList.Add(varCode);
-                            }
+                            variableCodeList.Add(varCode);
                         }
                     }
                 }
@@ -845,29 +790,207 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         /// <returns></returns>
         internal static TsValuesSingleVariableType GetValuesFromDb(string siteCode, string variableCode, DateTime startDateTime, DateTime endDateTime)
         {
-            // for storing heightDepth value
-            int heightDepthVal = 0;
-            
-            // methodID is taken from the variableCode
-            string vc = variableCode;
-            if (vc.IndexOf(":") > -1)
-            {
-                vc = vc.Substring(vc.IndexOf(":") + 1);
-            }
-            string[] vcSplit = variableCode.Split('_');
-            string elementCd = vcSplit[0];
-            string methodCode = "NOTSPECIFIED";
-            int offsetTypeID = 1;
-            string offsetTypeCode = "H";
+            // Extract short codes:
+            string neonSiteCode = siteCode.Split('_').First();
+            string productCode = variableCode.Split('_').First();
+            string attributeName = variableCode.Split('_').Last();
 
-            if (vcSplit.Length > 2)
+            // Variable Info (from DB)
+            VariableInfoType v = GetVariableInfoFromDb(variableCode);
+
+            // Method Info (from DB via productCode)
+            string shortVariableCode = variableCode;
+            if (shortVariableCode.IndexOf(":") > -1)
             {
-                methodCode = vcSplit[2];
+                shortVariableCode = shortVariableCode.Substring(shortVariableCode.IndexOf(":") + 1);
             }
 
+            MethodType meth = new MethodType();
+            string cnn = GetConnectionString();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT MethodID, MethodCode, MethodDescription, MethodLink FROM dbo.Methods WHERE MethodCode = @MethodCode";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@MethodCode", productCode));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+
+                    meth.methodCode = Convert.ToString(dr["MethodCode"]);
+                    meth.methodID = Convert.ToInt32(dr["MethodID"]);
+                    meth.methodDescription = Convert.ToString(dr["MethodDescription"]);
+                    meth.methodLink = Convert.ToString(dr["MethodLink"]);
+                }
+            }
+
             
-            //default methodID and qcID
-            int methodID = 0;
+
+            //LogWriter log = new LogWriter();
+            //var apiReader = new NeonApiReader();
+            var neonSite = new NeonSite();
+
+            // fetching available data URL's
+            NeonProductInfo dataProduct = null;
+
+            // Retrieve a matching NEON products for the specified site and variable.
+            string url = "http://data.neonscience.org/api/v0/sites/" + neonSiteCode;
+            var client = new WebClient();
+            using (var stream = client.OpenRead(url))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    var jsonData = client.DownloadString(url);
+                    NeonSiteItem siteData = JsonConvert.DeserializeObject<NeonSiteItem>(jsonData);
+                    var dataProducts = siteData.data.dataProducts;
+                    
+                    foreach(var product in dataProducts)
+                    {
+                        if (product.dataProductCode == productCode)
+                        {
+                            dataProduct = product;
+                            break;
+                        }
+                    }                   
+                }
+            }
+
+            if (dataProduct == null)
+            {
+                throw new ArgumentException(string.Format("Site {0} does not have data for variable {1}", siteCode, variableCode));
+            }
+
+            // Retrieve matching csv file URL's for the data product.
+            // The URL's are filtered by the startDate and endDate if startDate or endDate are specified.
+
+            var validMonths = new List<string>();
+            var firstMonth = new DateTime(startDateTime.Year, startDateTime.Month, 1);
+            var lastMonth = new DateTime(endDateTime.Year, endDateTime.Month, 1);
+
+            // TODO limit by selected months
+
+            var productDataUrls = new List<string>();
+            var dataFileUrls = new List<string>();
+
+            // Filter data URL's by user-specified <startDate, endDate range>
+            var dataMonthIndex = 0;
+            foreach (var dataMonth in dataProduct.availableMonths)
+            {
+                // for example 2017-11 becomes 2017-11-01
+                var dataMonthFirstDay = DateTime.Parse(dataMonth + "-01", CultureInfo.InvariantCulture);
+                if (dataMonthFirstDay >= firstMonth && dataMonthFirstDay <= lastMonth)
+                {
+                    string dataUrl = dataProduct.availableDataUrls[dataMonthIndex];
+                    productDataUrls.Add(dataUrl);
+                }
+                dataMonthIndex += 1;
+            }
+
+            // Retrieve links to NEON CSV data files.
+            client = new WebClient();
+            foreach (var dataUrl in productDataUrls)
+            {
+                //limit dataUrl by month               
+                var neonFiles = new NeonFileCollection();
+
+                using (var stream = client.OpenRead(dataUrl))
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var jsonData = client.DownloadString(dataUrl);
+
+                        var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
+                        neonFiles = neonFileData.data;
+                    }
+                }
+
+                var usedNeonFiles = new NeonFileCollection();
+                foreach (var neonFile in neonFiles.files)
+                {
+                    // always use the csv file containing basic and _30min.
+                    if (neonFile.name.Contains("basic") && neonFile.name.Contains("_30min"))
+                    {
+                        var validUrl = neonFile.url;
+                        dataFileUrls.Add(validUrl);
+                    }
+                }
+            }
+
+            client = new WebClient();
+            var allDateTimes = new List<DateTime>();
+            var allDataValues = new List<decimal>();
+
+            // WaterML values list
+            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
+
+            foreach (var dataFileUrl in dataFileUrls)
+            {
+                // retrieve CSV data files.
+                using (var stream = client.OpenRead(dataFileUrl))
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var firstLine = reader.ReadLine();
+                        var colHeadings = firstLine.Split(',');
+                        var dateTimeIndex = -1;
+                        var valueIndex = -1;
+                        for (var i = 0; i < colHeadings.Length; i++)
+                        {
+                            if (colHeadings[i] == "startDateTime")
+                            {
+                                dateTimeIndex = i;
+                            }
+                            if (colHeadings[i] == attributeName)
+                            {
+                                valueIndex = i;
+                            }
+                        }
+
+                        if (dateTimeIndex >= 0 && valueIndex >= 0)
+                        {
+                            while (!reader.EndOfStream)
+                            {
+                                var line = reader.ReadLine();
+                                var values = line.Split(',');
+                                var dateTimeStr = values[dateTimeIndex];
+                                var dataValueStr = values[valueIndex];
+
+                                var dt = DateTime.Parse(dateTimeStr.Replace("\"", ""), CultureInfo.InvariantCulture);
+
+                                if (dt >= startDateTime && dt <= endDateTime)
+                                {
+                                    // create a WaterML value object and add it to TimeSeries list.
+                                    var newValue = new ValueSingleVariable();
+                                    newValue.censorCode = "nc";
+                                    newValue.dateTime = dt.ToUniversalTime();
+                                    newValue.dateTimeUTC = dt.ToUniversalTime();
+                                    newValue.methodCode = meth.methodCode;
+                                    newValue.methodID = Convert.ToString(meth.methodID);
+                                    newValue.sourceCode = "1";
+                                    newValue.sourceID = "1";
+                                    newValue.qualityControlLevelCode = "1";
+
+                                    // assign dataValue
+                                    if (dataValueStr == "")
+                                    {
+                                        newValue.Value = Convert.ToDecimal(v.noDataValue);
+                                    }
+                                    else
+                                    {
+                                        newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
+                                    }
+                                    valuesList.Add(newValue);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            
+            
             int qcID = 1;
             int sourceID = 1;
             
@@ -882,27 +1005,11 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
             // method object from database
             s.method = new MethodType[1];
-            s.method[0] = GetMethodByCode(methodCode);
+            s.method[0] = meth;
             s.method[0].methodIDSpecified = true;
-            methodID = s.method[0].methodID;
+            int methodID = s.method[0].methodID;
 
-            // heightDepth, offset type id and code based on method code (if relevant)
-            if (methodCode.StartsWith("H"))
-            {
-                heightDepthVal = Convert.ToInt32(methodCode.Substring(1));
-                offsetTypeID = methodID;
-                offsetTypeCode = methodCode;
-            }
-            else if (methodCode.StartsWith("D"))
-            {
-                heightDepthVal = (-1) * Convert.ToInt32(methodCode.Substring(1));
-                offsetTypeID = methodID;
-                offsetTypeCode = methodCode;
-            }
-
-            //variable
-            VariableInfoType v = GetVariableInfoFromDb(variableCode);
-
+            
             //time units
             s.units = v.timeScale.unit;
 
@@ -915,252 +1022,18 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             s.source = new SourceType[1];
             s.source[0] = GetSourceFromDb();
 
-            //qualifiers - not used by SCAN
+            //qualifiers - not used by NEON for now
             s.qualifier = new QualifierType[3];
             s.qualifier[0] = new QualifierType();
             Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
             var usedQualifiers = new Dictionary<string, QualifierType>();
 
-            //values: get from AWDB web service
-            
-            // !!! necessary configuration to prevent the "Bad Gateway" error
-            // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
-            System.Net.ServicePointManager.Expect100Continue = false;
-
-            // connecting to the AWDB web service
-            Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
-
-            // !!! necessary configuration to prevent MaxReceivedMessageSize error
-            System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
-            httpBinding.MaxReceivedMessageSize = int.MaxValue;
-
-            // the AWDB station parameter must be in form ID:STATE:NETWORK
-            string[] stationTriplets = new string[] { siteCode.Replace("_", ":") };
-
-            // selecting the duration parameter
-            Awdb.duration duration = Awdb.duration.HOURLY;
-            string durationCode = vcSplit[1];
-            int hourIncrement = 1;
-            switch (durationCode)
-            {
-                case "H":
-                    duration = Awdb.duration.HOURLY;
-                    hourIncrement = 1;
-                    break;
-                case "D":
-                    duration = Awdb.duration.DAILY;
-                    hourIncrement = 24;
-                    break;
-                case "sm":
-                    duration = Awdb.duration.SEMIMONTHLY;
-                    hourIncrement = 24 * 15;
-                    break;
-                case "m":
-                    duration = Awdb.duration.MONTHLY;
-                    hourIncrement = 24 * 30;
-                    break;
-                case "season":
-                    duration = Awdb.duration.SEASONAL;
-                    hourIncrement = 24 * 30 * 3;
-                    break;
-                case "wy":
-                    duration = Awdb.duration.WATER_YEAR;
-                    hourIncrement = 24 * 365;
-                    break;
-                case "y":
-                    duration = Awdb.duration.CALENDAR_YEAR;
-                    hourIncrement = 24 * 365;
-                    break;
-                case "a":
-                    duration = Awdb.duration.ANNUAL;
-                    hourIncrement = 24 * 365;
-                    break;
-                default:
-                    duration = Awdb.duration.HOURLY;
-                    hourIncrement = 1;
-                    break;
-            }
-
-            // selecting the heightDepth parameter and offset
-            Awdb.heightDepth heightDepth = null;
-            if (heightDepthVal != 0)
-            {
-                heightDepth = new Awdb.heightDepth();
-                heightDepth.unitCd = "in";
-                heightDepth.value = heightDepthVal;
-                heightDepth.valueSpecified = true;
-
-                s.offset = new OffsetType[1];
-                s.offset[0] = new OffsetType();
-                s.offset[0].offsetDescription = s.method[0].methodDescription;
-                s.offset[0].offsetIsVertical = true;
-                s.offset[0].offsetTypeCode = offsetTypeCode;
-                s.offset[0].offsetTypeID = offsetTypeID;
-                s.offset[0].offsetTypeIDSpecified = true;
-                s.offset[0].offsetValue = heightDepthVal;
-                s.offset[0].unit = new UnitsType();
-                s.offset[0].unit.unitAbbreviation = "in";
-                s.offset[0].unit.unitName = "international inch";
-                s.offset[0].unit.unitCode = "49";
-                s.offset[0].unit.unitType = "Length";
-                s.offset[0].unit.unitID = 49;
-                s.offset[0].unit.unitIDSpecified = true;
-            }
-
-            // ordinal parameter - should be set to 1 ...
-            var ordinal = 1;
-
+            //values: get from NEON API           
             string beginDateStr = startDateTime.ToString("yyyy-MM-dd HH:mm:ss");
             string endDateStr = endDateTime.ToString("yyyy-MM-dd HH:mm:ss");
 
-            // increasing AWDB SOAP service timeout ...
-            wc.Endpoint.Binding.CloseTimeout = new TimeSpan(1);
-            wc.Endpoint.Binding.ReceiveTimeout = new TimeSpan(1);
-            wc.Endpoint.Binding.OpenTimeout = new TimeSpan(1);
-
-            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
-
-            if (duration == Awdb.duration.HOURLY)
-            {
-                // hourly data
-
-                beginDateStr = startDateTime.ToString("yyyy-MM-dd");
-                endDateStr = endDateTime.ToString("yyyy-MM-dd");
-                int beginHour = startDateTime.Hour;
-                int endHour = endDateTime.Hour;
-                Awdb.hourlyData[] valuesObjH = wc.getHourlyData(stationTriplets, elementCd, ordinal, heightDepth, beginDateStr, endDateStr, beginHour, endHour);
-
-                var vals0 = valuesObjH[0];
-                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-                DateTime endDate = Convert.ToDateTime(vals0.endDate);
-                Awdb.hourlyDataValue[] vals = vals0.values;
-
-                for (int i = 0; i < vals.Length; i++)
-                {
-                    ValueSingleVariable val = new ValueSingleVariable();
-                    val.censorCode = "nc";
-
-                    val.dateTime = begDate.AddHours(i);
-                    val.dateTimeUTC = val.dateTime;
-                    //val.timeOffset = "00:00";
-                    //val.timeOffsetSpecified = false;
-                    val.methodCode = methodID.ToString();
-                    val.methodID = methodID.ToString();
-
-                    // offset value (if relevant)
-                    if (heightDepthVal != 0)
-                    {
-                        val.offsetValueSpecified = true;
-                        val.offsetValue = heightDepthVal;
-                        val.offsetTypeID = offsetTypeID.ToString();
-                        val.offsetTypeCode = offsetTypeCode;
-                    }
-                    val.qualityControlLevelCode = qcID.ToString();
-                    val.sourceCode = sourceID.ToString();
-                    if (vals[i] == null)
-                    {
-                        val.Value = -9999.0M;
-                    }
-                    else
-                    {
-                        val.Value = vals[i].value;
-                    }
-
-                    // qualifier (if relevant)
-                    var flag = vals[i].flag;
-                    val.qualifiers = vals[i].flag;
-                    if (!usedQualifiers.ContainsKey(flag))
-                    {
-                        QualifierType qual = FlagToQualifier(flag);
-                        usedQualifiers.Add(flag, qual);
-                    }
-
-                    valuesList.Add(val);
-                }
-
-            }
-            else
-            {
-                // daily, semimonthly, monthly, seasonal or yearly data
-
-                Awdb.data[] valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, true, beginDateStr, endDateStr, false);
-
-                // getting parameters
-                var vals0 = valuesObj[0];
-                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-                DateTime endDate = Convert.ToDateTime(vals0.endDate);
-
-                decimal?[] vals = vals0.values;
-                string[] flags = vals0.flags;
-
-                for (int i = 0; i < vals.Length; i++)
-                {
-                    ValueSingleVariable val = new ValueSingleVariable();
-                    val.censorCode = "nc";
-                    
-                    switch(duration)
-                    {
-                        case Awdb.duration.DAILY:
-                            val.dateTime = begDate.AddDays(i);
-                            break;
-                        case Awdb.duration.SEMIMONTHLY:
-                            val.dateTime = begDate.AddDays(i * 15);
-                            break;
-                        case Awdb.duration.MONTHLY:
-                            val.dateTime = begDate.AddMonths(i);
-                            break;
-                        case Awdb.duration.SEASONAL:
-                            val.dateTime = begDate.AddMonths(i * 3);
-                            break;
-                        case Awdb.duration.ANNUAL:
-                        case Awdb.duration.CALENDAR_YEAR:
-                        case Awdb.duration.WATER_YEAR:
-                            val.dateTime = begDate.AddYears(i);
-                            break;
-                        default:
-                            val.dateTime = begDate.AddHours(hourIncrement);
-                            break;
-                    }
-                    
-                    val.dateTimeUTC = val.dateTime;
-                    //val.timeOffset = "00:00";
-                    //val.timeOffsetSpecified = false;
-                    val.methodCode = methodID.ToString();
-                    val.methodID = methodID.ToString();
-
-                    // offset value
-                    if (heightDepthVal != 0)
-                    {
-                        val.offsetValueSpecified = true;
-                        val.offsetValue = heightDepthVal;
-                        val.offsetTypeID = offsetTypeID.ToString();
-                        val.offsetTypeCode = offsetTypeCode;
-                    }
-                    val.qualityControlLevelCode = qcID.ToString();
-                    val.sourceCode = sourceID.ToString();
-                    if (vals[i] == null)
-                    {
-                        val.Value = -9999.0M;
-                    }
-                    else
-                    {
-                        val.Value = Convert.ToDecimal(vals[i]);
-                    }
-
-                    // flag -> qualifier code
-                    var flag = flags[i];
-                    val.qualifiers = flag;
-                    if (!usedQualifiers.ContainsKey(flag))
-                    {
-                        QualifierType qual = FlagToQualifier(flag);
-                        usedQualifiers.Add(flag, qual);
-                    }
-
-                    valuesList.Add(val);
-                }
-
-            }
-
+            
+            // assign data values
             s.value = valuesList.ToArray();
 
             // adding qualifiers
@@ -1241,113 +1114,5 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             }
         }
 
-        private static Decimal convertValue(object val, int varId) 
-        {
-            var dVal = Convert.ToDouble(val);
-            switch (varId)
-            {
-                case 1:
-                    // precipitation - no data value is now displayed as zero
-                    return Convert.ToDecimal(Math.Round(dVal, 1));
-                case 4:
-                    // water stag
-                    return Convert.ToDecimal(Math.Round(dVal, 4));
-                case 5:
-                    // discharge
-                    return Convert.ToDecimal(Math.Round(dVal, 4));
-                case 8:
-                    // snow
-                    return Convert.ToDecimal(Math.Round(dVal, 1));
-                case 16:
-                case 17:
-                case 18:
-                    // air temperature
-                    return Convert.ToDecimal(Math.Round(dVal, 1));
-                default:
-                    return Convert.ToDecimal(Math.Round(dVal, 4));
-            }
-        }
-
-
-        private static string VariableCodeToDuration(string variableCode)
-        {
-            string[] vcSplit = variableCode.Split('_');
-            string durationCode = vcSplit[1];
-            string duration = "HOURLY";
-            
-            switch (durationCode)
-            {
-                case "H":
-                    duration = "HOURLY";
-                    break;
-                case "D":
-                    duration = "DAILY";
-                    break;
-                case "sm":
-                    duration = "SEMIMONTHLY";
-                    break;
-                case "m":
-                    duration = "MONTHLY";
-                    break;
-                case "season":
-                    duration = "SEASONAL";
-                    break;
-                case "wy":
-                    duration = "WATER_YEAR";
-                    break;
-                case "y":
-                    duration = "CALENDAR_YEAR";
-                    break;
-                case "a":
-                    duration = "ANNUAL";
-                    break;
-                default:
-                    duration = "HOURLY";
-                    break;
-            }
-            return duration;
-        }
-
-
-        private static ValueSingleVariable CreateNoDataValue(DateTime time, TsValuesSingleVariableType s, int variableId)
-        {
-            ValueSingleVariable v = new ValueSingleVariable();
-            v.censorCode = "nc";
-            v.dateTime = Convert.ToDateTime(time);
-            v.dateTimeUTC = v.dateTime.AddHours(-1);
-            v.dateTimeUTCSpecified = true;
-            //v.methodCode = s.method[0].methodCode;
-            //v.methodID = v.methodCode;
-            v.methodCode = "0";
-            v.offsetValueSpecified = false;
-            v.qualityControlLevelCode = "1";
-            v.sourceCode = "1";
-            //v.sourceID = "1";
-            v.timeOffset = "01:00";
-
-            switch (variableId)
-            {
-                case 1:
-                    //for precipitation, set 'no data' to zero
-                    v.Value = 0.0M;
-                    break;
-                case 4:
-                    v.Value = -9999.0M;
-                    break;
-                case 5:
-                    v.Value = -9999.0M;
-                    break;
-                case 8:
-                    v.Value = 0.0M;
-                    break;
-                case 16:
-                    v.Value = -9999.0M;
-                    break;
-                default:
-                    v.Value = -9999.0M;
-                    break;
-            }
-            return v;
-        }
     }
 }

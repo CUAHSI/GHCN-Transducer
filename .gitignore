@@ -199,6 +199,11 @@ $RECYCLE.BIN/
 **/node_modules/*
 **/wwwroot/*
 
+# Log files
+log/
+logs/
+*log.txt
+
 #####
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####

@@ -122,8 +122,9 @@ from the WaterML web service response. By default, all durations are included.
 - Alternatively the empty ODM database can be created with the "Attach Database" command using the file: https://github.com/CUAHSI/GHCN-Transducer/blob/master/odm/OD.mdf
 2. Open the solution SNOTELharvester.sln in Visual Studio
 3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
-4. Build the solution and run the command-line program SCANharvester.EXE
-5. While executing the SNOTELharvester.EXE connects to the AWDB web service and populates the Variables, Sources, Qualifiers, Sites and SeriesCatalog tables in the ODM database. Progress report of the update including errors and exceptions is saved in a log file in the same directory as the EXE.
+4. Build the solution and run the command-line program SNOTELharvester.EXE
+5. Copy the file SNOTELharvester/settings/snotel_variables.xlsx to the same directory as the EXE.
+6. While executing the SNOTELharvester.EXE connects to the AWDB web service and populates the Variables, Sources, Qualifiers, Sites and SeriesCatalog tables in the ODM database. Progress report of the update including errors and exceptions is saved in a log file in the same directory as the EXE.
 
 ## Setup Instructions for SNOTEL Web Service
 1. Setup and run SNOTELHarvester as described above

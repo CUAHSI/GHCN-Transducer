@@ -9,84 +9,87 @@ using System.Globalization;
 using OfficeOpenXml;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 
-namespace SNOTELHarvester
+namespace NEONHarvester
 {
+    class ProductInfo
+    {
+        public string ProductCode { get; set; }
+        public string ProductName { get; set; }
+        public string ProductStatus { get; set; }
+        public int NumSites { get; set; }
+        public int NumMonths { get; set; }
+    }
+
+
     /// <summary>
     /// Responsible for updating the Variables table in the ODM
     /// </summary>
     class VariableManager
     {
         private LogWriter _log;
+        private NeonApiReader _apiReader;
 
         public VariableManager(LogWriter log)
         {
             _log = log;
+            _apiReader = new NeonApiReader(log);
         }
+
+
+        public void WriteProductTable()
+        {
+            var products = _apiReader.ReadProductsFromApi();
+
+            var productInfos = new List<ProductInfo>();
+            foreach (var prod in products.data)
+            {
+                var p = new ProductInfo();
+                p.ProductCode = prod.productCode;
+                p.ProductName = prod.productName;
+                p.ProductStatus = prod.productStatus;
+                if (prod.siteCodes is null)
+                {
+                    p.NumSites = 0;
+                    p.NumMonths = 0;
+                }
+                else
+                {
+                    p.NumSites = prod.siteCodes.Count;
+                    p.NumMonths = 0;
+                    foreach (var sc in prod.siteCodes)
+                    {
+                        foreach (var m in sc.availableMonths)
+                        {
+                            p.NumMonths += 1;
+                        }
+                    }
+                }
+                productInfos.Add(p);
+            }
+
+            var file = new FileInfo("neon_products.xlsx");
+            using (ExcelPackage package = new ExcelPackage(file))
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("test");
+
+                worksheet.Cells["A1"].LoadFromCollection(productInfos, true, OfficeOpenXml.Table.TableStyles.Medium1);
+
+                package.Save();
+            }
+        }
+
+        
+        
 
         public void UpdateVariables()
         {
-            // reading the variables from the EXCEL file
-            // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
-            string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string variablesFile = Path.Combine(executableLocation, "snotel_variables.xlsx");
-
-            // in previous version variables were read from the Github URL
-            //string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/SNOTELHarvester/settings/snotel_variables.xlsx";
-
-            var variables = new List<Variable>();
-
-            _log.LogWrite("Read Variables from File " + variablesFile);
-            int rowNum = 0;
-            object timeUnitsObj = "timeUnitsObj";
             try
             {
-                var variablesFileInfo = new FileInfo(variablesFile);
-                using(var package = new ExcelPackage(variablesFileInfo))
-                {
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
-                    var start = worksheet.Dimension.Start;
-                    var end = worksheet.Dimension.End;
-                    for (int row = start.Row; row <= end.Row; row++)
-                    { // Row by row..
-                        rowNum++;
-                        string code = Convert.ToString(worksheet.Cells[row, 1].Value);
-                        if (code.EndsWith("in"))
-                        {
-                            code = code.Substring(0, code.Length - 2);
-                        }
-                        if (code == "VariableCode")
-                        {
-                            continue;
-                        }
-                        string name = Convert.ToString(worksheet.Cells[row, 2].Value);
-                        if (name == "x")
-                        {
-                            continue;
-                        }
-                        string sampleMedium = Convert.ToString(worksheet.Cells[row, 3].Value);
-                        string dataType = Convert.ToString(worksheet.Cells[row, 4].Value);
-                        string unitsName = Convert.ToString(worksheet.Cells[row, 5].Value);
-                        int unitsID = Convert.ToInt32(worksheet.Cells[row, 6].Value);
-                        string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
-                        timeUnitsObj = worksheet.Cells[row, 8].Value;
-                        int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
-                        float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
+                LookupFileReader xlsReader = new LookupFileReader(_log);
 
-                        Variable v = new Variable
-                        {
-                            VariableCode = code,
-                            VariableName = name,
-                            VariableUnitsID = unitsID,
-                            VariableUnitsName = unitsName,
-                            DataType = dataType,
-                            SampleMedium = sampleMedium,
-                            TimeUnitsID = timeUnitsID,
-                            TimeSupport = timeSupport
-                        };
-                        variables.Add(v);
-                    }
-                }
+                var variables = xlsReader.ReadVariablesFromExcel();
 
                 _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -114,7 +117,7 @@ namespace SNOTELHarvester
             }
             catch (Exception ex)
             {
-                _log.LogWrite("UpdateVariables ERROR on row: " + timeUnitsObj.ToString() + " "  + rowNum + " " + ex.Message);
+                _log.LogWrite("UpdateVariables ERROR on row: "  + " " + ex.Message);
             }
 
         }
@@ -272,6 +275,7 @@ namespace SNOTELHarvester
                 }
             }
             return variableIDResult;
-        }
+}
     }
+
 }
