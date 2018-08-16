@@ -202,3 +202,11 @@ $RECYCLE.BIN/
 #####
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####
+/SCAN/logs/webapp-log.txt
+/SCAN/logs/query-log.txt201710
+/SCAN/logs/query-log.txt
+/SNOTEL/logs/webapp-log.txt
+/SNOTEL/logs/query-log.txt201712
+/SNOTEL/logs/query-log.txt201711
+/SNOTEL/logs/query-log.txt
+*.pubxml

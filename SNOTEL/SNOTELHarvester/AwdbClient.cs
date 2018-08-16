@@ -365,6 +365,13 @@ namespace SNOTELHarvester
                     series.EndDateTime = Convert.ToDateTime(element.endDate);
                     series.BeginDateTimeUTC = series.BeginDateTime;
                     series.EndDateTimeUTC = series.EndDateTime;
+                    //reset max enddate to end of month if no max end date{1/1/2100 12:00:00 AM} MS 3/17/19
+                    if (series.EndDateTime.ToString() == "1/1/2100 12:00:00 AM")
+                    {
+                        series.EndDateTime = Convert.ToDateTime(DateTime.Now.AddDays(7).ToShortDateString());
+                        series.EndDateTimeUTC = Convert.ToDateTime(DateTime.Now.AddDays(7).ToShortDateString());
+                    }
+                    
 
                     // estimate the value count
                     DateTime realEndTime = series.EndDateTime;
