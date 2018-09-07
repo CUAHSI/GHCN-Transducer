@@ -46,6 +46,7 @@ namespace NEONHarvester
                             var site = new Site();
                             site.SiteID = Convert.ToInt64(reader["SiteID"]);
                             site.SiteCode = Convert.ToString(reader["SiteCode"]);
+                            site.SiteName = Convert.ToString(reader["SiteName"]);
                             site.Latitude = Convert.ToDecimal(reader["Latitude"]);
                             site.Longitude = Convert.ToDecimal(reader["Longitude"]);
                             site.Elevation = Convert.ToDecimal(reader["Elevation_m"]);
@@ -278,7 +279,7 @@ namespace NEONHarvester
             var lookup = new Dictionary<string, Dictionary<string, Variable>>();
 
             var variableList = new List<Variable>();
-            string sqlQuery = "SELECT * FROM dbo.Variables";
+            string sqlQuery = "SELECT * FROM dbo.Variables v INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID";
             using (var cmd = new SqlCommand(sqlQuery, connection))
             {
                 try
@@ -293,7 +294,14 @@ namespace NEONHarvester
                             v.VariableID = Convert.ToInt32(reader["VariableID"]);
                             v.VariableCode = Convert.ToString(reader["VariableCode"]);
                             v.VariableName = Convert.ToString(reader["VariableName"]);
-                            // sample medium, etc..
+                            v.SampleMedium = Convert.ToString(reader["SampleMedium"]);
+                            v.TimeUnitsID = Convert.ToInt32(reader["TimeUnitsID"]);
+                            v.DataType = Convert.ToString(reader["DataType"]);
+                            v.GeneralCategory = Convert.ToString(reader["GeneralCategory"]);
+                            v.VariableUnitsID = Convert.ToInt32(reader["VariableUnitsID"]);
+                            v.VariableUnitsName = Convert.ToString(reader["UnitsName"]);
+                            v.ValueType = Convert.ToString(reader["ValueType"]);
+                            v.Speciation = Convert.ToString(reader["Speciation"]);
 
                             var neonProductCode = v.GetNeonProductCode();
                             if (lookup.ContainsKey(neonProductCode))
@@ -527,9 +535,9 @@ namespace NEONHarvester
                                 row["VariableUnitsName"] = s.VariableUnitsName;
                                 row["SampleMedium"] = s.SampleMedium;
                                 row["ValueType"] = s.ValueType;
-                                row["TimeSupport"] = s.TimeSupport;
+                                row["TimeSupport"] = 30;
                                 row["TimeUnitsID"] = s.TimeUnitsID;
-                                row["TimeUnitsName"] = "Day"; // todo get from DB !!!
+                                row["TimeUnitsName"] = "Minute"; // todo get from DB !!!
                                 row["DataType"] = s.DataType;
                                 row["GeneralCategory"] = s.GeneralCategory;
                                 row["MethodID"] = s.MethodID;
@@ -622,6 +630,8 @@ namespace NEONHarvester
                         s.SampleMedium = v.SampleMedium;
                         s.GeneralCategory = v.GeneralCategory;
                         s.TimeSupport = v.TimeSupport;
+                        s.ValueType = v.ValueType;
+                        s.Speciation = v.Speciation;
 
                         var productMethod = supportedMethods.Lookup[productCode];
                         s.MethodID = productMethod.MethodID;
@@ -647,6 +657,9 @@ namespace NEONHarvester
 
                             s.BeginDateTimeUTC = s.BeginDateTime;
                             s.EndDateTimeUTC = s.EndDateTime;
+
+                            var timeSpanDays = (s.EndDateTime - s.BeginDateTime).TotalDays;
+                            s.ValueCount = Convert.ToInt32(Math.Round(timeSpanDays) * 48);
 
                             seriesList.Add(s);
                         }

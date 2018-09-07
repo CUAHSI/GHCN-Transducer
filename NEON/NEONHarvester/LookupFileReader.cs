@@ -92,7 +92,9 @@ namespace NEONHarvester
                         GeneralCategory = generalCategory,
                         SampleMedium = sampleMedium,
                         TimeUnitsID = 102, // minute
-                        TimeSupport = 30.0f
+                        TimeSupport = 30.0f,
+                        ValueType = "Field Observation",
+                        Speciation = "Not Applicable"
                     };
                     variables.Add(v);
                 }

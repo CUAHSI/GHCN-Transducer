@@ -19,10 +19,10 @@ namespace NEONHarvester
         public int TimeUnitsID { get; set; }
         public string TimeUnitsName { get; set; }
 
-        public string ValueType { get { return "Field Observation"; } }
+        public string ValueType { get; set; }
         public bool IsRegular { get { return true; } }
 
-        public string Speciation { get { return ("Not Applicable"); } }
+        public string Speciation { get; set; } 
         public string GeneralCategory { get; set; }
         public double NoDataValue { get { return -9999.0; } }
 
