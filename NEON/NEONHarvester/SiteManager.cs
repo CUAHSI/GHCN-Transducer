@@ -632,6 +632,7 @@ namespace NEONHarvester
                         s.TimeSupport = v.TimeSupport;
                         s.ValueType = v.ValueType;
                         s.Speciation = v.Speciation;
+                        s.DataType = v.DataType;
 
                         var productMethod = supportedMethods.Lookup[productCode];
                         s.MethodID = productMethod.MethodID;
