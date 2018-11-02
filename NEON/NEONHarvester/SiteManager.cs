@@ -783,7 +783,7 @@ namespace NEONHarvester
                             var siteSensor = neonSiteSensors[sensorKey];
                             row["SiteID"] = siteID;
                             row["SiteCode"] = siteSensorCode;
-                            row["SiteName"] = siteSensor.ParentSite.siteName;
+                            row["SiteName"] = siteSensor.ParentSite.siteName + " " + siteSensor.HorVerCode;
                             row["Latitude"] = siteSensor.ReferenceLatitude;
                             row["Longitude"] = siteSensor.ReferenceLongitude;
                             row["LatLongDatumID"] = 3; // WGS1984
