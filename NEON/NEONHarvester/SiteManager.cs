@@ -279,7 +279,11 @@ namespace NEONHarvester
             var lookup = new Dictionary<string, Dictionary<string, Variable>>();
 
             var variableList = new List<Variable>();
-            string sqlQuery = "SELECT * FROM dbo.Variables v INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID";
+            string sqlQuery = "SELECT VariableID, VariableCode, VariableName, SampleMedium," +
+                "TimeUnitsID, DataType, GeneralCategory, VariableUnitsID, UnitsName," +
+                "ValueType, Speciation, tu.UnitsName AS TimeUnitsName FROM dbo.Variables v " +
+                "INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID" +
+                "INNER JOIN dbo.Units tu ON v.TimeUnitsID = u.UnitsID";
             using (var cmd = new SqlCommand(sqlQuery, connection))
             {
                 try
@@ -296,6 +300,7 @@ namespace NEONHarvester
                             v.VariableName = Convert.ToString(reader["VariableName"]);
                             v.SampleMedium = Convert.ToString(reader["SampleMedium"]);
                             v.TimeUnitsID = Convert.ToInt32(reader["TimeUnitsID"]);
+                            v.TimeUnitsName = Convert.ToString(reader["TimeUnitsName"]);
                             v.DataType = Convert.ToString(reader["DataType"]);
                             v.GeneralCategory = Convert.ToString(reader["GeneralCategory"]);
                             v.VariableUnitsID = Convert.ToInt32(reader["VariableUnitsID"]);
