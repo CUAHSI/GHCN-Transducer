@@ -6,7 +6,7 @@ The transducer contains two parts:
 - NEONWebService: this ASP.NET website publishes the data in WaterML format
 
 ## Original data source
-- NEON (http://data.neonnscience.org), using the NEON API.
+- NEON (http://data.neonscience.org), using the NEON API.
 
 ## Setup Instructions for NEON-Harvester
 1. Install an empty ODM 1.1.1 database on your Microsoft SQL Server. 
