@@ -31,7 +31,7 @@ The transducer contains two parts:
 </connectionStrings>
 ```
 
-- NOTE: For improved security we recommend setting up a separate MSSQL database user account with read-only data access permission to be used by NEONWebService. The file ConnectionStrings.config is not committed to GitHub for security reasons.
+- NOTE: The file ConnectionStrings.config is not committed to the GitHub repository for security reasons.
 4. Build the solution
 5. Copy the whole content of the "NEONWebService" folder to your a folder on IIS Web server where you want to publish the web service.
 
