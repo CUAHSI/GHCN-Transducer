@@ -965,6 +965,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 }
 
                 var usedNeonFiles = new NeonFileCollection();
+                var filesAddedForMonth = 0;
                 foreach (var neonFile in neonFiles.files)
                 {
                     // always use the csv file containing basic and _30min.
@@ -972,7 +973,14 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     {
                         var validUrl = neonFile.url;
                         dataFileUrls.Add(validUrl);
+                        filesAddedForMonth++;
+
+                        break; //to ensure that only one-file-per-month is added.
                     }
+                }
+                if (filesAddedForMonth > 1)
+                {
+                    throw new ArgumentException("more than 1 NEON data file found for month at: " + dataUrl);
                 }
             }
 
