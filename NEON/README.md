@@ -20,7 +20,17 @@ The transducer contains two parts:
 
 ## Setup Instructions for NEON-WebService
 1. Setup and run NEONHarvester.EXE as described above
-2. Open the solution NEONWebService.sln in Visual Studio
+2. Open the solution NEONWebService_wof11.sln in Visual Studio
+3. In the genericODws project create a new file ConnectionStrings.config with content: 
+
+<pre>
+<connectionStrings>
+  <clear />
+  <add name="ODDB" connectionString="Data Source=MY_SERVER;Initial Catalog=MY_DB;User Id=MY_USER;Password=MY_PASSWORD;"
+   providerName="System.Data.SqlClient" />
+</connectionStrings>
+</pre>
+
 3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
 - NOTE: For improved security we recommend setting up a separate MSSQL database user account with read-only data access permission to be used by NEONWebService
 4. Build the solution
