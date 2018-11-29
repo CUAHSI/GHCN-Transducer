@@ -154,6 +154,7 @@ namespace NEONHarvester
 
         public Dictionary<string, NeonSensorPosition> GetSensorPositions()
         {
+            _log.LogWrite("Retrieving sensor positions ...");
             var siteInfoList = _apiReader.ReadSitesFromApi().data;
             var siteInfoLookup = new Dictionary<string, NeonSite>();
             foreach(NeonSite neonSite in siteInfoList)
