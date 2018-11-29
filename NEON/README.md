@@ -6,7 +6,7 @@ The transducer contains two parts:
 - NEONWebService: this ASP.NET website publishes the data in WaterML format
 
 ## Original data source
-- NEON (http://data.neonnscience.org), using the NEON API.
+- NEON (http://data.neonscience.org), using the NEON API.
 
 ## Setup Instructions for NEON-Harvester
 1. Install an empty ODM 1.1.1 database on your Microsoft SQL Server. 
@@ -20,9 +20,18 @@ The transducer contains two parts:
 
 ## Setup Instructions for NEON-WebService
 1. Setup and run NEONHarvester.EXE as described above
-2. Open the solution NEONWebService.sln in Visual Studio
-3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
-- NOTE: For improved security we recommend setting up a separate MSSQL database user account with read-only data access permission to be used by NEONWebService
+2. Open the solution NEONWebService_wof11.sln in Visual Studio
+3. In the genericODws project create a new file ConnectionStrings.config with content similar as below, replacing MY_SERVER, MY_DB, MY_USER and MY_PASSWORD with the actual database server URL or IP, actual database name, actual DB user name and actual password: 
+
+```xml
+<connectionStrings>
+  <clear />
+  <add name="ODDB" connectionString="Data Source=MY_SERVER;Initial Catalog=MY_DB;User Id=MY_USER;Password=MY_PASSWORD;"
+   providerName="System.Data.SqlClient" />
+</connectionStrings>
+```
+
+- NOTE: The file ConnectionStrings.config is not committed to the GitHub repository for security reasons.
 4. Build the solution
 5. Copy the whole content of the "NEONWebService" folder to your a folder on IIS Web server where you want to publish the web service.
 
