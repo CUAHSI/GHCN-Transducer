@@ -178,6 +178,10 @@ namespace NEONHarvester
                 {
                     var dataUrl = siteDataUrls[siteCode];
                     var dataFiles = _apiReader.ReadNeonFilesFromApi(dataUrl);
+                    if (dataFiles is null || dataFiles.files is null)
+                    {
+                        continue; //skip invalid dataFiles response
+                    }
                     foreach (var dataFile in dataFiles.files)
                     {
                         if (dataFile.name.Contains("sensor_positions"))
@@ -784,11 +788,16 @@ namespace NEONHarvester
                             siteID = siteID + i;
                             var row = bulkTable.NewRow();
 
+                            
                             var siteSensorCode = sensorKey;
                             var siteSensor = neonSiteSensors[sensorKey];
+
+                            var horizontal_vertical_offset = ", horizontal: " + siteSensor.HorVerCode.Replace(".", ", vertical: ");
+
+
                             row["SiteID"] = siteID;
                             row["SiteCode"] = siteSensorCode;
-                            row["SiteName"] = siteSensor.ParentSite.siteName + " " + siteSensor.HorVerCode;
+                            row["SiteName"] = siteSensor.ParentSite.siteDescription + horizontal_vertical_offset;
                             row["Latitude"] = siteSensor.ReferenceLatitude;
                             row["Longitude"] = siteSensor.ReferenceLongitude;
                             row["LatLongDatumID"] = 3; // WGS1984
@@ -800,7 +809,7 @@ namespace NEONHarvester
                             row["PosAccuracy_m"] = 1.0f;
                             row["State"] = siteSensor.ParentSite.stateName;
                             row["County"] = DBNull.Value;
-                            row["Comments"] = siteSensor.ParentSite.siteDescription;
+                            row["Comments"] = siteSensor.ParentSite.siteName + horizontal_vertical_offset;
                             row["SiteType"] = "Atmosphere"; // from CUAHSI SiteTypeCV controlled vocabulary
                             bulkTable.Rows.Add(row);
                         }

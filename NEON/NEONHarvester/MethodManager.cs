@@ -90,8 +90,13 @@ namespace NEONHarvester
             foreach (string productCode in methodLookup.Keys)
             {
                 var productInfo = _apiReader.ReadProductFromApi(productCode);
-                var productDesc = productInfo.productDescription;
-                methodLookup[productCode].MethodDescription = productDesc;
+                // var productDesc = productInfo.productDescription;
+                // use productName in order to shorten the product description!
+                //if (productDesc.Length > 250)
+                //{
+                //    productDesc = productDesc.Substring(0, 249) + "..";
+                //}
+                methodLookup[productCode].MethodDescription = productInfo.productName;
             }
 
             _log.LogWrite(String.Format("Found {0} distinct methods.", methodLookup.Count));
