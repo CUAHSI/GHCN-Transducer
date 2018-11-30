@@ -174,23 +174,34 @@ namespace NEONHarvester
 
             foreach (string productCode in supportedProductCodes)
             {
-                var siteDataUrls = new Dictionary<string, string>();
+                var siteDataUrls = new Dictionary<string, List<string>>();
 
                 try
                 {
-                    siteDataUrls = GetSitesForProduct(productCode);
+                    siteDataUrls = GetDataUrlsForProduct(productCode);
                 }
                 catch(Exception ex)
                 {
-                    _log.LogWrite("ERROR in GetSitesForProduct " + productCode + " " + ex.Message);
+                    _log.LogWrite("ERROR in GetDataUrlsForProduct " + productCode + " " + ex.Message);
                     continue;
                 }
                 
 
                 foreach (var siteCode in siteDataUrls.Keys)
                 {
-                    var dataUrl = siteDataUrls[siteCode];
-                    var dataFiles = _apiReader.ReadNeonFilesFromApi(dataUrl);
+                    var dataUrls = siteDataUrls[siteCode];
+                    NeonFileCollection dataFiles = null;
+                    foreach(var dataUrl in dataUrls)
+                    {
+                        dataFiles = _apiReader.ReadNeonFilesFromApi(dataUrl);
+                        if (!(dataFiles is null) && !(dataFiles.files is null))
+                        {
+                            continue; // data files api call successful, no need to retry
+                        }
+                        // if data file call failed then retry in next loop.
+                        _log.LogWrite("retry url: " + dataUrl);
+                    }
+                    
                     if (dataFiles is null || dataFiles.files is null)
                     {
                         continue; //skip invalid dataFiles response
@@ -306,8 +317,8 @@ namespace NEONHarvester
 
             var variableList = new List<Variable>();
             string sqlQuery = "SELECT VariableID, VariableCode, VariableName, SampleMedium," +
-                "TimeUnitsID, DataType, GeneralCategory, VariableUnitsID, UnitsName," +
-                "ValueType, Speciation, tu.UnitsName AS TimeUnitsName FROM dbo.Variables v " +
+                "TimeUnitsID, DataType, GeneralCategory, VariableUnitsID, " +
+                "ValueType, Speciation, tu.UnitsName AS TimeUnitsName, u.UnitsName AS VariableUnitsName FROM dbo.Variables v " +
                 "INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID " +
                 "INNER JOIN dbo.Units tu ON v.TimeUnitsID = u.UnitsID";
             using (var cmd = new SqlCommand(sqlQuery, connection))
@@ -707,18 +718,18 @@ namespace NEONHarvester
         /// </summary>
         /// <param name="productCode"></param>
         /// <returns></returns>
-        public Dictionary<string, string> GetSitesForProduct(string productCode)
+        public Dictionary<string, List<string>> GetDataUrlsForProduct(string productCode)
         {
             var neonProduct = _apiReader.ReadProductFromApi(productCode);
             var productSiteCodes = neonProduct.siteCodes;
 
-            var siteDataUrls = new Dictionary<string, string>();
+            var siteDataUrls = new Dictionary<string, List<string>>();
             foreach (var siteCode in productSiteCodes)
             {
                 var shortCode = siteCode.siteCode;
                 var dataUrls = siteCode.availableDataUrls;
-                var lastDataUrl = dataUrls.Last();
-                siteDataUrls.Add(shortCode, lastDataUrl);
+                dataUrls.Reverse();
+                siteDataUrls.Add(shortCode, dataUrls);
             }
             return siteDataUrls;
         }
@@ -815,7 +826,7 @@ namespace NEONHarvester
                             var siteSensor = neonSiteSensors[sensorKey];
 
                             var horizontal_vertical_offset = ", horizontal: " + siteSensor.HorVerCode.Replace(".", ", vertical: ");
-
+                            var z_offset = ", zOffset: " + Convert.ToString(Math.Round(siteSensor.zOffset, 3)) + "meters";
 
                             row["SiteID"] = siteID;
                             row["SiteCode"] = siteSensorCode;
@@ -831,7 +842,7 @@ namespace NEONHarvester
                             row["PosAccuracy_m"] = 1.0f;
                             row["State"] = siteSensor.ParentSite.stateName;
                             row["County"] = DBNull.Value;
-                            row["Comments"] = siteSensor.ParentSite.siteName + horizontal_vertical_offset;
+                            row["Comments"] = siteSensor.ParentSite.siteName + horizontal_vertical_offset + z_offset;
                             row["SiteType"] = "Atmosphere"; // from CUAHSI SiteTypeCV controlled vocabulary
                             bulkTable.Rows.Add(row);
                         }
