@@ -250,7 +250,7 @@ namespace NEONHarvester
                                     }
                                     else
                                     {
-                                        senPos.neonProductCodes.Add(neonProd.dataProductCode);
+                                        sensorSiteLookup[fullSiteCode].neonProductCodes.Add(neonProd.dataProductCode);
                                     }
                                 }
                                 // add to list of processed files so that we need not download the file twice.

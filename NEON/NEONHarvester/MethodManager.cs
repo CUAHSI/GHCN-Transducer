@@ -30,9 +30,9 @@ namespace NEONHarvester
         {
             object methodIDResult = null;
 
-            using (SqlCommand cmd = new SqlCommand("SELECT MethodID FROM Methods WHERE MethodDescription = @desc", connection))
+            using (SqlCommand cmd = new SqlCommand("SELECT MethodID FROM Methods WHERE MethodCode = @code", connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@desc", meth.MethodDescription));
+                cmd.Parameters.Add(new SqlParameter("@code", meth.MethodCode));
                 connection.Open();
                 methodIDResult = cmd.ExecuteScalar();
                 connection.Close();
