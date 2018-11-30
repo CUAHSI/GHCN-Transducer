@@ -22,11 +22,13 @@ namespace NEONHarvester
     {
         private LogWriter _log;
         private NeonApiReader _apiReader;
+        private List<string> _sensorPositionFileNames;
 
         public SiteManager(LogWriter log)
         {
             _log = log;
             _apiReader = new NeonApiReader(log);
+            _sensorPositionFileNames = new List<string>();
         }
 
         public List<Site> GetSitesFromDB(SqlConnection connection)
@@ -173,7 +175,17 @@ namespace NEONHarvester
             foreach (string productCode in supportedProductCodes)
             {
                 var siteDataUrls = new Dictionary<string, string>();
-                siteDataUrls = GetSitesForProduct(productCode);
+
+                try
+                {
+                    siteDataUrls = GetSitesForProduct(productCode);
+                }
+                catch(Exception ex)
+                {
+                    _log.LogWrite("ERROR in GetSitesForProduct " + productCode + " " + ex.Message);
+                    continue;
+                }
+                
 
                 foreach (var siteCode in siteDataUrls.Keys)
                 {
@@ -183,12 +195,19 @@ namespace NEONHarvester
                     {
                         continue; //skip invalid dataFiles response
                     }
+
                     foreach (var dataFile in dataFiles.files)
                     {
                         if (dataFile.name.Contains("sensor_positions"))
                         {
-                            Console.WriteLine(dataFile.name);
                             var sensorPositionUrl = dataFile.url;
+
+                            if (_sensorPositionFileNames.Contains(dataFile.name))
+                            {
+                                continue;
+                            }
+
+                            Console.WriteLine("processsing file " + dataFile.name);
 
                             var sensorPositions = senPosReader.ReadSensorPositionsFromUrl(sensorPositionUrl);
                             foreach (var senPos in sensorPositions)
@@ -201,6 +220,8 @@ namespace NEONHarvester
                                     sensorSiteLookup.Add(fullSiteCode, senPos);
                                 }
                             }
+                            // add to list of processed files so that we need not download the file twice.
+                            _sensorPositionFileNames.Add(dataFile.name);
                         }
                     }
                 }
@@ -287,7 +308,7 @@ namespace NEONHarvester
             string sqlQuery = "SELECT VariableID, VariableCode, VariableName, SampleMedium," +
                 "TimeUnitsID, DataType, GeneralCategory, VariableUnitsID, UnitsName," +
                 "ValueType, Speciation, tu.UnitsName AS TimeUnitsName FROM dbo.Variables v " +
-                "INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID" +
+                "INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID " +
                 "INNER JOIN dbo.Units tu ON v.TimeUnitsID = u.UnitsID";
             using (var cmd = new SqlCommand(sqlQuery, connection))
             {

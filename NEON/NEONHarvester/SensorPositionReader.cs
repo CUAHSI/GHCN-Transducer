@@ -85,7 +85,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
-                _log.LogWrite("ReadProductFromApi ERROR: " + ex.Message);
+                _log.LogWrite("Location cannot be harvested. Reasson: SensorPositionReader ERROR for url: " + sensorPositionsUrl + " " + ex.Message);
             }
             return senPosList;
         }
