@@ -849,6 +849,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             string productCode = variableCode.Split('_').First();
             string attributeName = variableCode.Split('_').Last();
 
+            string horVerIndexes = siteCode.Split('_').Last();
+
             // Variable Info (from DB)
             VariableInfoType v = GetVariableInfoFromDb(variableCode);
 
@@ -969,7 +971,9 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 foreach (var neonFile in neonFiles.files)
                 {
                     // always use the csv file containing basic and _30min.
-                    if (neonFile.name.Contains("basic") && neonFile.name.Contains("_30min"))
+                    // only use the csv file for the chosen sensor (hor.ver)
+                    
+                    if (neonFile.name.Contains("basic") && neonFile.name.Contains(horVerIndexes) && (neonFile.name.Contains("_30min") || neonFile.name.Contains("30_minute")))
                     {
                         var validUrl = neonFile.url;
                         dataFileUrls.Add(validUrl);
