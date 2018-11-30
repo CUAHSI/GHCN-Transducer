@@ -90,12 +90,6 @@ namespace NEONHarvester
             foreach (string productCode in methodLookup.Keys)
             {
                 var productInfo = _apiReader.ReadProductFromApi(productCode);
-                // var productDesc = productInfo.productDescription;
-                // use productName in order to shorten the product description!
-                //if (productDesc.Length > 250)
-                //{
-                //    productDesc = productDesc.Substring(0, 249) + "..";
-                //}
                 methodLookup[productCode].MethodDescription = productInfo.productName;
             }
 
@@ -103,6 +97,9 @@ namespace NEONHarvester
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connString))
             {
+                // to remove any old ("unused") variables
+                DeleteOldMethods(connection);
+
                 foreach (MethodInfo meth in methodLookup.Values)
                 {
                     try
@@ -117,6 +114,81 @@ namespace NEONHarvester
                 }
             }
             _log.LogWrite("UpdateMethods OK: " + methodLookup.Count.ToString() + " methods.");
+        }
+
+
+        public void DeleteOldMethods(SqlConnection connection)
+        {
+            string sqlCount = "SELECT COUNT(*) FROM dbo.Methods";
+            int variablesCount = 0;
+            using (var cmd = new SqlCommand(sqlCount, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    var result = cmd.ExecuteScalar();
+                    variablesCount = Convert.ToInt32(result);
+                    Console.WriteLine("number of old methods to delete " + result.ToString());
+                }
+                catch (Exception ex)
+                {
+                    var msg = "finding methods count " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            string sqlDelete = "DELETE FROM dbo.Methods";
+
+            using (SqlCommand cmd = new SqlCommand(sqlDelete, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("deleting old methods ... ");
+                }
+                catch (Exception ex)
+                {
+                    var msg = "error deleting old methods " + " " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
+            // reset method ID
+            string sqlReset = @"DBCC CHECKIDENT('dbo.Methods', RESEED, 1);";
+            using (SqlCommand cmd = new SqlCommand(sqlReset, connection))
+            {
+                try
+                {
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("reset id of Methods Table");
+
+                }
+                catch (Exception ex)
+                {
+                    var msg = "error deleting old Methods table: " + ex.Message;
+                    Console.WriteLine(msg);
+                    _log.LogWrite(msg);
+                    return;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
         }
     }
 }
