@@ -21,7 +21,7 @@ namespace NEONHarvester
             _log = log;
         }
 
-        public List<NeonSensorPosition> ReadSensorPositionsFromUrl(string sensorPositionsUrl)
+        public List<NeonSensorPosition> ReadSensorPositionsFromUrl(string sensorPositionsUrl, NeonSite site)
         {
             var senPosList = new List<NeonSensorPosition>();
             try
@@ -51,28 +51,53 @@ namespace NEONHarvester
                                 for (var index = 0; index < fieldValues.Length; index++)
                                 {
                                     string fieldName = fieldNames[index];
+                                    var fieldValue = fieldValues[index];
+                                    senPos.xOffset = 0;
+                                    senPos.yOffset = 0;
+                                    senPos.zOffset = 0;
+                                    senPos.ReferenceLatitude = site.siteLatitude;
+                                    senPos.ReferenceLongitude = site.siteLongitude;
+                                    senPos.ReferenceElevation = 0;
                                     switch (fieldName)
-                                    {
+                                    {                                        
                                         case "HOR.VER":
-                                            senPos.HorVerCode = fieldValues[index];
+                                            senPos.HorVerCode = Convert.ToString(fieldValue);
                                             break;
                                         case "xOffset":
-                                            senPos.xOffset = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.xOffset = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
                                             break;
                                         case "yOffset":
-                                            senPos.yOffset = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.yOffset = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
                                             break;
                                         case "zOffset":
-                                            senPos.zOffset = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.zOffset = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
                                             break;
                                         case "referenceLatitude":
-                                            senPos.ReferenceLatitude = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.ReferenceLatitude = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
                                             break;
                                         case "referenceLongitude":
-                                            senPos.ReferenceLongitude = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.ReferenceLongitude = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
                                             break;
                                         case "referenceElevation":
-                                            senPos.ReferenceElevation = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.ReferenceElevation = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
                                             break;
 
                                     }

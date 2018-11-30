@@ -45,6 +45,11 @@ namespace NEONHarvester
         public string State { get; set; }
 
         /// <summary>
+        /// CUAHSI site type
+        /// </summary>
+        public string SiteType { get; set; }
+
+        /// <summary>
         /// The date (yyyy-MM-dd HH:mm:ss) that the station was installed.
         /// </summary>
         public DateTime BeginDate { get; set; }

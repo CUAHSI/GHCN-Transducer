@@ -24,11 +24,14 @@ namespace NEONHarvester
         private NeonApiReader _apiReader;
         private List<string> _sensorPositionFileNames;
 
+        //private Dictionary<String, NeonSite> _neonSiteSeriesLookup;
+
         public SiteManager(LogWriter log)
         {
             _log = log;
             _apiReader = new NeonApiReader(log);
             _sensorPositionFileNames = new List<string>();
+            //_neonSiteSeriesLookup = new Dictionary<string, NeonSite>();
         }
 
         public List<Site> GetSitesFromDB(SqlConnection connection)
@@ -52,6 +55,7 @@ namespace NEONHarvester
                             site.Latitude = Convert.ToDecimal(reader["Latitude"]);
                             site.Longitude = Convert.ToDecimal(reader["Longitude"]);
                             site.Elevation = Convert.ToDecimal(reader["Elevation_m"]);
+                            site.SiteType = Convert.ToString(reader["SiteType"]);
                             siteList.Add(site);
                         }
                     }
@@ -154,15 +158,23 @@ namespace NEONHarvester
         }
 
 
-        public Dictionary<string, NeonSensorPosition> GetSensorPositions()
+        public Dictionary<string, NeonSite> GetNeonSites()
+        {
+            _log.LogWrite("Retrieving NEON sites from API..");
+            var siteInfoList = _apiReader.ReadSitesFromApi().data;
+            Dictionary<string, NeonSite> neonSiteCodeLookup = new Dictionary<string, NeonSite>();
+            foreach (NeonSite neonSite in siteInfoList)
+            {
+                neonSiteCodeLookup.Add(neonSite.siteCode, neonSite);
+            }
+            return neonSiteCodeLookup;
+        }
+
+
+        public Dictionary<string, NeonSensorPosition> GetSensorPositions(Dictionary<string, NeonSite> siteSeriesLookup)
         {
             _log.LogWrite("Retrieving sensor positions ...");
-            var siteInfoList = _apiReader.ReadSitesFromApi().data;
-            var siteInfoLookup = new Dictionary<string, NeonSite>();
-            foreach(NeonSite neonSite in siteInfoList)
-            {
-                siteInfoLookup.Add(neonSite.siteCode, neonSite);
-            }
+            
 
             var sensorSiteLookup = new Dictionary<string, NeonSensorPosition>();
 
@@ -172,71 +184,84 @@ namespace NEONHarvester
             var lookupReader = new LookupFileReader(_log);
             supportedProductCodes = lookupReader.ReadProductCodesFromExcel();
 
-            foreach (string productCode in supportedProductCodes)
+            foreach(string neonSiteCode in siteSeriesLookup.Keys)
             {
-                var siteDataUrls = new Dictionary<string, List<string>>();
-
-                try
-                {
-                    siteDataUrls = GetDataUrlsForProduct(productCode);
-                }
-                catch(Exception ex)
-                {
-                    _log.LogWrite("ERROR in GetDataUrlsForProduct " + productCode + " " + ex.Message);
-                    continue;
-                }
                 
+                NeonSite neonSite = siteSeriesLookup[neonSiteCode];
 
-                foreach (var siteCode in siteDataUrls.Keys)
+                _log.LogWrite("processing NEON site " + neonSiteCode);
+
+                foreach(NeonProductInfo neonProd in neonSite.dataProducts)
                 {
-                    var dataUrls = siteDataUrls[siteCode];
-                    NeonFileCollection dataFiles = null;
-                    foreach(var dataUrl in dataUrls)
+                    if (supportedProductCodes.Contains(neonProd.dataProductCode))
                     {
-                        dataFiles = _apiReader.ReadNeonFilesFromApi(dataUrl);
-                        if (!(dataFiles is null) && !(dataFiles.files is null))
-                        {
-                            continue; // data files api call successful, no need to retry
-                        }
-                        // if data file call failed then retry in next loop.
-                        _log.LogWrite("retry url: " + dataUrl);
-                    }
-                    
-                    if (dataFiles is null || dataFiles.files is null)
-                    {
-                        continue; //skip invalid dataFiles response
-                    }
+                        var siteDataUrls = neonProd.availableDataUrls;
 
-                    foreach (var dataFile in dataFiles.files)
-                    {
-                        if (dataFile.name.Contains("sensor_positions"))
-                        {
-                            var sensorPositionUrl = dataFile.url;
+                        // prefer searching sensor-positions.csv in the most-recent data url:
+                        siteDataUrls.Reverse();
 
-                            if (_sensorPositionFileNames.Contains(dataFile.name))
+                        //_log.LogWrite("site " + neonSiteCode + ", product " + neonProd.dataProductCode);
+
+                        NeonFileCollection dataFiles = null;
+                        foreach (var dataUrl in siteDataUrls)
+                        {
+                            dataFiles = _apiReader.ReadNeonFilesFromApi(dataUrl);
+                            if (dataFiles is null)
                             {
-                                continue;
+                                _log.LogWrite(dataUrl + " " + dataUrl + " failed, try other month..");
                             }
-
-                            Console.WriteLine("processsing file " + dataFile.name);
-
-                            var sensorPositions = senPosReader.ReadSensorPositionsFromUrl(sensorPositionUrl);
-                            foreach (var senPos in sensorPositions)
+                            else
                             {
-                                string fullSiteCode = siteCode + "_" + senPos.HorVerCode;
-                                
-                                if (!sensorSiteLookup.ContainsKey(fullSiteCode))
+                                break; // data files api call successful, no need to retry
+                            }
+                        }
+
+                        //skip invalid dataFiles response if there is no data after all retries
+                        if (dataFiles is null || dataFiles.files is null)
+                        {
+                            _log.LogWrite("GetSensorPositions dataUrl ERROR for site " + neonSiteCode + ", product " + neonProd.dataProductCode);
+                            continue; // invalid dataFiles response, skip to next product.
+                        }
+
+                        foreach (var dataFile in dataFiles.files)
+                        {
+                            if (dataFile.name.Contains("sensor_positions"))
+                            {
+                                var sensorPositionUrl = dataFile.url;
+
+                                if (_sensorPositionFileNames.Contains(dataFile.name))
                                 {
-                                    senPos.ParentSite = siteInfoLookup[siteCode];
-                                    sensorSiteLookup.Add(fullSiteCode, senPos);
+                                    // prevent duplicate download of the same sensor_position file
+                                    continue;
                                 }
+
+                                Console.WriteLine("sensors: " + dataFile.name);
+
+                                var sensorPositions = senPosReader.ReadSensorPositionsFromUrl(sensorPositionUrl, neonSite);
+                                foreach (var senPos in sensorPositions)
+                                {
+                                    string fullSiteCode = neonSiteCode + "_" + senPos.HorVerCode;
+
+                                    if (!sensorSiteLookup.ContainsKey(fullSiteCode))
+                                    {
+                                        senPos.ParentSite = neonSite;
+                                        senPos.neonProductCodes.Add(neonProd.dataProductCode);
+                                        sensorSiteLookup.Add(fullSiteCode, senPos);
+                                    }
+                                    else
+                                    {
+                                        senPos.neonProductCodes.Add(neonProd.dataProductCode);
+                                    }
+                                }
+                                // add to list of processed files so that we need not download the file twice.
+                                _sensorPositionFileNames.Add(dataFile.name);
                             }
-                            // add to list of processed files so that we need not download the file twice.
-                            _sensorPositionFileNames.Add(dataFile.name);
                         }
+
                     }
                 }
             }
+            
             return sensorSiteLookup;
         }
 
@@ -316,11 +341,14 @@ namespace NEONHarvester
             var lookup = new Dictionary<string, Dictionary<string, Variable>>();
 
             var variableList = new List<Variable>();
-            string sqlQuery = "SELECT VariableID, VariableCode, VariableName, SampleMedium," +
-                "TimeUnitsID, DataType, GeneralCategory, VariableUnitsID, " +
-                "ValueType, Speciation, tu.UnitsName AS TimeUnitsName, u.UnitsName AS VariableUnitsName FROM dbo.Variables v " +
-                "INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID " +
-                "INNER JOIN dbo.Units tu ON v.TimeUnitsID = u.UnitsID";
+
+            string sqlQuery = @"SELECT v.VariableID, v.VariableCode,  v.VariableName, 
+v.SampleMedium,v.TimeUnitsID, v.DataType, v.GeneralCategory, v.VariableUnitsID, v.ValueType, v.Speciation, 
+tu.UnitsName AS TimeUnitsName, u.UnitsName AS VariableUnitsName 
+FROM dbo.Variables v 
+INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID
+INNER JOIN dbo.Units tu ON v.TimeUnitsID = tu.UnitsID";
+
             using (var cmd = new SqlCommand(sqlQuery, connection))
             {
                 try
@@ -341,7 +369,7 @@ namespace NEONHarvester
                             v.DataType = Convert.ToString(reader["DataType"]);
                             v.GeneralCategory = Convert.ToString(reader["GeneralCategory"]);
                             v.VariableUnitsID = Convert.ToInt32(reader["VariableUnitsID"]);
-                            v.VariableUnitsName = Convert.ToString(reader["UnitsName"]);
+                            v.VariableUnitsName = Convert.ToString(reader["VariableUnitsName"]);
                             v.ValueType = Convert.ToString(reader["ValueType"]);
                             v.Speciation = Convert.ToString(reader["Speciation"]);
 
@@ -439,14 +467,12 @@ namespace NEONHarvester
 
 
 
-        public void UpdateSeriesCatalog()
+        public void UpdateSeriesCatalog(Dictionary<string, NeonSensorPosition> neonSiteSensors)
         {
             List<CuahsiTimeSeries> fullSeriesList = new List<CuahsiTimeSeries>(1000);
 
             try
             {
-                
-
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
@@ -462,7 +488,11 @@ namespace NEONHarvester
                         _log.LogWrite("Harvesting series for site: " + i.ToString() + " " + site.SiteCode);
                         try
                         {
-                            List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, supportedVariables, supportedMethods, source);
+                            var neonSensor = neonSiteSensors[site.SiteCode];
+                            var neonSite = neonSensor.ParentSite;
+                            var productsAtSensor = neonSensor.neonProductCodes;
+
+                            List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, neonSite, productsAtSensor, supportedVariables, supportedMethods, source);
                             fullSeriesList.AddRange(siteSeriesList);
                             i++;
                         }
@@ -568,7 +598,7 @@ namespace NEONHarvester
                                 row["SiteID"] = s.SiteID;
                                 row["SiteCode"] = s.SiteCode;
                                 row["SiteName"] = s.SiteName;
-                                row["SiteType"] = "Atmosphere";
+                                row["SiteType"] = s.SiteType;
                                 row["VariableID"] = s.VariableID;
                                 row["VariableCode"] = s.VariableCode;
                                 row["VariableName"] = s.VariableName;
@@ -579,7 +609,7 @@ namespace NEONHarvester
                                 row["ValueType"] = s.ValueType;
                                 row["TimeSupport"] = 30;
                                 row["TimeUnitsID"] = s.TimeUnitsID;
-                                row["TimeUnitsName"] = "Minute"; // todo get from DB !!!
+                                row["TimeUnitsName"] = s.TimeUnitsName;
                                 row["DataType"] = s.DataType;
                                 row["GeneralCategory"] = s.GeneralCategory;
                                 row["MethodID"] = s.MethodID;
@@ -626,30 +656,16 @@ namespace NEONHarvester
         /// <param name="cuahsiSite">The CUAHSI site object from the ODM database with SiteID and SiteCode.</param>
         /// <param name="supportedProductCodes">A list of ALL NEON product codes supported by CUAHSI (from the XLSX lookup table)</param>
         /// <returns>Series List</returns>
-        public List<CuahsiTimeSeries> GetListOfSeriesForSite(Site cuahsiSite, ProductVariableLookup supportedProducts, ProductMethodLookup supportedMethods, Source source)
+        public List<CuahsiTimeSeries> GetListOfSeriesForSite(Site cuahsiSite, NeonSite neonSite, List<string> productsAtSensor, ProductVariableLookup supportedProducts, ProductMethodLookup supportedMethods, Source source)
         {
             var seriesList = new List<CuahsiTimeSeries>();
-            
-            // Get NEON site Code
-            var neonSiteCode = cuahsiSite.GetNeonSiteCode();
-
-            // Read Site info from NEON API
-            NeonSite neonSite = _apiReader.ReadSiteFromApi(neonSiteCode);
-
-            // Filter products available at a NEON site by products supported by CUAHSI
-
-            // supportedProductCodes can be read by a dedicated function VariableManager.GetProductVariableLookupFromDb
-
-            //List<string> supportedProductCodes = new List<string>();
-            //var lookupReader = new LookupFileReader(_log);
-            //supportedProductCodes = lookupReader.ReadProductCodesFromExcel();
 
             var siteDataProducts = neonSite.dataProducts;
 
             foreach(NeonProductInfo siteProduct in siteDataProducts)
             {
                 string productCode = siteProduct.dataProductCode;
-                if (supportedProducts.Lookup.ContainsKey(productCode) && supportedMethods.Lookup.ContainsKey(productCode))
+                if (productsAtSensor.Contains(productCode) && supportedProducts.Lookup.ContainsKey(productCode) && supportedMethods.Lookup.ContainsKey(productCode))
                 {
                     // get available months
                     var availableMonths = siteProduct.availableMonths;
@@ -661,7 +677,7 @@ namespace NEONHarvester
                         s.SiteID = cuahsiSite.SiteID;
                         s.SiteCode = cuahsiSite.SiteCode;
                         s.SiteName = cuahsiSite.SiteName;
-                        s.SiteType = "Atmosphere";
+                        s.SiteType = cuahsiSite.SiteType;
                         s.VariableID = v.VariableID;
                         s.VariableCode = v.VariableCode;
                         s.VariableName = v.VariableName;
@@ -739,11 +755,11 @@ namespace NEONHarvester
         /// <summary>
         /// Updates the NEON Sites using the NEON JSON Data API
         /// </summary>
-        public void UpdateSites()
+        public void UpdateSites(Dictionary<string, NeonSensorPosition> neonSiteSensors)
         {
-            var neonSiteSensors = GetSensorPositions();
+            //var neonSiteSensors = GetSensorPositions(_neonSiteSeriesLookup);
 
-            NeonSiteCollection neonSites = _apiReader.ReadSitesFromApi();
+            // NeonSiteCollection neonSites = _apiReader.ReadSitesFromApi();
 
             int numSitesFromApi = neonSiteSensors.Keys.Count;
             _log.LogWrite("UpdateSites for " + numSitesFromApi.ToString() + " sites ...");
@@ -784,7 +800,7 @@ namespace NEONHarvester
                     int batchSize = 10000;
                     long siteID = 0L;
 
-                    var siteList = neonSites.data;
+                    //var siteList = neonSites.data;
                     int numBatches = (numSitesFromApi / batchSize) + 1;
                     for (int b = 0; b < numBatches; b++)
                     {
@@ -843,7 +859,8 @@ namespace NEONHarvester
                             row["State"] = siteSensor.ParentSite.stateName;
                             row["County"] = DBNull.Value;
                             row["Comments"] = siteSensor.ParentSite.siteName + horizontal_vertical_offset + z_offset;
-                            row["SiteType"] = "Atmosphere"; // from CUAHSI SiteTypeCV controlled vocabulary
+                            row["SiteType"] = "Atmosphere"; // FIXME set SiteType based on sensor (tower, soil pit..)
+                            //row["SiteType"] = siteSensor.ParentSite."Atmosphere"; // from CUAHSI SiteTypeCV controlled vocabulary
                             bulkTable.Rows.Add(row);
                         }
                         

@@ -8,6 +8,11 @@ namespace NEONHarvester
 {
     public class NeonSensorPosition
     {
+        public NeonSensorPosition()
+        {
+            neonProductCodes = new List<string>();
+        }
+
         public string HorVerCode { get; set; }
 
         public double xOffset { get; set; }
@@ -29,5 +34,7 @@ namespace NEONHarvester
         public double ReferenceElevation { get; set; }
 
         public NeonSite ParentSite { get; set; }
+
+        public List<string> neonProductCodes { get; set; }
     }
 }
