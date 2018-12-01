@@ -59,14 +59,16 @@
     <Compile Include="MethodInfo.cs" />
     <Compile Include="MethodManager.cs" />
     <Compile Include="NeonApiReader.cs" />
+    <Compile Include="CuahsiSiteNeonSensorLookup.cs" />
     <Compile Include="NeonSensorPosition.cs" />
-    <Compile Include="NeonSite.cs" />
+    <Compile Include="NeonObjects.cs" />
     <Compile Include="NeonTimeSeries.cs" />
     <Compile Include="ProductMethodLookup.cs" />
     <Compile Include="ProductVariableLookup.cs" />
     <Compile Include="Qualifier.cs" />
     <Compile Include="SensorPositionReader.cs" />
     <Compile Include="Series.cs" />
+    <Compile Include="SeriesCatalogManager.cs" />
     <Compile Include="Site.cs" />
     <Compile Include="Source.cs" />
     <Compile Include="Variable.cs" />

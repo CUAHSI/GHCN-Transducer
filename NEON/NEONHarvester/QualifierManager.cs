@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace NEONHarvester
 {
+    /// <summary>
+    /// FIXME reimplement for NEON qualifiers
+    /// </summary>
     class QualifierManager
     {
         private LogWriter _log;

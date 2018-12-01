@@ -40,6 +40,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
+                Console.WriteLine("ERROR writing to Log file: " + ex.Message);
             }
         }
 
@@ -56,6 +57,7 @@ namespace NEONHarvester
             }
             catch (Exception ex)
             {
+                Console.WriteLine("ERROR writing to Log file: " + ex.Message);
             }
         }
     }

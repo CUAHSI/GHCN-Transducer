@@ -186,6 +186,7 @@ namespace NEONHarvester
             object metadataIDResult;
             var metadata = new ISOMetadata
             {
+                // FIXME use actual NEON metadata!
                 TopicCategory = "climatology/meteorology/atmosphere",
                 Title = "Snow Telemetry (SNOTEL) Network",
                 Abstract = @"The SNOTEL network is composed of over 800 automated data collection sites located in remote, 

@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Configuration;
 using System.IO;
-using System.Net;
-using System.Globalization;
 using OfficeOpenXml;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
 
 namespace NEONHarvester
 {

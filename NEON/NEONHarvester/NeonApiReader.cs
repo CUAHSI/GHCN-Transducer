@@ -12,15 +12,20 @@ namespace NEONHarvester
     class NeonApiReader
     {
         private LogWriter _log;
+
         public NeonApiReader(LogWriter log)
         {
             _log = log;
+            NeonApiUrl = "http://data.neonscience.org/api/v0";
         }
+
+        public string NeonApiUrl { get; }
+
 
         public NeonProduct ReadProductFromApi(string productCode)
         {
             var neonProduct = new NeonProduct();
-            string url = "http://data.neonscience.org/api/v0/products/" + productCode;
+            string url = NeonApiUrl + "/products/" + productCode;
 
             try
             {
@@ -48,7 +53,7 @@ namespace NEONHarvester
             var neonProducts = new NeonProductCollection();
             try
             {
-                string url = "http://data.neonscience.org/api/v0/products";
+                string url = NeonApiUrl + "/products/";
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))
@@ -70,21 +75,14 @@ namespace NEONHarvester
         {
             var neonFiles = new NeonFileCollection();
 
-            try
+            var client = new WebClient();
+            using (var stream = client.OpenRead(filesUrl))
+            using (var reader = new StreamReader(stream))
             {
-                var client = new WebClient();
-                using (var stream = client.OpenRead(filesUrl))
-                using (var reader = new StreamReader(stream))
-                {
-                    var jsonData = client.DownloadString(filesUrl);
+                var jsonData = client.DownloadString(filesUrl);
 
-                    var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
-                    neonFiles = neonFileData.data;
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.LogWrite(string.Format("ReadNeonFilesFromApi ERROR for URL {0}: ", filesUrl) + ex.Message);
+                var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
+                neonFiles = neonFileData.data;
             }
             return (neonFiles);
         }
@@ -95,7 +93,7 @@ namespace NEONHarvester
             var neonSites = new NeonSiteCollection();
             try
             {
-                string url = "http://data.neonscience.org/api/v0/sites";
+                string url = NeonApiUrl + "/sites/";
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))
@@ -118,7 +116,7 @@ namespace NEONHarvester
             var neonSite = new NeonSite();
             try
             {
-                string url = "http://data.neonscience.org/api/v0/sites/" + neonSiteCode;
+                string url = NeonApiUrl + "/sites/" + neonSiteCode;
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))
@@ -136,6 +134,5 @@ namespace NEONHarvester
             return (null);
             
         }
-
     }
 }

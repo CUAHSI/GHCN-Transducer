@@ -97,7 +97,7 @@ namespace NEONHarvester
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connString))
             {
-                // to remove any old ("unused") variables
+                // to remove any old ("unused") methods
                 DeleteOldMethods(connection);
 
                 foreach (MethodInfo meth in methodLookup.Values)

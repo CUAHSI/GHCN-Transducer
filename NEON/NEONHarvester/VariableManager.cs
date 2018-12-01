@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
-using System.IO;
-using System.Net;
-using System.Globalization;
-using OfficeOpenXml;
-using System.Linq;
-using System.Reflection;
-using Newtonsoft.Json;
 
 namespace NEONHarvester
 {
@@ -36,52 +28,6 @@ namespace NEONHarvester
             _log = log;
             _apiReader = new NeonApiReader(log);
         }
-
-
-        public void WriteProductTable()
-        {
-            var products = _apiReader.ReadProductsFromApi();
-
-            var productInfos = new List<ProductInfo>();
-            foreach (var prod in products.data)
-            {
-                var p = new ProductInfo();
-                p.ProductCode = prod.productCode;
-                p.ProductName = prod.productName;
-                p.ProductStatus = prod.productStatus;
-                if (prod.siteCodes is null)
-                {
-                    p.NumSites = 0;
-                    p.NumMonths = 0;
-                }
-                else
-                {
-                    p.NumSites = prod.siteCodes.Count;
-                    p.NumMonths = 0;
-                    foreach (var sc in prod.siteCodes)
-                    {
-                        foreach (var m in sc.availableMonths)
-                        {
-                            p.NumMonths += 1;
-                        }
-                    }
-                }
-                productInfos.Add(p);
-            }
-
-            var file = new FileInfo("neon_products.xlsx");
-            using (ExcelPackage package = new ExcelPackage(file))
-            {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("test");
-
-                worksheet.Cells["A1"].LoadFromCollection(productInfos, true, OfficeOpenXml.Table.TableStyles.Medium1);
-
-                package.Save();
-            }
-        }
-
-        
-        
 
         public void UpdateVariables()
         {
@@ -275,7 +221,7 @@ namespace NEONHarvester
                 }
             }
             return variableIDResult;
-}
+        }
     }
 
 }

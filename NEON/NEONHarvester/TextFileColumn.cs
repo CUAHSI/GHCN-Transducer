@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NEONHarvester
+﻿namespace NEONHarvester
 {
     /// <summary>
     /// Auxiliary class to hold information about column

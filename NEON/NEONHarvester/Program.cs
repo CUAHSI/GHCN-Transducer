@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NEONHarvester
+﻿namespace NEONHarvester
 {
     class Program
     {
@@ -18,7 +15,6 @@ namespace NEONHarvester
             var methodM = new MethodManager(logger);
             methodM.UpdateMethods();
 
-
             // (3) updating sites
             var siteM = new SiteManager(logger);
             var neonSiteCodeLookup = siteM.GetNeonSites();
@@ -28,16 +24,14 @@ namespace NEONHarvester
 
             // (3b) saving sites to ODM database
             siteM.UpdateSites(neonSiteSensors);
-
             
-            // (4) updating sources
+            // (4) updating sources TODO use distinct source per NEON site or product.
             var srcM = new SourceManager(logger);
             srcM.UpdateSources();
 
-
             // (5) updating the series catalog
-            siteM.UpdateSeriesCatalog(neonSiteSensors);
-
+            var seriesM = new SeriesCatalogManager(logger);
+            seriesM.UpdateSeriesCatalog(neonSiteSensors);
         }
     }
 }
