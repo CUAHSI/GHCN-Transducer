@@ -8,8 +8,18 @@ namespace NEONHarvester
 {
     public class NeonSensorPosition
     {
-        public NeonSensorPosition()
+        public NeonSensorPosition(NeonSite parentSite)
         {
+            ParentSite = parentSite;
+            xOffset = 0;
+            yOffset = 0;
+            zOffset = 0;
+            ReferenceElevation = 0;
+            ReferenceLatitude = parentSite.siteLatitude;
+            ReferenceLongitude = parentSite.siteLongitude;
+            pitch = 0;
+            roll = 0;
+            azimuth = 0;
             neonProductCodes = new List<string>();
         }
 

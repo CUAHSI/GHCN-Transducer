@@ -47,17 +47,20 @@ namespace NEONHarvester
                             else
                             {
                                 string[] fieldValues = parser.ReadFields();
-                                var senPos = new NeonSensorPosition();
+                                var senPos = new NeonSensorPosition(site);
+
+                                senPos.xOffset = 0;
+                                senPos.yOffset = 0;
+                                senPos.zOffset = 0;
+                                senPos.ReferenceLatitude = site.siteLatitude;
+                                senPos.ReferenceLongitude = site.siteLongitude;
+                                senPos.ReferenceElevation = 0;
+
                                 for (var index = 0; index < fieldValues.Length; index++)
                                 {
                                     string fieldName = fieldNames[index];
                                     var fieldValue = fieldValues[index];
-                                    senPos.xOffset = 0;
-                                    senPos.yOffset = 0;
-                                    senPos.zOffset = 0;
-                                    senPos.ReferenceLatitude = site.siteLatitude;
-                                    senPos.ReferenceLongitude = site.siteLongitude;
-                                    senPos.ReferenceElevation = 0;
+                                    
                                     switch (fieldName)
                                     {                                        
                                         case "HOR.VER":
@@ -97,6 +100,24 @@ namespace NEONHarvester
                                             if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
                                             {
                                                 senPos.ReferenceElevation = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
+                                            break;
+                                        case "pitch":
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.pitch = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
+                                            break;
+                                        case "roll":
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.roll = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
+                                            }
+                                            break;
+                                        case "azimuth":
+                                            if (!String.IsNullOrEmpty(Convert.ToString(fieldValue)))
+                                            {
+                                                senPos.azimuth = Convert.ToDouble(fieldValues[index], CultureInfo.InvariantCulture);
                                             }
                                             break;
 
