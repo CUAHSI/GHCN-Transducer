@@ -971,9 +971,10 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                 foreach (var neonFile in neonFiles.files)
                 {
                     // always use the csv file containing basic and _30min.
+                    // FIXME use table name from the variables csv lookup table!
                     // only use the csv file for the chosen sensor (hor.ver)
                     
-                    if (neonFile.name.Contains("basic") && neonFile.name.Contains(horVerIndexes) && (neonFile.name.Contains("_30min") || neonFile.name.Contains("30_minute")))
+                    if (neonFile.name.Contains("basic") && neonFile.name.Contains(horVerIndexes) && (neonFile.name.Contains("_30min") || neonFile.name.Contains("30_min")))
                     {
                         var validUrl = neonFile.url;
                         dataFileUrls.Add(validUrl);
