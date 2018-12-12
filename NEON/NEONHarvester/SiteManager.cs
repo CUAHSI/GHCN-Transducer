@@ -121,7 +121,10 @@ namespace NEONHarvester
             Dictionary<string, NeonSite> neonSiteCodeLookup = new Dictionary<string, NeonSite>();
             foreach (NeonSite neonSite in siteInfoList)
             {
+                //if (neonSite.siteCode == "HARV")
+                //{
                 neonSiteCodeLookup.Add(neonSite.siteCode, neonSite);
+                //}
             }
             return neonSiteCodeLookup;
         }
@@ -199,6 +202,12 @@ namespace NEONHarvester
                                 {
                                     // prevent duplicate download of the same sensor_position file
                                     continue;
+                                }
+
+                                // debugging ...
+                                if (neonProd.dataProductCode.Contains("00006.001") || neonProd.dataProductCode.Contains("00098."))
+                                {
+                                    Console.WriteLine(neonProd.dataProductCode);
                                 }
 
                                 Console.WriteLine("sensors: " + dataFile.name);

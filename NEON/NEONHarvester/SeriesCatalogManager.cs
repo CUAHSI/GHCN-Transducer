@@ -49,6 +49,14 @@ namespace NEONHarvester
                             var neonSite = neonSensor.ParentSite;
                             var productsAtSensor = neonSensor.neonProductCodes;
 
+                            foreach(var prodCode in productsAtSensor)
+                            {
+                                if (prodCode.Contains("00098") || prodCode.Contains("00003"))
+                                {
+                                    Console.WriteLine("processing debug products..");
+                                }
+                            }
+
                             List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, neonSite, productsAtSensor, supportedVariables, supportedMethods, source);
                             fullSeriesList.AddRange(siteSeriesList);
                             i++;
