@@ -1,4 +1,6 @@
-﻿namespace NEONHarvester
+﻿using System.Collections.Generic;
+
+namespace NEONHarvester
 {
     class Program
     {
@@ -6,6 +8,9 @@
         {
             // (0) setup progress logging with writing to console and log file
             var logger = new LogWriter(true);
+
+            var tester = new WebServiceTester("http://hydroportal.cuahsi.org/NEON/cuahsi_1_1.asmx");
+            tester.Run();
 
             // (1) updating variables and methods from NEON data product info
             var varM = new VariableManager(logger);
