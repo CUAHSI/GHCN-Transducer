@@ -49,14 +49,6 @@ namespace NEONHarvester
                             var neonSite = neonSensor.ParentSite;
                             var productsAtSensor = neonSensor.neonProductCodes;
 
-                            foreach(var prodCode in productsAtSensor)
-                            {
-                                if (prodCode.Contains("00098") || prodCode.Contains("00003"))
-                                {
-                                    Console.WriteLine("processing debug products..");
-                                }
-                            }
-
                             List<CuahsiTimeSeries> siteSeriesList = GetListOfSeriesForSite(site, neonSite, productsAtSensor, supportedVariables, supportedMethods, source);
                             fullSeriesList.AddRange(siteSeriesList);
                             i++;
@@ -529,14 +521,23 @@ INNER JOIN dbo.Units tu ON v.TimeUnitsID = tu.UnitsID";
                         }
                         else
                         {
+                            var estimatedValueCount = 0;
+                            var valuesPerDay = 48; // for 30-minute data there are 2*24=48 values per day.
+                            availableMonths.Sort();
+                            foreach (var availableMonth in availableMonths)
+                            {
+                                var monthBeginTime = BeginTimeFromNeonMonth(availableMonth);
+                                var monthEndTime = EndTimeFromNeonMonth(availableMonth);
+                                var spanDays = (monthEndTime - monthBeginTime).TotalDays;
+                                estimatedValueCount += Convert.ToInt32(Math.Round(spanDays) *valuesPerDay);
+                            }
+
                             s.BeginDateTime = BeginTimeFromNeonMonth(availableMonths.First());
                             s.EndDateTime = EndTimeFromNeonMonth(availableMonths.Last());
+                            s.BeginDateTimeUTC = BeginTimeFromNeonMonth(availableMonths.First());
+                            s.EndDateTimeUTC = EndTimeFromNeonMonth(availableMonths.Last());
 
-                            s.BeginDateTimeUTC = s.BeginDateTime;
-                            s.EndDateTimeUTC = s.EndDateTime;
-
-                            var timeSpanDays = (s.EndDateTime - s.BeginDateTime).TotalDays;
-                            s.ValueCount = Convert.ToInt32(Math.Round(timeSpanDays) * 48);
+                            s.ValueCount = estimatedValueCount;
 
                             seriesList.Add(s);
                         }

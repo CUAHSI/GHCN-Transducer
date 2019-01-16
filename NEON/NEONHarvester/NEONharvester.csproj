@@ -80,7 +80,6 @@
     <Compile Include="SiteManager.cs" />
     <Compile Include="SourceManager.cs" />
     <Compile Include="TextFileColumn.cs" />
-    <Compile Include="WebServiceTester.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ConnectionStrings.config">

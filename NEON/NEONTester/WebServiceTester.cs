@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace NEONHarvester
+namespace NEONTester
 {
     class TimeSeriesInfo
     {
@@ -24,7 +24,7 @@ namespace NEONHarvester
     }
 
     class DataValuesInfo
-    {       
+    {
         public string SiteCode { get; set; }
         public string VariableCode { get; set; }
         public DateTime StartDate { get; set; }
@@ -70,7 +70,7 @@ namespace NEONHarvester
                 }
             }
 
-            //TODO write result to csv or xlsx
+            // write result to tab-delimited text file.
             var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string reportFileName = exePath + "\\testing_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
             using (StreamWriter file = new StreamWriter(reportFileName))
@@ -79,7 +79,7 @@ namespace NEONHarvester
                 {
                     var startDateStr = info.StartDate.ToString("s", CultureInfo.InvariantCulture);
                     var endDateStr = info.EndDate.ToString("s", CultureInfo.InvariantCulture);
-                    var line = String.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}", 
+                    var line = String.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}",
                         info.SiteCode, info.VariableCode, startDateStr, endDateStr,
                         info.ExpectedValueCount, info.ActualValueCount, info.TimeTakenSeconds, info.Status);
                     // If the line doesn't contain the word 'Second', write the line to the file.
@@ -101,10 +101,10 @@ namespace NEONHarvester
             {
                 if (siteElement.Name == "site")
                 {
-                    XmlElement siteInfo = (XmlElement) siteElement.FirstChild;
-                    foreach(XmlElement siteProperty in siteInfo.ChildNodes)
+                    XmlElement siteInfo = (XmlElement)siteElement.FirstChild;
+                    foreach (XmlElement siteProperty in siteInfo.ChildNodes)
                     {
-                        if(siteProperty.Name == "siteCode")
+                        if (siteProperty.Name == "siteCode")
                         {
                             var siteCodeValue = siteProperty.InnerText;
                             var siteNetwork = siteProperty.GetAttribute("network");
@@ -126,16 +126,16 @@ namespace NEONHarvester
             XmlDocument doc1 = new XmlDocument();
             doc1.Load(siteInfoUrl);
             XmlElement root = doc1.DocumentElement;
-            XmlElement site = (XmlElement) root.LastChild;
-            XmlElement seriesCatalog = (XmlElement) root.LastChild.LastChild;
-            foreach(XmlElement series in seriesCatalog.ChildNodes)
+            XmlElement site = (XmlElement)root.LastChild;
+            XmlElement seriesCatalog = (XmlElement)root.LastChild.LastChild;
+            foreach (XmlElement series in seriesCatalog.ChildNodes)
             {
                 TimeSeriesInfo seriesInfo = new TimeSeriesInfo();
                 foreach (XmlElement seriesProp in series.ChildNodes)
-                {                    
+                {
                     if (seriesProp.Name == "variable")
                     {
-                        foreach(XmlElement variableProp in seriesProp.ChildNodes)
+                        foreach (XmlElement variableProp in seriesProp.ChildNodes)
                         {
                             if (variableProp.Name == "variableCode")
                             {
@@ -152,7 +152,7 @@ namespace NEONHarvester
                     }
                     else if (seriesProp.Name == "variableTimeInterval")
                     {
-                        foreach(XmlElement timeProp in seriesProp.ChildNodes)
+                        foreach (XmlElement timeProp in seriesProp.ChildNodes)
                         {
                             if (timeProp.Name == "beginDateTime")
                             {
@@ -212,12 +212,12 @@ namespace NEONHarvester
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 valuesInfo.Status = "WOF ERROR: " + ex.Message;
             }
             int timeTakenSeconds = Convert.ToInt32(Math.Round((DateTime.Now - queryBeginTime).TotalSeconds));
-            valuesInfo.TimeTakenSeconds = timeTakenSeconds; 
+            valuesInfo.TimeTakenSeconds = timeTakenSeconds;
 
             return valuesInfo;
         }
