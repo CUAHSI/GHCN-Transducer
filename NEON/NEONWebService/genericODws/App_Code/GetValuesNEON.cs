@@ -954,16 +954,24 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 //limit dataUrl by month               
                 var neonFiles = new NeonFileCollection();
+                neonFiles.files = new List<NeonFile>();
 
-                using (var stream = client.OpenRead(dataUrl))
+                try
                 {
-                    using (var reader = new StreamReader(stream))
+                    using (var stream = client.OpenRead(dataUrl))
                     {
-                        var jsonData = client.DownloadString(dataUrl);
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var jsonData = client.DownloadString(dataUrl);
 
-                        var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
-                        neonFiles = neonFileData.data;
+                            var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
+                            neonFiles = neonFileData.data;
+                        }
                     }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Error retrieving NEONFiles from URL: " + dataUrl);
                 }
 
                 var usedNeonFiles = new NeonFileCollection();
@@ -999,64 +1007,71 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             foreach (var dataFileUrl in dataFileUrls)
             {
                 // retrieve CSV data files.
-                using (var stream = client.OpenRead(dataFileUrl))
+                try
                 {
-                    using (var reader = new StreamReader(stream))
+                    using (var stream = client.OpenRead(dataFileUrl))
                     {
-                        var firstLine = reader.ReadLine();
-                        var colHeadings = firstLine.Split(',');
-                        var dateTimeIndex = -1;
-                        var valueIndex = -1;
-                        for (var i = 0; i < colHeadings.Length; i++)
+                        using (var reader = new StreamReader(stream))
                         {
-                            if (colHeadings[i] == "startDateTime")
+                            var firstLine = reader.ReadLine();
+                            var colHeadings = firstLine.Split(',');
+                            var dateTimeIndex = -1;
+                            var valueIndex = -1;
+                            for (var i = 0; i < colHeadings.Length; i++)
                             {
-                                dateTimeIndex = i;
-                            }
-                            if (colHeadings[i] == attributeName)
-                            {
-                                valueIndex = i;
-                            }
-                        }
-
-                        if (dateTimeIndex >= 0 && valueIndex >= 0)
-                        {
-                            while (!reader.EndOfStream)
-                            {
-                                var line = reader.ReadLine();
-                                var values = line.Split(',');
-                                var dateTimeStr = values[dateTimeIndex];
-                                var dataValueStr = values[valueIndex];
-
-                                var dt = DateTime.Parse(dateTimeStr.Replace("\"", ""), CultureInfo.InvariantCulture);
-
-                                if (dt >= startDateTime && dt <= endDateTime)
+                                if (colHeadings[i] == "startDateTime")
                                 {
-                                    // create a WaterML value object and add it to TimeSeries list.
-                                    var newValue = new ValueSingleVariable();
-                                    newValue.censorCode = "nc";
-                                    newValue.dateTime = dt.ToUniversalTime();
-                                    newValue.dateTimeUTC = dt.ToUniversalTime();
-                                    newValue.methodCode = meth.methodCode;
-                                    newValue.methodID = Convert.ToString(meth.methodID);
-                                    newValue.sourceCode = "1";
-                                    newValue.sourceID = "1";
-                                    newValue.qualityControlLevelCode = "1";
+                                    dateTimeIndex = i;
+                                }
+                                if (colHeadings[i] == attributeName)
+                                {
+                                    valueIndex = i;
+                                }
+                            }
 
-                                    // assign dataValue
-                                    if (dataValueStr == "")
+                            if (dateTimeIndex >= 0 && valueIndex >= 0)
+                            {
+                                while (!reader.EndOfStream)
+                                {
+                                    var line = reader.ReadLine();
+                                    var values = line.Split(',');
+                                    var dateTimeStr = values[dateTimeIndex];
+                                    var dataValueStr = values[valueIndex];
+
+                                    var dt = DateTime.Parse(dateTimeStr.Replace("\"", ""), CultureInfo.InvariantCulture);
+
+                                    if (dt >= startDateTime && dt <= endDateTime)
                                     {
-                                        newValue.Value = Convert.ToDecimal(v.noDataValue);
+                                        // create a WaterML value object and add it to TimeSeries list.
+                                        var newValue = new ValueSingleVariable();
+                                        newValue.censorCode = "nc";
+                                        newValue.dateTime = dt.ToUniversalTime();
+                                        newValue.dateTimeUTC = dt.ToUniversalTime();
+                                        newValue.methodCode = meth.methodCode;
+                                        newValue.methodID = Convert.ToString(meth.methodID);
+                                        newValue.sourceCode = "1";
+                                        newValue.sourceID = "1";
+                                        newValue.qualityControlLevelCode = "1";
+
+                                        // assign dataValue
+                                        if (dataValueStr == "")
+                                        {
+                                            newValue.Value = Convert.ToDecimal(v.noDataValue);
+                                        }
+                                        else
+                                        {
+                                            newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
+                                        }
+                                        valuesList.Add(newValue);
                                     }
-                                    else
-                                    {
-                                        newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
-                                    }
-                                    valuesList.Add(newValue);
                                 }
                             }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("error in URL: " + dataFileUrl);
                 }
             }
 
