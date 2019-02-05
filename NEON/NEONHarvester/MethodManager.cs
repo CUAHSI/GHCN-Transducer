@@ -85,22 +85,16 @@ namespace NEONHarvester
         {
             LookupFileReader xlsReader = new LookupFileReader(_log);
 
-            Dictionary<string, MethodInfo> methodLookup = xlsReader.ReadMethodsFromExcel();
+            List<MethodInfo> methods = xlsReader.ReadMethodsFromExcel();
 
-            foreach (string productCode in methodLookup.Keys)
-            {
-                var productInfo = _apiReader.ReadProductFromApi(productCode);
-                methodLookup[productCode].MethodDescription = productInfo.productName;
-            }
-
-            _log.LogWrite(String.Format("Found {0} distinct methods.", methodLookup.Count));
+            _log.LogWrite(String.Format("Found {0} distinct methods.", methods.Count));
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connString))
             {
                 // to remove any old ("unused") methods
                 DeleteOldMethods(connection);
 
-                foreach (MethodInfo meth in methodLookup.Values)
+                foreach (MethodInfo meth in methods)
                 {
                     try
                     {
@@ -113,7 +107,7 @@ namespace NEONHarvester
 
                 }
             }
-            _log.LogWrite("UpdateMethods OK: " + methodLookup.Count.ToString() + " methods.");
+            _log.LogWrite("UpdateMethods OK: " + methods.Count.ToString() + " methods.");
         }
 
 

@@ -143,24 +143,24 @@ namespace NEONHarvester
         }
 
 
-        public Dictionary<string, MethodInfo> ReadMethodsFromExcel()
+        public List<MethodInfo> ReadMethodsFromExcel()
         {
             // reading the methods from the EXCEL file
             // NEON Product code -- CUAHSI Method Code
             // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
             //string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             //string variablesFile = Path.Combine(executableLocation, "settings", "neon_variables_lookup.xlsx");
-            string variablesFile = this.LookupFilePath;
+            string lookupFile = this.LookupFilePath;
 
             var variables = new List<Variable>();
-            var methods = new Dictionary<string, MethodInfo>();
+            var methods = new List<MethodInfo>();
 
-            _log.LogWrite("Read Methods from File " + variablesFile);
+            _log.LogWrite("Read Methods from File " + lookupFile);
             int rowNum = 0;
             object timeUnitsObj = "timeUnitsObj";
 
-            var variablesFileInfo = new FileInfo(variablesFile);
-            using (var package = new ExcelPackage(variablesFileInfo))
+            var lookupFileInfo = new FileInfo(lookupFile);
+            using (var package = new ExcelPackage(lookupFileInfo))
             {
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
                 var start = worksheet.Dimension.Start;
@@ -180,18 +180,17 @@ namespace NEONHarvester
                     }
                     string neonDocument = Convert.ToString(worksheet.Cells[row, 6].Value);
 
+                    string methodDescription = Convert.ToString(worksheet.Cells[row, 15].Value);
+
 
                     MethodInfo newMethod = new MethodInfo()
                     {
                         MethodLink = neonDocument,
                         MethodCode = productCode,
-                        MethodDescription = null
+                        MethodDescription = methodDescription
                     };
 
-                    if (!methods.ContainsKey(productCode))
-                    {
-                        methods.Add(productCode, newMethod);
-                    }
+                    methods.Add(newMethod);
                 }
             }
 
