@@ -1024,12 +1024,13 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 // hourly data
 
-                beginDateStr = startDateTime.ToString("yyyy-MM-dd");
-                endDateStr = endDateTime.ToString("yyyy-MM-dd");
+                beginDateStr = startDateTime.ToString("yyyy-MM-dd HH:mm");
+                endDateStr = endDateTime.ToString("yyyy-MM-dd HH:mm");
                 int beginHour = startDateTime.Hour;
                 int endHour = endDateTime.Hour;
-                Awdb.hourlyData[] valuesObjH = wc.getHourlyData(stationTriplets, elementCd, ordinal, heightDepth, beginDateStr, endDateStr, beginHour, endHour);
 
+                // get all hourly data in the specified time range (all hours of day)
+                Awdb.hourlyData[] valuesObjH = wc.getHourlyData(stationTriplets, elementCd, ordinal, heightDepth, beginDateStr, endDateStr, 0, 23);
                 var vals0 = valuesObjH[0];
                 DateTime begDate = Convert.ToDateTime(vals0.beginDate);
                 DateTime endDate = Convert.ToDateTime(vals0.endDate);
@@ -1037,13 +1038,18 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
                 for (int i = 0; i < vals.Length; i++)
                 {
+                    DateTime valDateTime = Convert.ToDateTime(vals[i].dateTime);
+
+                    if (valDateTime < startDateTime || valDateTime > endDateTime)
+                    {
+                        continue;
+                    }
+
                     ValueSingleVariable val = new ValueSingleVariable();
                     val.censorCode = "nc";
 
-                    val.dateTime = begDate.AddHours(i);
-                    val.dateTimeUTC = val.dateTime;
-                    //val.timeOffset = "00:00";
-                    //val.timeOffsetSpecified = false;
+                    val.dateTime = valDateTime;
+                    val.dateTimeUTC = valDateTime;
                     val.methodCode = methodID.ToString();
                     val.methodID = methodID.ToString();
 
