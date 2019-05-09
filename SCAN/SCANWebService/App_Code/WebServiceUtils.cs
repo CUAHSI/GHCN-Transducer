@@ -480,34 +480,6 @@ namespace WaterOneFlow.odws
         }
 
 
-        public static Dictionary<string, QualifierType> GetQualifiersFromDb()
-        {
-            string cnn = GetConnectionString();
-            Dictionary<string, QualifierType> qualifierLookup = new Dictionary<string, QualifierType>();
-            using (SqlConnection conn = new SqlConnection(cnn))
-            {
-                using (SqlCommand cmd = new SqlCommand())
-                {
-                    string sql = @"SELECT * FROM dbo.Qualifiers";
-                    cmd.CommandText = sql;
-                    cmd.Connection = conn;
-                    conn.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    while (dr.Read())
-                    {
-                        var q = new QualifierType();
-                        q.qualifierID = Convert.ToInt32(dr["QualifierID"]);
-                        q.qualifierCode = Convert.ToString(dr["QualifierCode"]);
-                        q.qualifierDescription = Convert.ToString(dr["QualifierDescription"]);
-                        qualifierLookup.Add(q.qualifierCode, q);
-                    }
-                }
-            }
-            return qualifierLookup;
-        }
-
-
         public static VariableInfoType GetVariableInfoFromDb(string variableCode)
         {
             string cnn = GetConnectionString();
@@ -1233,12 +1205,6 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             //source - always the first source in the db 
             s.source = new SourceType[1];
             s.source[0] = GetSourceFromDb();
-
-            //qualifiers - not used by SCAN
-            s.qualifier = new QualifierType[3];
-            s.qualifier[0] = new QualifierType();
-            Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
-            var usedQualifiers = new Dictionary<string, QualifierType>();
 
             //values: get from AWDB web service
             
