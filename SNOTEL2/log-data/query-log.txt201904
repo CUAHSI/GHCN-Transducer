@@ -1,7 +1,0 @@
-2019-04-05 18:38:09,795 NEON|GetValues|NEON:MAYF_200.000|DP1.00001.001_windSpeedMean|||||::1
-2019-04-05 18:39:18,203 NEON|GetSites|System.String[]||||||::1
-2019-04-05 18:39:18,766 NEON|GetSites|System.String[]||||753|2371|::1
-2019-04-05 18:40:06,445 NEON|GetSiteInfo|System.String[]||||||::1
-2019-04-05 18:40:06,681 NEON|GetSiteInfo|System.String[]||||235|1|::1
-2019-04-05 18:41:13,944 NEON|GetValues|NEON:ABBY_000.010|NEON:DP1.00002.001_tempSingleMean|||||::1
-2019-04-05 18:41:44,937 NEON|GetValues|NEON:ABBY_000.010|NEON:DP1.00002.001_tempSingleMean|||31076|38078|::1

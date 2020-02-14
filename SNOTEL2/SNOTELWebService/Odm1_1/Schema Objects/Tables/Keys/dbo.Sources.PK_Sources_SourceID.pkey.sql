@@ -1,3 +1,0 @@
-﻿ALTER TABLE [dbo].[Sources] ADD CONSTRAINT [PK_Sources_SourceID] PRIMARY KEY CLUSTERED  ([SourceID]) ON [PRIMARY]
-
-

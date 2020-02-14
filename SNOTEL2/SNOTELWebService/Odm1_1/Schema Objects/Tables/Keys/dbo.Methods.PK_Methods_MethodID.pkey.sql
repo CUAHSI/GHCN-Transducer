@@ -1,3 +1,0 @@
-﻿ALTER TABLE [dbo].[Methods] ADD CONSTRAINT [PK_Methods_MethodID] PRIMARY KEY CLUSTERED  ([MethodID]) ON [PRIMARY]
-
-

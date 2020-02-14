@@ -1,3 +1,0 @@
-﻿ALTER TABLE [dbo].[Units] ADD CONSTRAINT [PK_Units_UnitsID] PRIMARY KEY CLUSTERED  ([UnitsID]) ON [PRIMARY]
-
-
