@@ -14,7 +14,6 @@ using System.Net;
 using System.IO;
 using System.Linq;
 using System.Globalization;
-using Newtonsoft.Json;
 
 namespace WaterOneFlow.odws
 {
@@ -1049,6 +1048,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
                     val.dateTime = valDateTime;
                     val.dateTimeUTC = valDateTime;
+                    val.dateTimeUTCSpecified = true;
+                    val.timeOffset = "00:00";
                     val.methodCode = methodID.ToString();
                     val.methodID = methodID.ToString();
 
