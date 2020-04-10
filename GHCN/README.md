@@ -23,13 +23,13 @@ The transducer contains two parts:
 
 ## Optional Configuration Settings in GHCNHarvester App.config file
 - **use_cocorahs** (default value: **true**): Set this value to false to exclude CoCoRaHS sites from the ODM database and web service (NOTE: CUAHSI already provides original data from the CoCoRaHS dataset using the dedicated CoCoRaHS web service) 
-- **use_snotel** (default value: **true**): Set this value to false to exclude SNOTEL sites from the ODM database and web service (NOTE: CUAHSI is planning to provide complete data from the SNOTEL network using the dedicated SNOTEL web service) 
+- **use_snotel** (default value: **true**): Set this value to false to exclude SNOTEL sites from the ODM database and web service (NOTE: CUAHSI is providing complete data from the SNOTEL network using the dedicated SNOTEL web service) 
 - **db_batch_size** This setting can be used to adjust the number of records sent to the ODM database server in one request by the GhcnHarvester when updating the *Sites* and *SeriesCatalog* table. The default value is 500 records.
 
 ## Setup Instructions for GHCN-Service
 1. Setup and run ChcnHarvester.EXE as described above
-2. Open the solution GhcnWebService.sln in Visual Studio
-3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
+2. Open the solution GhcnWebService_wof11.sln in Visual Studio
+3. Inside the project genericODws, create a file ConnectionStrings.config with the correct database server, database name, database user and database password for the ODM database. You can use the included file ConnectionStrings_example config as an example.
 - NOTE: For improved security we recommend setting up a separate MSSQL database user account with read-only data access permission to be used by GhcnWebService
 4. Build the solution
 5. Copy the whole content of the "GhcnWebService" folder to your a folder on IIS Web server where you want to publish the web service
