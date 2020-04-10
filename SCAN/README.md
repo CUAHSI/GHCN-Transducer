@@ -71,7 +71,7 @@ The transducer contains two parts:
 | CALENDAR_YEAR | y                         | year             | 1                         |
 
 ## Excluding time-aggregated SCAN Variables
-- A special setting in the **appsettings.config** file of **SnotelWebService** allows excluding variables with selected duration
+- A special setting in the **appsettings.config** file of **SCANWebService** allows excluding variables with selected duration
 from the WaterML web service response. By default, all durations are included.
 
 ## SCAN Heights and Depths 
@@ -100,7 +100,7 @@ from the WaterML web service response. By default, all durations are included.
 ## Setup Instructions for SCAN Web Service
 1. Setup and run SCANharvester as described above
 2. Open the solution SCANWebService.sln in Visual Studio
-3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
+3. Inside the genericODws project, create a file ConnectionStrings.config and fill in the correct database server, database name, database user and database password for the ODM database. You can use the included file ConnectionStrings_example.config as an example.
 4. If required, edit the file appsettings.config and uncomment or edit the setting <add key="exclude_durations" value="WATER_YEAR, CALENDAR_YEAR, YEARLY, SEASONAL, MONTHLY, SEMIMONTHLY"/> to exclude any time-aggregated variables from the WaterML response.
 5. Build the solution
 6. Copy the whole content of the "SCANWebService" folder to your a folder on IIS Web server where you want to publish the web service
