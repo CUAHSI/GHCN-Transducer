@@ -128,8 +128,8 @@ from the WaterML web service response. By default, all durations are included.
 
 ## Setup Instructions for SNOTEL Web Service
 1. Setup and run SNOTELHarvester as described above
-2. Open the solution SNOTELWebService.sln in Visual Studio
-3. In the project GenericODWS create a file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database. You can use ConnectionString_example.config as an example.
+2. Open the solution SNOTELWebService_wof11.sln in Visual Studio
+3. In the project genericODws create a file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database. You can use ConnectionString_example.config as an example.
 4. If required, edit the file appsettings.config and uncomment or edit the setting <add key="exclude_durations" value="WATER_YEAR, CALENDAR_YEAR, YEARLY, SEASONAL, MONTHLY, SEMIMONTHLY"/> to exclude any time-aggregated variables from the WaterML response.
 5. Build the solution
 6. Copy the whole content of the "SNOTELWebService" folder to your a folder on IIS Web server where you want to publish the web service

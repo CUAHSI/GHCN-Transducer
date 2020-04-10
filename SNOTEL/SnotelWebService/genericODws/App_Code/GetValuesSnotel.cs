@@ -1131,6 +1131,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     }
 
                     val.dateTimeUTC = val.dateTime;
+                    val.dateTimeUTCSpecified = true;
                     //val.timeOffset = "00:00";
                     //val.timeOffsetSpecified = false;
                     val.methodCode = methodID.ToString();
