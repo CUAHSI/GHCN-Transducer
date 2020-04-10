@@ -19,7 +19,7 @@ The transducer contains two parts:
 
 ## Setup Instructions for CoCoRaHS Web Service
 1. Setup and run CoCoHarvester as described above
-2. Open the solution CoCoWebService.sln in Visual Studio
-3. Edit the file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database.
+2. Open the solution CoCoWebService_wof11.sln in Visual Studio
+3. In the genericODws project, create a file ConnectionStrings.config: fill in the correct database server, database name, database user and database password for the ODM database. You can use the provided file ConnectionStrings_Example.config as an example.
 4. Build the solution
 5. Copy the whole content of the "CoCoWebService" folder to your a folder on IIS Web server where you want to publish the web service
