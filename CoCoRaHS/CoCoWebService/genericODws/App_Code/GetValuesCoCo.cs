@@ -224,6 +224,8 @@ namespace WaterOneFlow.odws
 
 
             var client = new WebClient();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             using (var stream = client.OpenRead(dlyFileUrl))
             using (var reader = new StreamReader(stream))
             {

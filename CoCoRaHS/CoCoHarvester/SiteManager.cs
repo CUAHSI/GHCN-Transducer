@@ -99,7 +99,7 @@ namespace CoCoHarvester
             var states = ReadStatesFromWeb();
             var siteList = new List<Site>();
 
-            string sitesUrl = "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?format=csv&state=";
+            string sitesUrl = "https://data.cocorahs.org/cocorahs/export/exportstations.aspx?format=csv&state=";
 
             Console.WriteLine("Reading Sites from URL: " + sitesUrl);
             _log.LogWrite("Reading sites from URL: " + sitesUrl);
@@ -256,7 +256,7 @@ namespace CoCoHarvester
 
         public int ReadSeriesFromWeb(Site site)
         {
-            var seriesUrl = String.Format("http://data.cocorahs.org/cocorahs/export/exportreports.aspx?ReportType=Daily&dtf=1&Format=csv&Station={0}&ReportDateType=timestamp&Date=1/1/2000&TimesInGMT=False", site.SiteCode);
+            var seriesUrl = String.Format("https://data.cocorahs.org/cocorahs/export/exportreports.aspx?ReportType=Daily&dtf=1&Format=csv&Station={0}&ReportDateType=timestamp&Date=1/1/2000&TimesInGMT=False", site.SiteCode);
 
             try
             {

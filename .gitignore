@@ -218,3 +218,4 @@ logs/
 /SNOTEL/logs/query-log.txt201711
 /SNOTEL/logs/query-log.txt
 *.pubxml
+/GHCN/log-data/query-log.txt202004

@@ -924,10 +924,11 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             // !!! necessary configuration to prevent the "Bad Gateway" error
             // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
             System.Net.ServicePointManager.Expect100Continue = false;
-
+            
             // connecting to the AWDB web service
             Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
-
+            // add TLS requirement
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             // !!! necessary configuration to prevent MaxReceivedMessageSize error
             System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
             httpBinding.MaxReceivedMessageSize = int.MaxValue;

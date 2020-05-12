@@ -193,7 +193,7 @@ namespace WaterOneFlow.odws
 
             //values: get from.dly files
             string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
-
+            
             //text file column positions
             TextFileColumn yearPos = new TextFileColumn(12, 15);
             TextFileColumn monthPos = new TextFileColumn(16, 17);
@@ -224,6 +224,7 @@ namespace WaterOneFlow.odws
 
 
             var client = new WebClient();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             using (var stream = client.OpenRead(dlyFileUrl))
             using (var reader = new StreamReader(stream))
             {
