@@ -895,6 +895,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             // Retrieve a matching NEON products for the specified site and variable.
             string url = "https://data.neonscience.org/api/v0/sites/" + neonSiteCode;
             var client = new WebClient();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             using (var stream = client.OpenRead(url))
             {
                 using (var reader = new StreamReader(stream))

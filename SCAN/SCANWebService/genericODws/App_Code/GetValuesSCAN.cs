@@ -927,7 +927,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
             // connecting to the AWDB web service
             Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
-
+            // add TLS requirement
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             // !!! necessary configuration to prevent MaxReceivedMessageSize error
             System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
             httpBinding.MaxReceivedMessageSize = int.MaxValue;
