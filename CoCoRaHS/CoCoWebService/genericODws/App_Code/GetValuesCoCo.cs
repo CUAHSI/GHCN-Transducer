@@ -192,7 +192,9 @@ namespace WaterOneFlow.odws
             var usedQualifiers = new Dictionary<string, QualifierType>();
 
             //values: get from.dly files
-            string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
+            //string dlyFileUrl = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
+            string dlyFileUrl = "ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/all/" + siteCode + ".dly";
+            
 
             //text file column positions
             TextFileColumn yearPos = new TextFileColumn(12, 15);
