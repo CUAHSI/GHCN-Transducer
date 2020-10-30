@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Net;
+using System.Collections.Generic;
 
 namespace NEONHarvester
 {
@@ -6,6 +7,9 @@ namespace NEONHarvester
     {
         static void Main(string[] args)
         {
+            // Ensure correct TLS settings.
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             // (0) setup progress logging with writing to console and log file
             var logger = new LogWriter(true);
 
