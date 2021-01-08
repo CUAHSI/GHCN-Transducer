@@ -23,10 +23,10 @@ namespace NEONHarvester
         private LogWriter _log;
         private NeonApiReader _apiReader;
 
-        public VariableManager(LogWriter log)
+        public VariableManager(LogWriter log, int sleepTime)
         {
             _log = log;
-            _apiReader = new NeonApiReader(log);
+            _apiReader = new NeonApiReader(log, sleepTime);
         }
 
         public void UpdateVariables()

@@ -19,10 +19,10 @@ namespace NEONHarvester
         private LogWriter _log;
         private NeonApiReader _apiReader;
 
-        public MethodManager(LogWriter log)
+        public MethodManager(LogWriter log, int sleepTime)
         {
             _log = log;
-            _apiReader = new NeonApiReader(_log);
+            _apiReader = new NeonApiReader(_log, sleepTime);
         }
 
 

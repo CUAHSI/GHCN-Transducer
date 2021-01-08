@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
@@ -12,10 +9,12 @@ namespace NEONHarvester
     class NeonApiReader
     {
         private LogWriter _log;
+        private int _sleepTime;
 
-        public NeonApiReader(LogWriter log)
+        public NeonApiReader(LogWriter log, int sleepTime)
         {
             _log = log;
+            _sleepTime = sleepTime;
             NeonApiUrl = "http://data.neonscience.org/api/v0";
         }
 
@@ -29,7 +28,7 @@ namespace NEONHarvester
 
             try
             {
-                
+                Thread.Sleep(_sleepTime);
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))
@@ -53,6 +52,7 @@ namespace NEONHarvester
             var neonProducts = new NeonProductCollection();
             try
             {
+                Thread.Sleep(_sleepTime);
                 string url = NeonApiUrl + "/products/";
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
@@ -75,6 +75,7 @@ namespace NEONHarvester
         {
             var neonFiles = new NeonFileCollection();
 
+            Thread.Sleep(_sleepTime);
             var client = new WebClient();
             using (var stream = client.OpenRead(filesUrl))
             using (var reader = new StreamReader(stream))
@@ -94,6 +95,7 @@ namespace NEONHarvester
             try
             {
                 string url = NeonApiUrl + "/sites/";
+                Thread.Sleep(_sleepTime);
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))
@@ -117,6 +119,7 @@ namespace NEONHarvester
             try
             {
                 string url = NeonApiUrl + "/sites/" + neonSiteCode;
+                Thread.Sleep(_sleepTime);
                 var client = new WebClient();
                 using (var stream = client.OpenRead(url))
                 using (var reader = new StreamReader(stream))

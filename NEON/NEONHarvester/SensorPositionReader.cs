@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
+using System.Threading;
 using Microsoft.VisualBasic.FileIO;
 
 namespace NEONHarvester
@@ -9,11 +10,13 @@ namespace NEONHarvester
     class SensorPositionReader
     {
         private LogWriter _log;
+        private int _sleepTime;
 
-        public SensorPositionReader(LogWriter log)
+        public SensorPositionReader(LogWriter log, int sleepTime)
         {
             // initialize the logger and the variable lookup
             _log = log;
+            _sleepTime = sleepTime;
         }
 
         public List<NeonSensorPosition> ReadSensorPositionsFromUrl(string sensorPositionsUrl, NeonSite site)
@@ -21,6 +24,8 @@ namespace NEONHarvester
             var senPosList = new List<NeonSensorPosition>();
             try
             {
+                // A sleep time has been intentionally added to overcome NEON API rate limitation.
+                Thread.Sleep(_sleepTime);
                 var client = new WebClient();
                 using (var stream = client.OpenRead(sensorPositionsUrl))
                 {

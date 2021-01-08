@@ -15,12 +15,14 @@ namespace NEONHarvester
         private LogWriter _log;
         private NeonApiReader _apiReader;
         private List<string> _sensorPositionFileNames;
+        private int _sleepTime;
 
-        public SiteManager(LogWriter log)
+        public SiteManager(LogWriter log, int sleepTime)
         {
             _log = log;
-            _apiReader = new NeonApiReader(log);
+            _apiReader = new NeonApiReader(log, sleepTime);
             _sensorPositionFileNames = new List<string>();
+            _sleepTime = sleepTime;
         }
 
         /// <summary>
@@ -121,10 +123,7 @@ namespace NEONHarvester
             Dictionary<string, NeonSite> neonSiteCodeLookup = new Dictionary<string, NeonSite>();
             foreach (NeonSite neonSite in siteInfoList)
             {
-                //if (neonSite.siteCode == "HARV")
-                //{
                 neonSiteCodeLookup.Add(neonSite.siteCode, neonSite);
-                //}
             }
             return neonSiteCodeLookup;
         }
@@ -142,7 +141,7 @@ namespace NEONHarvester
             var cuahsiSiteNeonSensorLookup = new CuahsiSiteNeonSensorLookup();
             var sensorSiteLookup = cuahsiSiteNeonSensorLookup.Lookup;
 
-            var senPosReader = new SensorPositionReader(_log);
+            var senPosReader = new SensorPositionReader(_log, _sleepTime);
 
             List<string> supportedProductCodes = new List<string>();
             var lookupReader = new LookupFileReader(_log);
