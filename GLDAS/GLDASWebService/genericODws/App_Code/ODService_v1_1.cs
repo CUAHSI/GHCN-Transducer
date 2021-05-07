@@ -274,7 +274,7 @@ namespace WaterOneFlow.odws
                 //TimeSeriesResponseType resp = obj.getValues(SiteNumber, Variable, StartDate, EndDate);
 
                 // USE CUSTOM CODE here !!!!
-                TimeSeriesResponseType resp = GetValuesNEON.GetValues(SiteNumber, Variable, StartDate, EndDate);
+                TimeSeriesResponseType resp = GetValuesGldas.GetValues(SiteNumber, Variable, StartDate, EndDate);
 
                 queryLog2.LogValuesEnd(Logging.Methods.GetValues,
                  SiteNumber, //locaiton

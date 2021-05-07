@@ -25,22 +25,22 @@ namespace GldasHarvester
                 int metadataID = SaveOrUpdateMetadata();
                 GldasSource source = new GldasSource
                 {
-                    Organization = "NOAA National Centers for Environmental Information",
-                    SourceDescription = "Global Historical Climate Network - Daily (GHCN-Daily) Version 3",
-                    SourceLink = "ncdc.noaa.gov",
-                    ContactName = "John Leslie",
-                    Phone = "1-828-271-4876",
-                    Email = "ncei.orders@noaa.gov",
-                    Address = "Federal Building, 151 Patton Avenue",
-                    City = "Asheville",
-                    State = "NC",
+                    Organization = "NASA / Goddard Earth Sciences Data and Information Services Center (GES DISC)",
+                    SourceDescription = "GLDAS Noah Land Surface Model L4 3 hourly 0.25 x 0.25 degree V2.1",
+                    SourceLink = "https://disc.gsfc.nasa.gov/datasets/GLDAS_NOAH025_3H_2.1/summary",
+                    ContactName = "Hiroko Kato Beaudoing",
+                    Phone = "301.254.1538",
+                    Email = "207420001",
+                    Address = "Goddard Earth Sciences Data and Information Services Center (GES DISC)",
+                    City = "Greenbelt",
+                    State = "MD",
                     ZipCode = "28801-5001",
                     Citation = @"Cite this dataset when used as a source: 
-Menne, Matthew J., Imke Durre, Bryant Korzeniewski, Shelley McNeal, Kristy Thomas, Xungang Yin, Steven Anthony, Ron Ray, Russell S. Vose, Byron E.Gleason, and Tamara G. Houston (2012): 
-Global Historical Climatology Network - Daily (GHCN-Daily), Version 3. [indicate subset used]. 
-NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
+Beaudoing, H. and M. Rodell, NASA/GSFC/HSL (2020), GLDAS Noah Land Surface Model L4 3 hourly 0.25 x 0.25 degree V2.1, 
+Greenbelt, Maryland, USA, Goddard Earth Sciences Data and Information Services Center (GES DISC), 
+Accessed: [Data Access Date]",
                     MetadataID = metadataID,
-                    SourceCode = "NOAH-GHCN"
+                    SourceCode = "GES-DISC"
                 };
 
 
@@ -186,17 +186,19 @@ NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ [access date].",
             GldasISOMetadata metadata = new GldasISOMetadata
             {
                 TopicCategory = "climatology/meteorology/atmosphere",
-                Title = "Global Historical Climate Network - Daily (GHCN-Daily) Version 3",
-                Abstract = @"The Global Historical Climatology Network - Daily (GHCN-Daily) dataset integrates daily climate observations from approximately 30 different data sources. 
-Version 3 was released in September 2012 with the addition of data from two additional station networks. 
-Changes to the processing system associated with the version 3 release also allowed for updates to occur 7 days a week rather than only on most weekdays. 
-Version 3 contains station-based measurements from well over 90,000 land-based stations worldwide, 
-about two thirds of which are for precipitation measurement only. 
-Other meteorological elements include, but are not limited to, daily maximum and minimum temperature, temperature at the time of observation, snowfall and snow depth. 
-Over 25,000 stations are regularly updated with observations from within roughly the last month. 
-The dataset is also routinely reconstructed (usually every week) from its roughly 30 data sources to ensure that GHCN-Daily is generally in sync with its growing list of constituent sources. 
-During this process, quality assurance checks are applied to the full dataset. Where possible, GHCN-Daily station data are also updated daily from a variety of data streams. 
-Station values for each daily update also undergo a suite of quality checks.",
+                Title = "GLDAS Noah Land Surface Model L4 3 hourly 0.25 x 0.25 degree V2.1",
+                Abstract = @"NASA Global Land Data Assimilation System Version 2 (GLDAS-2) has three components: 
+GLDAS-2.0, GLDAS-2.1, and GLDAS-2.2. GLDAS-2.0 is forced entirely with the Princeton meteorological forcing input data and provides a temporally consistent series from 1948 through 2014. GLDAS-2.1 is forced with a combination of model and observation data from 2000 to present. 
+GLDAS-2.2 product suites use data assimilation (DA), whereas the GLDAS-2.0 and GLDAS-2.1 products are open - loop (i.e., no data assimilation). 
+The choice of forcing data, as well as DA observation source, variable, and scheme, vary for different GLDAS-2.2 products.
+GLDAS - 2.1 data products are now available in two production streams: one stream is forced with combined forcing data including GPCP version 1.3
+(the main production stream), and the other stream is processed without this forcing data(the early production stream). 
+Since the GPCP Version 1.3 data have a 3 - 4 month latency, the GLDAS - 2.1 data products are first created without it, 
+and are designated as Early Products(EPs), with about 1.5 month latency. 
+Once the GPCP Version 1.3 data become available, the GLDAS-2.1 data products are processed in the main production stream and are removed from the Early Products archive.
+This data product, reprocessed in January 2020, is for GLDAS - 2.1 Noah 3 - hourly 0.25 degree data from the main production stream and it is a replacement to its previous version.
+The 3 - hourly data product was simulated with the Noah Model 3.6 in Land Information System(LIS) Version 7.The data product contains 36 land surface fields from January 2000 to present.
+The GLDAS - 2.1 data are archived and distributed in NetCDF format.The GLDAS - 2.1 products supersede their corresponding GLDAS - 1 products.",
                 ProfileVersion = "19115-2",
                 MetadataLink = "data.nodc.noaa.gov"
             };

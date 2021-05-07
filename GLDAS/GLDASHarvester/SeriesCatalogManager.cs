@@ -11,14 +11,11 @@ namespace GldasHarvester
     class SeriesCatalogManager
     {
         private LogWriter _log;
-        private Dictionary<string, GldasVariable> _variableLookup;
-        
 
         public SeriesCatalogManager(LogWriter log)
         {
             // initialize the logger and the variable lookup
             _log = log;
-            _variableLookup = getVariableLookup();
         }
 
         /// <summary>
@@ -33,7 +30,7 @@ namespace GldasHarvester
 
             using (SqlConnection connection = new SqlConnection(connString))
             {               
-                string sql = "SELECT SiteID, SiteCode, SiteName, Latitude, Longitude FROM dbo.Sites";
+                string sql = "SELECT SiteID, SiteCode, SiteName, Longitude, Latitude FROM dbo.Sites";
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
                     cmd.Connection.Open();
@@ -42,10 +39,10 @@ namespace GldasHarvester
                     while (reader.Read())
                     {
                         string code = reader.GetString(1);
-                        var longitude = reader.GetFloat(3);
-                        var latitude = reader.GetFloat(4);
-                        var siteId = reader.GetInt64(0);
-                        GldasSite site = new GldasSite(siteId, latitude, longitude);
+                        var longitude = reader.GetValue(3);
+                        var latitude = reader.GetValue(4);
+                        var siteId = Convert.ToInt64(reader.GetValue(0));
+                        GldasSite site = new GldasSite(siteId, Convert.ToSingle(latitude), Convert.ToSingle(longitude));
                         lookup.Add(code, site);
                     }
                     reader.Close();
@@ -119,118 +116,98 @@ namespace GldasHarvester
         }
 
 
-        /// <summary>
-        /// Create a dictionary for looking up a GhcnVariable object based on its variable code
-        /// </summary>
-        /// <returns>Variable code - GhcnVariable object lookup dictionary</returns>
-        private Dictionary<string, GldasVariable> getVariableLookup()
+        private Dictionary<string, Variable> GetVariableLookup()
         {
-            Dictionary<string,GldasVariable> lookup = new Dictionary<string, GldasVariable>();
+            var lookup = new Dictionary<string, Variable>();
+
+            var variableList = new List<Variable>();
+
+            // fetch information from ODM (Variables joined with Units table)
+            string sqlQuery = @"SELECT v.VariableID, v.VariableCode,  v.VariableName, 
+v.SampleMedium,v.TimeUnitsID, v.DataType, v.GeneralCategory, v.VariableUnitsID, v.ValueType, v.Speciation, 
+tu.UnitsName AS TimeUnitsName, u.UnitsName AS VariableUnitsName 
+FROM dbo.Variables v 
+INNER JOIN dbo.Units u ON v.VariableUnitsID = u.UnitsID
+INNER JOIN dbo.Units tu ON v.TimeUnitsID = tu.UnitsID";
+
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
 
             try
             {
-
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    string sql = "SELECT VariableID, VariableCode, VariableName, VariableUnitsID, SampleMedium, DataType FROM dbo.Variables";
-                    using (SqlCommand cmd = new SqlCommand(sql, connection))
+                    using (var cmd = new SqlCommand(sqlQuery, connection))
                     {
-                        cmd.Connection.Open();
 
-                        SqlDataReader reader = cmd.ExecuteReader();
-                        while (reader.Read())
+                        connection.Open();
+                        var reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
                         {
-                            string code = reader.GetString(1);
-                            GldasVariable variable = new GldasVariable
+                            while (reader.Read())
                             {
-                                VariableID = reader.GetInt32(0),
-                                VariableCode = code,
-                                VariableName = reader.GetString(2),
-                                VariableUnitsID = reader.GetInt32(3),
-                                SampleMedium = reader.GetString(4),
-                                DataType = reader.GetString(5)
-                            };
-                            lookup.Add(code, variable);
+                                var v = new Variable();
+                                var variableCode = Convert.ToString(reader["VariableCode"]);
+                                v.VariableID = Convert.ToInt32(reader["VariableID"]);
+                                v.VariableCode = variableCode;
+                                v.VariableName = Convert.ToString(reader["VariableName"]);
+                                v.SampleMedium = Convert.ToString(reader["SampleMedium"]);
+                                v.DataType = Convert.ToString(reader["DataType"]);
+                                v.VariableUnitsID = Convert.ToInt32(reader["VariableUnitsID"]);
+                                v.VariableUnitsName = Convert.ToString(reader["VariableUnitsName"]);
+                                lookup.Add(variableCode, v);
+                            }
                         }
-                        reader.Close();
-                        cmd.Connection.Close();
+
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _log.LogWrite("SeriesCatalogManager ERROR in GetVariableLookup: " + ex.Message);
+                var msg = "ERROR reading product-variable lookup from DB: " + ex.Message;
+                Console.WriteLine(msg);
+                _log.LogWrite(msg);
+                return null;
             }
             return lookup;
         }
+
 
         /// <summary>
         /// Reads a list of time series (observed variable and period of record) from the online GHCND inventory
         /// </summary>
         /// <param name="siteLookup">Lookup dictionary to find site object by site code</param>
         /// <returns>List of Series objects with info on Site, Variable, Start date and End date</returns>
-        public List<GldasSeries> ReadSeriesFromInventory(Dictionary<string, GldasSite> siteLookup)
+        public List<GldasSeries> GenerateSeriesList(Dictionary<string, GldasSite> siteLookup, Dictionary<string, Variable> variableLookup)
         {
-            Console.WriteLine("Reading Series from GHCN file ghcnd-inventory.txt ...");
-            
+            Console.WriteLine("Reading Series from database ...");
+
             List<GldasSeries> seriesList = new List<GldasSeries>();
-            Dictionary<string, TextFileColumn> colPos = new Dictionary<string,TextFileColumn>();
-            colPos.Add("sitecode", new TextFileColumn(1, 11));
-            colPos.Add("varcode", new TextFileColumn(32, 35));
-            colPos.Add("firstyear", new TextFileColumn(37, 40));
-            colPos.Add("lastyear", new TextFileColumn(42, 45));
 
-            string url = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-inventory.txt";
-            _log.LogWrite("Reading Series from url: " + url);
+            var beginDateTime = new DateTime(2000, 1, 1);
+            var endDateTime = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);
+            // Total number of days * number of 3-hour datapoints in a day.
+            var valueCount = Convert.ToInt32(endDateTime.Subtract(beginDateTime).TotalDays * 8);
 
-            try
+            foreach (string siteCode in siteLookup.Keys)
             {
-
-                var client = new WebClient();
-                using (var stream = client.OpenRead(url))
-                using (var reader = new StreamReader(stream))
+                foreach (string varCode in variableLookup.Keys)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    seriesList.Add(new GldasSeries
                     {
-                        string siteCode = line.Substring(colPos["sitecode"].Start, colPos["sitecode"].Length);
-                        string varCode = line.Substring(colPos["varcode"].Start, colPos["varcode"].Length);
-                        int firstYear = Convert.ToInt32(line.Substring(colPos["firstyear"].Start, colPos["firstyear"].Length));
-                        int lastYear = Convert.ToInt32(line.Substring(colPos["lastyear"].Start, colPos["lastyear"].Length));
-
-                        DateTime beginDateTime = new DateTime(firstYear, 1, 1);
-                        DateTime endDateTime = new DateTime(lastYear, 12, 31);
-                        if (lastYear == DateTime.Now.Year)
-                        {
-                            endDateTime = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)).AddDays(-1);
-                        }
-                        int valueCount = (int)((endDateTime - beginDateTime).TotalDays);
-
-                        // only add series for the GHCN core variables (SNWD, PRCP, TMAX, TMIN, TAVG)
-                        if (_variableLookup.ContainsKey(varCode) && siteLookup.ContainsKey(siteCode))
-                        {
-                            seriesList.Add(new GldasSeries
-                            {
-                                SiteCode = siteCode,
-                                SiteID = siteLookup[siteCode].SiteID,
-                                SiteName = siteLookup[siteCode].SiteName,
-                                VariableCode = varCode,
-                                VariableID = _variableLookup[varCode].VariableID,
-                                BeginDateTime = beginDateTime,
-                                EndDateTime = endDateTime,
-                                ValueCount = valueCount
-                            });
-                        }
-                    }
+                        SiteCode = siteCode,
+                        SiteID = siteLookup[siteCode].SiteID,
+                        SiteName = siteLookup[siteCode].SiteName,
+                        VariableCode = varCode,
+                        VariableID = variableLookup[varCode].VariableID,
+                        BeginDateTime = beginDateTime,
+                        EndDateTime = endDateTime,
+                        ValueCount = valueCount
+                    });
                 }
-                Console.WriteLine(String.Format("found {0} series", seriesList.Count));
-                _log.LogWrite(String.Format("found {0} series", seriesList.Count));
             }
-            catch(Exception ex)
-            {
-                _log.LogWrite("UpdateSeriesCatalog ERROR reading series from web: " + ex.Message);
-            }
+            Console.WriteLine(String.Format("found {0} series", seriesList.Count));
+            _log.LogWrite(String.Format("found {0} series", seriesList.Count));
+
             return seriesList;
         }
 
@@ -240,11 +217,12 @@ namespace GldasHarvester
         public void UpdateSeriesCatalog_fast()
         {
             var siteLookup = GetSiteLookup();
+            var variableLookup = GetVariableLookup();
 
             var source = GetSource();
             string methodDescription = GetMethodDescription();
 
-            List<GldasSeries> seriesList = ReadSeriesFromInventory(siteLookup);
+            List<GldasSeries> seriesList = GenerateSeriesList(siteLookup, variableLookup);
             Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
@@ -324,7 +302,7 @@ namespace GldasHarvester
                         {
                             var row = bulkTable.NewRow();
                             seriesID = seriesID + 1;
-                            GldasVariable v = _variableLookup[seriesList[i].VariableCode];
+                            Variable v = variableLookup[seriesList[i].VariableCode];
                             row["SeriesID"] = seriesID;
                             row["SiteID"] = seriesList[i].SiteID;
                             row["SiteCode"] = seriesList[i].SiteCode;
@@ -335,12 +313,12 @@ namespace GldasHarvester
                             row["VariableName"] = v.VariableName;
                             row["Speciation"] = v.Speciation;
                             row["VariableUnitsID"] = v.VariableUnitsID;
-                            row["VariableUnitsName"] = "Centimeter"; // todo get from DB!!
+                            row["VariableUnitsName"] = v.VariableUnitsName;
                             row["SampleMedium"] = v.SampleMedium;
                             row["ValueType"] = v.ValueType;
                             row["TimeSupport"] = v.TimeSupport;
                             row["TimeUnitsID"] = v.TimeUnitsID;
-                            row["TimeUnitsName"] = "Day"; // todo get from DB!!
+                            row["TimeUnitsName"] = v.TimeUnitsName;
                             row["DataType"] = v.DataType;
                             row["GeneralCategory"] = v.GeneralCategory;
                             row["MethodID"] = 0;

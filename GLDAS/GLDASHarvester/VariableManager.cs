@@ -22,34 +22,30 @@ namespace GldasHarvester
         {
             try
             {
-
-                List<GldasVariable> variables = new List<GldasVariable>();
-                variables.Add(new GldasVariable
-                {
-                    VariableCode = "GLDAS_NOAH025_3H_v2.1:Tair_f_inst",
-                    VariableName = "Temperature",
-                    VariableUnitsID = 47,
-                    SampleMedium = "Air",
-                    DataType = "Continuous"
-                });
-
-                variables.Add(new GldasVariable
-                {
-                    VariableCode = "GLDAS_NOAH025_3H_v2.1:Evap_tavg",
-                    VariableName = "Evaporation",
-                    VariableUnitsID = 47,
-                    SampleMedium = "Air",
-                    DataType = "Continuous"
-                });
-
-                
+                var xlsxReader = new LookupFileReader(_log);
+                var variables = xlsxReader.ReadVariablesFromExcel();
 
                 string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    foreach (GldasVariable variable in variables)
+                    using (SqlCommand cmd = new SqlCommand("DELETE from Variables", connection))
                     {
-                        object variableID = SaveOrUpdateVariable(variable, connection);
+                        connection.Open();
+                        cmd.ExecuteNonQuery();
+                        connection.Close();
+                    }
+
+                    foreach (Variable variable in variables)
+                    {
+                        try
+                        {
+                            object variableID = SaveOrUpdateVariable(variable, connection);
+                        }
+                        catch(Exception ex)
+                        {
+                            _log.LogWrite(ex.Message);
+                            connection.Close();
+                        }
                     }
                 }
                 _log.LogWrite("UpdateVariables OK: " + variables.Count.ToString() + " variables.");
@@ -60,7 +56,7 @@ namespace GldasHarvester
             }
         }
 
-        private object SaveOrUpdateVariable(GldasVariable variable, SqlConnection connection)
+        private object SaveOrUpdateVariable(Variable variable, SqlConnection connection)
         {
             object variableIDResult = null;
             using (SqlCommand cmd = new SqlCommand("SELECT VariableID FROM Variables WHERE VariableCode = @code", connection))

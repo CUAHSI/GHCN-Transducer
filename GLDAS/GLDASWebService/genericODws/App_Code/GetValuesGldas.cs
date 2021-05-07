@@ -21,7 +21,7 @@ namespace WaterOneFlow.odws
     /// <summary>
     /// The web service utilities
     /// </summary>
-    public class GetValuesNEON
+    public class GetValuesGldas
     {
         public static string GetConnectionString()
         {
@@ -82,6 +82,7 @@ namespace WaterOneFlow.odws
                 endDateTime = DateTime.Parse(EndDate);
             }
 
+
             TimeSeriesResponseType resp = new TimeSeriesResponseType();
             //resp.timeSeries[0].values[0].
             resp.timeSeries = new TimeSeriesType[1];
@@ -92,7 +93,6 @@ namespace WaterOneFlow.odws
             resp.timeSeries[0].values = new TsValuesSingleVariableType[1];
 
             resp.timeSeries[0].values[0] = GetValuesFromDb(siteId, variableId, startDateTime, endDateTime);
-
             //set the query info
             resp.queryInfo = new QueryInfoType();
             resp.queryInfo.criteria = new QueryInfoTypeCriteria();
@@ -660,6 +660,42 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         }
 
 
+        public static List<double> GetLatLonFromDb(string siteCode)
+        {
+            string cnn = GetConnectionString();
+            string serviceCode = ConfigurationManager.AppSettings["network"];
+            List<double> latLonList = new List<double>();
+
+            if (siteCode.StartsWith(serviceCode))
+            {
+                siteCode = siteCode.Substring(serviceCode.Length + 1);
+            }
+
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sqlSite = "SELECT latitude, longitude FROM dbo.Sites WHERE SiteCode=@siteCode";
+
+                    cmd.CommandText = sqlSite;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@siteCode", siteCode));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    dr.Read();
+                    if (dr.HasRows)
+                    {
+                        latLonList.Add(Math.Round(Convert.ToDouble(dr["Latitude"]), 4));
+                        latLonList.Add(Math.Round(Convert.ToDouble(dr["Longitude"]), 4));
+                        
+                    }
+                }
+            }
+            return latLonList;
+        }
+
+
         public static SiteInfoType GetSiteFromDb2(string siteCode)
         {
             string cnn = GetConnectionString();
@@ -846,13 +882,14 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         {
             // Extract short codes:
             string neonSiteCode = siteCode.Split('_').First();
-            string productCode = variableCode.Split('_').First();
-            string attributeName = variableCode.Split('_').Last();
+            int methodID = 0;
 
-            string horVerIndexes = siteCode.Split('_').Last();
 
             // Variable Info (from DB)
             VariableInfoType v = GetVariableInfoFromDb(variableCode);
+
+            // lat and lon (from DB)
+            List<double> latLonList = GetLatLonFromDb(siteCode);
 
             // Method Info (from DB via productCode)
             string shortVariableCode = variableCode;
@@ -867,15 +904,15 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             {
                 using (SqlCommand cmd = new SqlCommand())
                 {
-                    string sql = @"SELECT MethodID, MethodCode, MethodDescription, MethodLink FROM dbo.Methods WHERE MethodCode = @MethodCode";
+                    string sql = @"SELECT MethodID, MethodCode, MethodDescription, MethodLink FROM dbo.Methods WHERE MethodID = @MethodID";
                     cmd.CommandText = sql;
                     cmd.Connection = conn;
-                    cmd.Parameters.Add(new SqlParameter("@MethodCode", productCode));
+                    cmd.Parameters.Add(new SqlParameter("@MethodID", methodID));
                     conn.Open();
                     SqlDataReader dr = cmd.ExecuteReader();
                     dr.Read();
 
-                    meth.methodCode = Convert.ToString(dr["MethodCode"]);
+                    meth.methodCode = Convert.ToString(dr["MethodID"]);
                     meth.methodID = Convert.ToInt32(dr["MethodID"]);
                     meth.methodIDSpecified = true;
                     meth.methodDescription = Convert.ToString(dr["MethodDescription"]);
@@ -889,196 +926,86 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             //var apiReader = new NeonApiReader();
             var neonSite = new NeonSite();
 
-            // fetching available data URL's
-            NeonProductInfo dataProduct = null;
+            // fetching the data URL
+            var baseDataUrl = "https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi";
 
-            // Retrieve a matching NEON products for the specified site and variable.
-            string url = "https://data.neonscience.org/api/v0/sites/" + neonSiteCode;
+            var dataUrl = String.Format("{0}?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:{1}&startDate={2}T00&endDate={3}T00&location=GEOM:POINT({4}, {5})&type=asc2",
+                baseDataUrl,
+                shortVariableCode,
+                startDateTime.ToString("yyyy-MM-dd"),
+                endDateTime.ToString("yyyy-MM-dd"),
+                latLonList[1].ToString(CultureInfo.InvariantCulture),
+                latLonList[0].ToString(CultureInfo.InvariantCulture));
+
+
             var client = new WebClient();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            using (var stream = client.OpenRead(url))
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    var jsonData = client.DownloadString(url);
-                    NeonSiteItem siteData = JsonConvert.DeserializeObject<NeonSiteItem>(jsonData);
-                    var dataProducts = siteData.data.dataProducts;
-
-                    foreach (var product in dataProducts)
-                    {
-                        if (product.dataProductCode == productCode)
-                        {
-                            dataProduct = product;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (dataProduct == null)
-            {
-                throw new ArgumentException(string.Format("Site {0} does not have data for variable {1}", siteCode, variableCode));
-            }
-
-            // Retrieve matching csv file URL's for the data product.
-            // The URL's are filtered by the startDate and endDate if startDate or endDate are specified.
-
-            var validMonths = new List<string>();
-            var firstMonth = new DateTime(startDateTime.Year, startDateTime.Month, 1);
-            var lastMonth = new DateTime(endDateTime.Year, endDateTime.Month, 1);
-
-            // TODO limit by selected months
-
-            var productDataUrls = new List<string>();
-            var dataFileUrls = new List<string>();
-
-            // Filter data URL's by user-specified <startDate, endDate range>
-            var dataMonthIndex = 0;
-            foreach (var dataMonth in dataProduct.availableMonths)
-            {
-                // for example 2017-11 becomes 2017-11-01
-                var dataMonthFirstDay = DateTime.Parse(dataMonth + "-01", CultureInfo.InvariantCulture);
-                if (dataMonthFirstDay >= firstMonth && dataMonthFirstDay <= lastMonth)
-                {
-                    string dataUrl = dataProduct.availableDataUrls[dataMonthIndex];
-                    productDataUrls.Add(dataUrl);
-                }
-                dataMonthIndex += 1;
-            }
-
-            // sort ascending
-            productDataUrls.Sort();
-
-            // Retrieve links to NEON CSV data files.
-            client = new WebClient();
-            foreach (var dataUrl in productDataUrls)
-            {
-                //limit dataUrl by month               
-                var neonFiles = new NeonFileCollection();
-                neonFiles.files = new List<NeonFile>();
-
-                try
-                {
-                    using (var stream = client.OpenRead(dataUrl))
-                    {
-                        using (var reader = new StreamReader(stream))
-                        {
-                            var jsonData = client.DownloadString(dataUrl);
-
-                            var neonFileData = JsonConvert.DeserializeObject<NeonFileData>(jsonData);
-                            neonFiles = neonFileData.data;
-                        }
-                    }
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine("Error retrieving NEONFiles from URL: " + dataUrl);
-                }
-
-                var usedNeonFiles = new NeonFileCollection();
-                var filesAddedForMonth = 0;
-                foreach (var neonFile in neonFiles.files)
-                {
-                    // always use the csv file containing basic and _30min.
-                    // FIXME use table name from the variables csv lookup table!
-                    // only use the csv file for the chosen sensor (hor.ver)
-                    
-                    if (neonFile.name.Contains("basic") && neonFile.name.Contains(horVerIndexes) && (neonFile.name.Contains("_30min") || neonFile.name.Contains("30_min")))
-                    {
-                        var validUrl = neonFile.url;
-                        dataFileUrls.Add(validUrl);
-                        filesAddedForMonth++;
-
-                        break; //to ensure that only one-file-per-month is added.
-                    }
-                }
-                if (filesAddedForMonth > 1)
-                {
-                    throw new ArgumentException("more than 1 NEON data file found for month at: " + dataUrl);
-                }
-            }
-
-            client = new WebClient();
-            var allDateTimes = new List<DateTime>();
-            var allDataValues = new List<decimal>();
-
-            // WaterML values list
+            var lineNo = 0;
             List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
-
-            foreach (var dataFileUrl in dataFileUrls)
+            try
             {
-                // retrieve CSV data files.
-                try
+                using (var stream = client.OpenRead(dataUrl))
                 {
-                    using (var stream = client.OpenRead(dataFileUrl))
+                    using (var reader = new StreamReader(stream))
                     {
-                        using (var reader = new StreamReader(stream))
+                        var firstLine = reader.ReadLine();
+                        lineNo++;
+
+                        
+                        var colHeadings = firstLine.Split(',');
+                        var reading = false;
+
+                        while (!reader.EndOfStream)
                         {
-                            var firstLine = reader.ReadLine();
-                            var colHeadings = firstLine.Split(',');
-                            var dateTimeIndex = -1;
-                            var valueIndex = -1;
-                            for (var i = 0; i < colHeadings.Length; i++)
+                            var line = reader.ReadLine();
+                            lineNo++;
+                            if (reading == false)
                             {
-                                if (colHeadings[i] == "startDateTime")
+                                if(line.StartsWith("Date&Time"))
                                 {
-                                    dateTimeIndex = i;
+                                    reading = true;
                                 }
-                                if (colHeadings[i] == attributeName)
-                                {
-                                    valueIndex = i;
-                                }
+                                continue;
                             }
 
-                            if (dateTimeIndex >= 0 && valueIndex >= 0)
+                            var values = line.Split('\t');              
+                            var dateTimeStr = values[0];
+                            var dataValueStr = values[1];
+
+                            var dt = DateTime.Parse(dateTimeStr.Replace("\"", ""), CultureInfo.InvariantCulture);
+
+                            // create a WaterML value object and add it to TimeSeries list.
+                            var newValue = new ValueSingleVariable();
+                            newValue.censorCode = "nc";
+                            newValue.dateTime = dt.ToUniversalTime();
+                            newValue.dateTimeUTC = dt.ToUniversalTime();
+                            newValue.dateTimeUTCSpecified = true;
+                            newValue.timeOffset = "0";
+                            newValue.methodCode = meth.methodCode;
+                            newValue.methodID = Convert.ToString(meth.methodID);
+                            newValue.sourceCode = "1";
+                            newValue.sourceID = "1";
+                            newValue.qualityControlLevelCode = "1";
+
+                            // assign dataValue
+                            if (dataValueStr == "")
                             {
-                                while (!reader.EndOfStream)
-                                {
-                                    var line = reader.ReadLine();
-                                    var values = line.Split(',');
-                                    var dateTimeStr = values[dateTimeIndex];
-                                    var dataValueStr = values[valueIndex];
-
-                                    var dt = DateTime.Parse(dateTimeStr.Replace("\"", ""), CultureInfo.InvariantCulture);
-
-                                    if (dt >= startDateTime && dt <= endDateTime)
-                                    {
-                                        // create a WaterML value object and add it to TimeSeries list.
-                                        var newValue = new ValueSingleVariable();
-                                        newValue.censorCode = "nc";
-                                        newValue.dateTime = dt.ToUniversalTime();
-                                        newValue.dateTimeUTC = dt.ToUniversalTime();
-                                        newValue.dateTimeUTCSpecified = true;
-                                        newValue.timeOffset = "0";
-                                        newValue.methodCode = meth.methodCode;
-                                        newValue.methodID = Convert.ToString(meth.methodID);
-                                        newValue.sourceCode = "1";
-                                        newValue.sourceID = "1";
-                                        newValue.qualityControlLevelCode = "1";
-
-                                        // assign dataValue
-                                        if (dataValueStr == "")
-                                        {
-                                            newValue.Value = Convert.ToDecimal(v.noDataValue);
-                                        }
-                                        else
-                                        {
-                                            newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
-                                        }
-                                        valuesList.Add(newValue);
-                                    }
-                                }
+                                newValue.Value = Convert.ToDecimal(v.noDataValue);
                             }
+                            else
+                            {
+                                newValue.Value = Decimal.Parse(dataValueStr, CultureInfo.InvariantCulture);
+                            }
+                            valuesList.Add(newValue);
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("error in URL: " + dataFileUrl);
-                }
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine("error in URL: " + dataUrl);
+            }
 
 
             int qcID = 1;
@@ -1097,7 +1024,6 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             s.method = new MethodType[1];
             s.method[0] = meth;
             s.method[0].methodIDSpecified = true;
-            int methodID = s.method[0].methodID;
 
 
             //time units
