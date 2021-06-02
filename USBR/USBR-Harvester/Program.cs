@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using static USBRHarvester.USBRLocationPoint;
 
 namespace USBRHarvester
 {
@@ -9,6 +10,7 @@ namespace USBRHarvester
         static void Main(string[] args)
         {
             var catalogTimeseriesItems = new List<USBRCatalogItem.Data>();
+            var catalogLocations = new List<USBRLocationPointRoot>();
             // Ensure correct TLS settings.
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -24,31 +26,49 @@ namespace USBRHarvester
             var catalogRecords = RISE_APIM.GetCatalogRecordsAsync().GetAwaiter().GetResult();
 
             logger.LogWrite(String.Format("Found {0} distinct USBRCatalogRecord.", catalogRecords.Count));
+            var parameters = RISE_APIM.GetParametersAsync().GetAwaiter().GetResult();
 
             if (catalogRecords != null) {
-                catalogTimeseriesItems = RISE_APIM.GetCatalogItemsAsync(catalogRecords).Result;
+
+                
+                var result = RISE_APIM.GetCatalogItemsAsync(catalogRecords).GetAwaiter().GetResult();
+                ////Get timeseries
+                catalogTimeseriesItems = result.Item1;
                 logger.LogWrite(String.Format("Found {0} distinct timeseries items", catalogTimeseriesItems.Count));
+                ////get locations
+                catalogLocations = result.Item2;
+                logger.LogWrite(String.Format("Found {0} distinct locations", catalogLocations.Count));
+                
             }
 
-            // (2) updating variables
-            //var varM = new VariableManager(logger);
-            //varM.UpdateVariables();
+            // (1) updating sites
+            var siteM = new SiteManager(logger);
+            siteM.UpdateSites_fast(catalogLocations);
+
+
+            // (2) updating variables mapping to parameters
+            if (parameters != null)
+            {
+                var varM = new VariableManager(logger);
+                varM.UpdateVariables(parameters);
+            }
+            
 
                 // (3) updating methods
                 //var methM = new MethodManager(logger);
                 //methM.UpdateMethods();
 
                 // (4) updating sources
-                //var srcM = new SourceManager(logger);
-                //srcM.UpdateSources();
+                var srcM = new SourceManager(logger);
+                srcM.UpdateSources();
 
                 // (4) updating qualifiers
                 //var qualM = new QualifierManager(logger);
                 // qualM.UpdateQualifiers();
 
                 // (5) updating the series catalog
-                //SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-                //seriesM.UpdateSeriesCatalog_fast();
+                SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
+                //seriesM.UpdateSeriesCatalog_fast(catalogTimeseriesItems);
         }
     }
 }

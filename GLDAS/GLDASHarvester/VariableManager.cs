@@ -110,6 +110,8 @@ namespace GldasHarvester
                     param.Direction = ParameterDirection.Output;
                     cmd.Parameters.Add(param);
 
+                    //var q = _log.LogSQL(cmd);
+
                     cmd.ExecuteNonQuery();
                     variableIDResult = cmd.Parameters["@VariableID"].Value;
                     connection.Close();

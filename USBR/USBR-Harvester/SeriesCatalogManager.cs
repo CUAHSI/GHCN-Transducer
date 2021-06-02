@@ -75,14 +75,14 @@ namespace USBRHarvester
                             string code = reader.GetString(1);
                             var variable = new Variable
                             {
-                                VariableID = reader.GetInt32(0),
-                                VariableCode = code,
-                                VariableName = reader.GetString(2),
-                                VariableUnitsID = reader.GetInt32(3),
-                                SampleMedium = reader.GetString(4),
-                                DataType = reader.GetString(5),
-                                TimeSupport = Convert.ToSingle(reader.GetValue(6)),
-                                TimeUnitsID = reader.GetInt32(7)
+                                //VariableID = reader.GetInt32(0),
+                                //VariableCode = code,
+                                //VariableName = reader.GetString(2),
+                                //VariableUnitsID = reader.GetInt32(3),
+                                //SampleMedium = reader.GetString(4),
+                                //DataType = reader.GetString(5),
+                                //TimeSupport = Convert.ToSingle(reader.GetValue(6)),
+                                //TimeUnitsID = reader.GetInt32(7)
                  
                             };
                             lookup.Add(code, variable);
@@ -177,17 +177,17 @@ namespace USBRHarvester
         }
 
 
-        //public void UpdateSeriesCatalog_fast()
+        //public void UpdateSeriesCatalog_fast(List<USBRCatalogItem.Data> catalogTimeseriesItems)
         //{
         //    var siteLookup = GetSiteLookup();
         //    var variableLookup = getVariableLookup();
         //    var methodLookup = getMethodLookup();
         //    var source = getSource();
 
-        //    var wsClient = new AwdbClient(_log);
-        //    List<Series> seriesList = wsClient.GetAllSeries();
             
-        //    Console.WriteLine("updating series catalog for " + seriesList.Count.ToString() + " series ...");
+           
+
+        //    Console.WriteLine("updating series catalog for " + catalogTimeseriesItems.Count.ToString() + " series ...");
 
         //    string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
         //    using (SqlConnection connection = new SqlConnection(connString))
@@ -215,7 +215,7 @@ namespace USBRHarvester
         //        }
 
         //        int batchSize = 500;
-        //        int numBatches = (seriesList.Count / batchSize) + 1;
+        //        int numBatches = (catalogTimeseriesItems.Count / batchSize) + 1;
         //        long seriesID = 0L;
 
         //        try
@@ -258,17 +258,17 @@ namespace USBRHarvester
 
         //                int batchStart = b * batchSize;
         //                int batchEnd = batchStart + batchSize;
-        //                if (batchEnd >= seriesList.Count)
+        //                if (batchEnd >= catalogTimeseriesItems.Count)
         //                {
-        //                    batchEnd = seriesList.Count;
+        //                    batchEnd = catalogTimeseriesItems.Count;
         //                }
         //                for (int i = batchStart; i < batchEnd; i++)
         //                {
         //                    try
         //                    {
-        //                        var variableCode = seriesList[i].VariableCode;
-        //                        var siteCode = seriesList[i].SiteCode;
-        //                        var methodCode = seriesList[i].MethodCode;
+        //                        var variableCode = catalogTimeseriesItems[i].attributes..relationships.parameter.data.id;
+        //                        var siteCode = catalogTimeseriesItems[i];
+        //                        var methodCode = catalogTimeseriesItems[i].MethodCode;
 
         //                        // only include series for variables which are already in the Variables table
         //                        // for example "DIAG" series are excluded because the "DIAG" variable has no CUAHSI equivalent ...
@@ -314,7 +314,7 @@ namespace USBRHarvester
         //                            bulkTable.Rows.Add(row);
         //                        }
         //                    }
-        //                    catch(Exception ex)
+        //                    catch (Exception ex)
         //                    {
         //                        Console.WriteLine(ex.Message);
         //                    }
@@ -329,7 +329,7 @@ namespace USBRHarvester
         //            Console.WriteLine("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
         //            _log.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
         //        }
-        //        catch(Exception ex)
+        //        catch (Exception ex)
         //        {
         //            _log.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
         //        }

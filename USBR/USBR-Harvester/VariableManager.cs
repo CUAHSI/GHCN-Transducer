@@ -9,6 +9,7 @@ using System.Globalization;
 using OfficeOpenXml;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace USBRHarvester
 {
@@ -24,98 +25,98 @@ namespace USBRHarvester
             _log = log;
         }
 
-        public void UpdateVariables()
+        public void UpdateVariables(List<USBRParameter.Data> parameters)
         {
-            // reading the variables from the EXCEL file
-            // During "build solution" the EXCEL file is moved to bin/Debug or bin/Release
-            string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string variablesFile = Path.Combine(executableLocation, "snotel_variables.xlsx");
-
-            // in previous version variables were read from the Github URL
-            //string variablesUrl = @"http://raw.githubusercontent.com/CUAHSI/GHCN-Transducer/master/SNOTEL/USBRHarvester/settings/snotel_variables.xlsx";
-
             var variables = new List<Variable>();
+            int unitId;
+            string unitName;
+            //get Units from ODM
+            var odmUnits = GetODMUnits();           
 
-            _log.LogWrite("Read Variables from File " + variablesFile);
-            int rowNum = 0;
-            object timeUnitsObj = "timeUnitsObj";
+            //Get VariableCV from ODM
+            var odmVariableCV = GetODMVariableCV();
+
+       
+            
             try
             {
-                var variablesFileInfo = new FileInfo(variablesFile);
-                using(var package = new ExcelPackage(variablesFileInfo))
+                foreach (var p in parameters)
                 {
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
-                    var start = worksheet.Dimension.Start;
-                    var end = worksheet.Dimension.End;
-                    for (int row = start.Row; row <= end.Row; row++)
-                    { // Row by row..
-                        rowNum++;
-                        string code = Convert.ToString(worksheet.Cells[row, 1].Value);
-                        if (code.EndsWith("in"))
-                        {
-                            code = code.Substring(0, code.Length - 2);
-                        }
-                        if (code == "VariableCode")
-                        {
-                            continue;
-                        }
-                        string name = Convert.ToString(worksheet.Cells[row, 2].Value);
-                        if (name == "x")
-                        {
-                            continue;
-                        }
-                        string sampleMedium = Convert.ToString(worksheet.Cells[row, 3].Value);
-                        string dataType = Convert.ToString(worksheet.Cells[row, 4].Value);
-                        string unitsName = Convert.ToString(worksheet.Cells[row, 5].Value);
-                        int unitsID = Convert.ToInt32(worksheet.Cells[row, 6].Value);
-                        string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
-                        timeUnitsObj = worksheet.Cells[row, 8].Value;
-                        int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
-                        float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
-
-                        Variable v = new Variable
-                        {
-                            VariableCode = code,
-                            VariableName = name,
-                            VariableUnitsID = unitsID,
-                            VariableUnitsName = unitsName,
-                            DataType = dataType,
-                            SampleMedium = sampleMedium,
-                            TimeUnitsID = timeUnitsID,
-                            TimeSupport = timeSupport
-                        };
-                        variables.Add(v);
-                    }
-                }
-
-                _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
-                string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-
-                using (SqlConnection connection = new SqlConnection(connString))
-                {
-                    // to remove any old ("unused") variables
-                    DeleteOldVariables(connection);
-
-                    foreach (Variable variable in variables)
+                    //look up and map Variableunits
+                    string unitsAbbr = (getUnitSynonym(p.attributes.parameterUnit) != null) ? getUnitSynonym(p.attributes.parameterUnit) : p.attributes.parameterUnit;
+                    //_log.LogWrite(String.Format(p.attributes.parameterName + "||" + p.attributes.parameterDescription));
+                    
+                    //int unitsID = null;//  (int) .FirstOrDefault(x => x.UnitsAbbreviation == unitsAbbr).UnitsID;
+                    try
                     {
-                        try
-                        {
-                            object variableID = SaveOrUpdateVariable(variable, connection);
-                        }
-                        catch(Exception ex)
-                        {
-                            _log.LogWrite("error updating variable: " + variable.VariableCode + " " + ex.Message);
-                        }
-                        
+                         unitId = (from u in odmUnits where u.UnitsAbbreviation.ToLower() == unitsAbbr.ToLower() select u.UnitsID).First();
+                         unitName = (from u in odmUnits where u.UnitsAbbreviation.ToLower() == unitsAbbr.ToLower() select u.UnitsName).First();
                     }
+                    catch (Exception ex)
+                    {
+                       // _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
+                        continue;
+                    }
+                    //Lookup up and map variablenames
+                    string variableName = (getVariablenameSynonym(p.attributes.parameterName) != null) ? getVariablenameSynonym(p.attributes.parameterName) : p.attributes.parameterName;
+
+                    try
+                    {
+                        var odmvariableName = (from item in odmVariableCV where item.Key.ToLower() == variableName.ToLower() select item.Key).First();
+                        _log.LogWrite(String.Format("SUCCESS:  match was found: " + p.attributes.parameterName));
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterName + ", " + p.attributes.parameterDescription));
+                        continue;
+                    }
+                    //string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
+                    //timeUnitsObj = worksheet.Cells[row, 8].Value;
+                    //int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
+                    //float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
+
+                    Variable v = new Variable
+                    {
+                        VariableCode = p.id,
+                        VariableName = variableName,
+                        VariableUnitsID = unitId,
+                        VariableUnitsName = unitName,
+                    //    DataType = dataType,
+                    //    SampleMedium = sampleMedium,
+                    //    TimeUnitsID = timeUnitsID,
+                    //    TimeSupport = timeSupport
+                    };
+                    variables.Add(v);
                 }
-                _log.LogWrite("UpdateVariables OK: " + variables.Count.ToString() + " variables.");
 
             }
             catch (Exception ex)
             {
-                _log.LogWrite("UpdateVariables ERROR on row: " + timeUnitsObj.ToString() + " "  + rowNum + " " + ex.Message);
+
             }
+
+            _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                // to remove any old ("unused") variables
+                DeleteOldVariables(connection);
+
+                foreach (Variable variable in variables)
+                {
+                    try
+                    {
+                        object variableID = SaveOrUpdateVariable(variable, connection);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWrite("error updating variable: " + variable.VariableCode + " " + ex.Message);
+                    }
+
+                }
+            }
+            _log.LogWrite("UpdateVariables OK: " + variables.Count.ToString() + " variables.");
 
         }
 
@@ -201,18 +202,18 @@ namespace USBRHarvester
             object unitsIDResult = null;
 
             // getting the units ID by units name
-            using (SqlCommand cmd = new SqlCommand("SELECT UnitsID FROM Units WHERE UnitsName = @name", connection))
-            {
-                cmd.Parameters.Add(new SqlParameter("@name", variable.VariableUnitsName));
-                connection.Open();
-                unitsIDResult = cmd.ExecuteScalar();
-                connection.Close();
-            }
+            //using (SqlCommand cmd = new SqlCommand("SELECT UnitsID FROM Units WHERE UnitsName = @name", connection))
+            //{
+            //    cmd.Parameters.Add(new SqlParameter("@name", variable.VariableUnitsName));
+            //    connection.Open();
+            //    unitsIDResult = cmd.ExecuteScalar();
+            //    connection.Close();
+            //}
 
-            if (unitsIDResult == null)
-            {
-                throw new ArgumentNullException("Units " + variable.VariableUnitsName + " do not exist in the ODM database!");
-            }
+            //if (unitsIDResult == null)
+            //{
+            //    throw new ArgumentNullException("Units " + variable.VariableUnitsName + " do not exist in the ODM database!");
+            //}
 
 
             using (SqlCommand cmd = new SqlCommand("SELECT VariableID FROM Variables WHERE VariableCode = @code", connection))
@@ -248,10 +249,10 @@ namespace USBRHarvester
                 using (SqlCommand cmd = new SqlCommand(sql, connection))
                 {
                     connection.Open();
-                    cmd.Parameters.Add(new SqlParameter("@VariableCode", variable.VariableCode));
+                    cmd.Parameters.Add(new SqlParameter("@VariableCode", variable.VariableCode.Split('/').Last()));
                     cmd.Parameters.Add(new SqlParameter("@VariableName", variable.VariableName));
                     cmd.Parameters.Add(new SqlParameter("@Speciation", variable.Speciation));
-                    cmd.Parameters.Add(new SqlParameter("@VariableUnitsID", unitsIDResult));
+                    cmd.Parameters.Add(new SqlParameter("@VariableUnitsID", variable.VariableUnitsID));
                     cmd.Parameters.Add(new SqlParameter("@SampleMedium", variable.SampleMedium));
                     cmd.Parameters.Add(new SqlParameter("@ValueType", variable.ValueType));
                     cmd.Parameters.Add(new SqlParameter("@IsRegular", variable.IsRegular));
@@ -264,8 +265,13 @@ namespace USBRHarvester
                     // to get the inserted variable id
                     SqlParameter param = new SqlParameter("@VariableID", SqlDbType.Int);
                     param.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(param);
 
+                   
+
+                    cmd.Parameters.Add(param);
+                    
+                    //getcommand text
+                    var c = ToReadableString(cmd);
                     cmd.ExecuteNonQuery();
                     variableIDResult = cmd.Parameters["@VariableID"].Value;
                     connection.Close();
@@ -273,5 +279,109 @@ namespace USBRHarvester
             }
             return variableIDResult;
         }
+
+        public List<Units> GetODMUnits()
+        {
+            var odmUnitList = new List<Units>();
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+
+            using (SqlConnection cn = new SqlConnection(connString))
+            {
+                cn.Open();
+                SqlCommand sqlCommand = new SqlCommand("SELECT * FROM units", cn);
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                while (reader.Read())
+                {
+                    var u = new Units();
+                    u.UnitsID = (int)reader["UnitsID"];
+                    u.UnitsName = (string)reader["UnitsName"];
+                    u.UnitsType = (string)reader["UnitsType"];
+                    u.UnitsAbbreviation = (string)reader["UnitsAbbreviation"];
+                    odmUnitList.Add(u);
+                }
+                cn.Close();
+            }
+
+            return odmUnitList;
+        }
+
+        public Dictionary<String, String> GetODMVariableCV()
+        {
+            var ODMVariableCV = new Dictionary<String, String>();//Name, description
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+
+            using (SqlConnection cn = new SqlConnection(connString))
+            {
+                cn.Open();
+                SqlCommand sqlCommand = new SqlCommand("SELECT * FROM VariableNameCV", cn);
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                while (reader.Read())
+                {                    
+                    ODMVariableCV.Add( (string)reader["Term"], (string)reader["Definition"]);                    
+                }
+                cn.Close();
+            }
+
+            return ODMVariableCV;
+        }
+
+        public string getUnitSynonym(string term)
+        {
+            string syn = String.Empty;
+            //adding synanyms for cv entries missing
+            var unitAbbreviationSynonyms = new Dictionary<String, String>();//usbr code, ODM term
+            unitAbbreviationSynonyms.Add("af", "ac ft");
+            unitAbbreviationSynonyms.Add("Feet per Acre", "ac ft/mo");
+            unitAbbreviationSynonyms.Add("pulses/minute", "pulses/min");
+            unitAbbreviationSynonyms.Add("Pascal", "pa");
+            unitAbbreviationSynonyms.Add("m3/sec", "m^3/s");
+            unitAbbreviationSynonyms.Add("count", "#");
+            unitAbbreviationSynonyms.Add("count/m3", "#/m^3");
+            unitAbbreviationSynonyms.Add("inches", "in");
+            unitAbbreviationSynonyms.Add("acres", "ac"); 
+            unitAbbreviationSynonyms.Add("kwH", "kW hr");
+            unitAbbreviationSynonyms.Add("kw", "kW");
+            //unitAbbreviationSynonyms.Add("mwh", "kW");
+
+
+            //syn = unitAbbreviationSynonyms.Where (v => v.Key == term).FirstOrDefault().ToString();
+            unitAbbreviationSynonyms.TryGetValue(term, out syn);
+            return syn;
+
+        }
+
+        public string getVariablenameSynonym(string term)
+        {
+            string syn = String.Empty;
+            //adding synanyms for cv entries missing
+            var VariablenameSynonym = new Dictionary<String, String>();//usbr code, ODM term
+            VariablenameSynonym.Add("af", "ac ft");
+
+            VariablenameSynonym.TryGetValue(term, out syn);
+            return syn;
+
+        }
+
+        public string ToReadableString(IDbCommand command)
+        {
+            StringBuilder builder = new StringBuilder();
+            if (command.CommandType == CommandType.StoredProcedure)
+                builder.AppendLine("Stored procedure: " + command.CommandText);
+            else
+                builder.AppendLine("Sql command: " + command.CommandText);
+            if (command.Parameters.Count > 0)
+                builder.AppendLine("With the following parameters.");
+            foreach (IDataParameter param in command.Parameters)
+            {
+                builder.AppendFormat(
+                    "     Paramater {0}: {1}",
+                    param.ParameterName,
+                    (param.Value == null ?
+                    "NULL" : param.Value.ToString())).AppendLine();
+            }
+            return builder.ToString();
+        }
+
+
     }
 }

@@ -105,6 +105,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="app.manifest" />
+    <None Include="ConnectionStrings.config" />
     <None Include="packages.config" />
     <None Include="settings\gldas_points_025d.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

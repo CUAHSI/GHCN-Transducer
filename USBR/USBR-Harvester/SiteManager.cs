@@ -10,6 +10,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
+using static USBRHarvester.USBRLocationPoint;
 
 namespace USBRHarvester
 {
@@ -106,114 +107,113 @@ namespace USBRHarvester
             }
         }
 
-        //public void UpdateSites_fast()
-        //{
-        //    var client = new AwdbClient(_log);
-        //    List<Site> siteList = client.GetStations();
+        public void UpdateSites_fast(List<USBRLocationPointRoot> locations)
+        {
+            
+            _log.LogWrite("UpdateSites for " + locations.Count.ToString() + " sites ...");
 
-        //    _log.LogWrite("UpdateSites for " + siteList.Count.ToString() + " sites ...");
+            try
+            {
 
-        //    try
-        //    {
+                string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // delete old entries from series catalog (necessary for deleting entries from Sites table)
+                    string sqlDeleteSeries = "TRUNCATE TABLE dbo.SeriesCatalog";
+                    using (SqlCommand cmd = new SqlCommand(sqlDeleteSeries, connection))
+                    {
+                        try
+                        {
+                            connection.Open();
+                            cmd.ExecuteNonQuery();
+                            _log.LogWrite("deleted old series from SeriesCatalog");
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogWrite("error deleting old SeriesCatalog table: " + ex.Message);
+                            return;
+                        }
+                        finally
+                        {
+                            connection.Close();
+                        }
+                    }
 
-        //        string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-        //        using (SqlConnection connection = new SqlConnection(connString))
-        //        {
-        //            // delete old entries from series catalog (necessary for deleting entries from Sites table)
-        //            string sqlDeleteSeries = "TRUNCATE TABLE dbo.SeriesCatalog";
-        //            using (SqlCommand cmd = new SqlCommand(sqlDeleteSeries, connection))
-        //            {
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    cmd.ExecuteNonQuery();
-        //                    _log.LogWrite("deleted old series from SeriesCatalog");
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    _log.LogWrite("error deleting old SeriesCatalog table: " + ex.Message);
-        //                    return;
-        //                }
-        //                finally
-        //                {
-        //                    connection.Close();
-        //                }
-        //            }
+                    // delete old entries from "sites" table
+                    // using batch delete 
+                    DeleteOldSites(locations.Count, connection);
 
-        //            // delete old entries from "sites" table
-        //            // using batch delete 
-        //            DeleteOldSites(siteList.Count, connection);
-                    
 
-        //            // to be adjusted
-        //            int batchSize = 500;
-        //            long siteID = 0L;
+                    // to be adjusted
+                    int batchSize = 500;
+                    long siteID = 0L;
 
-        //            int numBatches = (siteList.Count / batchSize) + 1;
-        //            for (int b = 0; b < numBatches; b++)
-        //            {
-        //                // prepare for bulk insert
-        //                DataTable bulkTable = new DataTable();
+                    int numBatches = (locations.Count / batchSize) + 1;
+                    for (int b = 0; b < numBatches; b++)
+                    {
+                        // prepare for bulk insert
+                        DataTable bulkTable = new DataTable();
 
-        //                bulkTable.Columns.Add("SiteID", typeof(long));
-        //                bulkTable.Columns.Add("SiteCode", typeof(string));
-        //                bulkTable.Columns.Add("SiteName", typeof(string));
-        //                bulkTable.Columns.Add("Latitude", typeof(float));
-        //                bulkTable.Columns.Add("Longitude", typeof(float));
-        //                bulkTable.Columns.Add("LatLongDatumID", typeof(int));
-        //                bulkTable.Columns.Add("Elevation_m", typeof(float));
-        //                bulkTable.Columns.Add("VerticalDatum", typeof(string));
-        //                bulkTable.Columns.Add("LocalX", typeof(float));
-        //                bulkTable.Columns.Add("LocalY", typeof(float));
-        //                bulkTable.Columns.Add("LocalProjectionID", typeof(int));
-        //                bulkTable.Columns.Add("PosAccuracy_m", typeof(float));
-        //                bulkTable.Columns.Add("State", typeof(string));
-        //                bulkTable.Columns.Add("County", typeof(string));
-        //                bulkTable.Columns.Add("Comments", typeof(string));
-        //                bulkTable.Columns.Add("SiteType", typeof(string));
+                        bulkTable.Columns.Add("SiteID", typeof(long));
+                        bulkTable.Columns.Add("SiteCode", typeof(string));
+                        bulkTable.Columns.Add("SiteName", typeof(string));
+                        bulkTable.Columns.Add("Latitude", typeof(decimal));
+                        bulkTable.Columns.Add("Longitude", typeof(decimal));
+                        bulkTable.Columns.Add("LatLongDatumID", typeof(int));
+                        bulkTable.Columns.Add("Elevation_m", typeof(float));
+                        bulkTable.Columns.Add("VerticalDatum", typeof(string));
+                        bulkTable.Columns.Add("LocalX", typeof(float));
+                        bulkTable.Columns.Add("LocalY", typeof(float));
+                        bulkTable.Columns.Add("LocalProjectionID", typeof(int));
+                        bulkTable.Columns.Add("PosAccuracy_m", typeof(decimal));
+                        bulkTable.Columns.Add("State", typeof(string));
+                        bulkTable.Columns.Add("County", typeof(string));
+                        bulkTable.Columns.Add("Comments", typeof(string));
+                        bulkTable.Columns.Add("SiteType", typeof(string));
 
-        //                int batchStart = b * batchSize;
-        //                int batchEnd = batchStart + batchSize;
-        //                if (batchEnd >= siteList.Count)
-        //                {
-        //                    batchEnd = siteList.Count;
-        //                }
-        //                for (int i = batchStart; i < batchEnd; i++)
-        //                {
-        //                    siteID = siteID + 1;
-        //                    var row = bulkTable.NewRow();
-        //                    row["SiteID"] = siteID;
-        //                    row["SiteCode"] = siteList[i].SiteCode;
-        //                    row["SiteName"] = siteList[i].SiteName;
-        //                    row["Latitude"] = siteList[i].Latitude;
-        //                    row["Longitude"] = siteList[i].Longitude;
-        //                    row["LatLongDatumID"] = 3; // WGS1984
-        //                    row["Elevation_m"] = siteList[i].Elevation;
-        //                    row["VerticalDatum"] = "Unknown";
-        //                    row["LocalX"] = 0.0f;
-        //                    row["LocalY"] = 0.0f;
-        //                    row["LocalProjectionID"] = DBNull.Value;
-        //                    row["PosAccuracy_m"] = 0.0f;
-        //                    row["State"] = siteList[i].State;
-        //                    row["County"] = siteList[i].County;
-        //                    row["Comments"] = siteList[i].Comments;
-        //                    row["SiteType"] = "Soil hole"; // from CUAHSI SiteTypeCV controlled vocabulary
-        //                    bulkTable.Rows.Add(row);
-        //                }
-        //                SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
-        //                bulkCopy.DestinationTableName = "dbo.Sites";
-        //                connection.Open();
-        //                bulkCopy.WriteToServer(bulkTable);
-        //                connection.Close();
-        //                Console.WriteLine("Sites inserted row " + batchEnd.ToString());
-        //            }
-        //        }
-        //        _log.LogWrite("UpdateSites: " + siteList.Count.ToString() + " sites updated.");
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        _log.LogWrite("UpdateSites ERROR: " + ex.Message);
-        //    }
-        //}
+                        int batchStart = b * batchSize;
+                        int batchEnd = batchStart + batchSize;
+                        if (batchEnd >= locations.Count)
+                        {
+                            batchEnd = locations.Count;
+                        }
+                        for (int i = batchStart; i < batchEnd; i++)
+                        {
+                            siteID = siteID + 1;
+                            var row = bulkTable.NewRow();
+                            row["SiteID"] = siteID;
+                            row["SiteCode"] = locations[i].data.id.Split('/').Last();
+                            row["SiteName"] = locations[i].data.attributes.locationName;
+                            row["Latitude"] = Math.Round(locations[i].data.attributes.locationCoordinates.coordinates.Last(), 5);
+                            row["Longitude"] = Math.Round(locations[i].data.attributes.locationCoordinates.coordinates.First(),5);
+                            row["LatLongDatumID"] = 343; // WGS1984
+                            var elev = (locations[i].data.attributes.elevation != null) ? locations[i].data.attributes.elevation : DBNull.Value.ToString();//needed as some returns have empty elevation fields
+                            if (elev == string.Empty) { row["Elevation_m"] = DBNull.Value; } else { row["Elevation_m"] = elev; };
+                            row["VerticalDatum"] = "Unknown"; //locations[i].data.attributes.verticalDatum._id;
+                            row["LocalX"] = DBNull.Value;
+                            row["LocalY"] = DBNull.Value;
+                            row["LocalProjectionID"] = 340; //unknown;
+                            row["PosAccuracy_m"] = DBNull.Value;
+                            row["State"] = locations[i].data.relationships.states.data[0].id.Split('/').Last();
+                            row["County"] = String.Empty;
+                            row["Comments"] = String.Empty;
+                            row["SiteType"] = "Unknown"; //TODO lookup from CUAHSI SiteTypeCV controlled vocabulary
+                            bulkTable.Rows.Add(row);
+                        }
+                        SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
+                        bulkCopy.DestinationTableName = "dbo.Sites";
+                        connection.Open();
+                        bulkCopy.WriteToServer(bulkTable);
+                        connection.Close();
+                        Console.WriteLine("Sites inserted row " + batchEnd.ToString());
+                    }
+                }
+                _log.LogWrite("UpdateSites: " + locations.Count.ToString() + " sites updated.");
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("UpdateSites ERROR: " + ex.Message);
+            }
+        }
     }
 }

@@ -221,3 +221,6 @@ logs/
 /GHCN/log-data/query-log.txt202004
 /CoCoRaHS/log-data
 /GHCN/log-data
+
+#publish profiles
+website.publishproj

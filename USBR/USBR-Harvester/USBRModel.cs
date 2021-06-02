@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace USBRHarvester
 {
-    public class USBRParameters
+    public class USBRParameter
     { 
         // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
         public class Links
@@ -45,7 +45,7 @@ namespace USBRHarvester
             public Attributes attributes { get; set; }
         }
 
-        public class Parameter
+        public class USBRParameterRoot
         {
             public Links links { get; set; }
             public Meta meta { get; set; }

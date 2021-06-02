@@ -25,18 +25,18 @@ namespace USBRHarvester
                 int metadataID = SaveOrUpdateMetadata();
                 Source source = new Source
                 {
-                    Organization = "United States Department of Agriculture Natural Resources Conservation Service",
-                    SourceDescription = "Snow Telemetry (SNOTEL)",
-                    SourceLink = "www.wcc.nrcs.usda.gov/about/mon_automate.html",
-                    ContactName = "Deb Harms",
-                    Phone = "503-414-3050",
-                    Email = "deb.harms@por.usda.gov",
+                    Organization = "United States Bureau of Reclamation",
+                    SourceDescription = "Reclamation Information Sharing Environment (RISE)",
+                    SourceLink = "https://data.usbr.gov/about",
+                    ContactName = "",
+                    Phone = "",
+                    Email = "data@usbr.gov",
                     Address = "",
                     City = "",
                     State = "",
                     ZipCode = "",
                     Citation = @"USDA NRCS Snow Telemetry (SNOTEL) Network",
-                    SourceCode = "NRCS-WCC-SNOTEL",
+                    SourceCode = "USBR-RISE",
                     MetadataID = metadataID
                 };
 
@@ -183,25 +183,19 @@ namespace USBRHarvester
             object metadataIDResult;
             var metadata = new ISOMetadata
             {
-                TopicCategory = "climatology/meteorology/atmosphere",
-                Title = "Snow Telemetry (SNOTEL) Network",
-                Abstract = @"The SNOTEL network is composed of over 800 automated data collection sites located in remote, 
-high-elevation mountain watersheds in the western U.S. They are used to monitor snowpack, precipitation, temperature, and 
-other climatic conditions. The data collected at SNOTEL sites are transmitted to a central database, 
-called the Water and Climate Information System, where they are used for water supply forecasting, maps, and reports.
-SNOTEL sites are designed to operate unattended and without maintenance for a year or more. A typical SNOTEL remote site 
-consists of measuring devices and sensors, an equipment shelter for the radio telemetry equipment, and an antenna that 
-also supports the solar panels used to keep batteries charged. A standard sensor configuration includes a snow pillow, 
-a storage precipitation gage, and a temperature sensor. The snow pillow measures how much water is in the snowpack by 
-weighing the snow with a pressure transducer. Devices in the shelter convert the weight of the snow into the snow's 
-water equivalent -- that is, the actual amount of water in a given volume of snow. SNOTEL stations also collect data on 
-snow depth, all-season precipitation accumulation, and air temperature with daily maximums, minimums, and averages. 
-Many enhanced SNOTEL sites are equipped to take soil moisture and soil temperature measurements at various depths, 
-as well as solar radiation, wind speed, and relative humidity. The configuration at each site is tailored to the physical 
-conditions, the climate, and the specific requirements of the data users.
-The data collected at SNOTEL sites are generally reported multiple times per day, with some sensors reporting hourly.",
-                ProfileVersion = "19115-2",
-                MetadataLink = "catalog.data.gov/dataset/snowpack-telemetry-network-snotel"
+                TopicCategory = "",
+                Title = "Reclamation Information Sharing Environment (RISE)",
+                Abstract = @"The Reclamation Information Sharing Environment (RISE) is a new Reclamation-wide system for viewing, accessing, and downloading Reclamation's data via a centralized data portal.
+With RISE you can:
+- Access a range of data types (geospatial, time series, and other) from multiple data domains (e.g. water, hydropower, biological, water quality, and infrastructure/assets).
+- Locate data via the map.
+- Search the catalog for data.
+- Query and download observed and modeled data.
+- Plot and map data.
+- Get machine readable time series datasets to use as input for your models, applications and analyses via manual downloads or automated data exchange via web service.
+RISE helps fulfill Reclamation’s responsibilities under the OPEN Government Data Act to make data assets available in open and machine-readable formats. RISE is the replacement for the Reclamation Water Information System (RWIS). RWIS will be retired after a period of concurrent operation with RISE.",
+                ProfileVersion = "",
+                MetadataLink = "https://data.usbr.gov/catalog"
             };
 
             string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;

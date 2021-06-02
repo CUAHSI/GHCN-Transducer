@@ -13,17 +13,17 @@ namespace USBRHarvester
         public string VariableName { get; set; }
         public string VariableUnitsName { get; set; }
         public int VariableUnitsID { get; set; }
-        public string SampleMedium { get; set; }             
-        public string DataType { get; set; }
-        public float TimeSupport { get; set; }
-        public int TimeUnitsID { get; set; }
+        public string SampleMedium { get { return ("Unknown"); } }
+        public string DataType { get { return ("Unknown"); } }
+        public float TimeSupport { get { return 0; } }
+        public int TimeUnitsID { get { return 104; } } //arbitrarily set to 104 = day as there is no n/a
 
         public string ValueType { get { return "Field Observation"; } }
-        public bool IsRegular { get { return true; } }
+        public bool IsRegular { get { return false; } }
 
         public string Speciation { get { return ("Not Applicable"); } }
-        public string GeneralCategory { get { return "Soil"; } }
-        public double NoDataValue { get { return -9999.0; } }
+        public string GeneralCategory { get { return ("Unknown"); } }
+        public double NoDataValue { get { return -9999; } }
 
     }
 }

@@ -67,6 +67,7 @@
     <Compile Include="Series.cs" />
     <Compile Include="Site.cs" />
     <Compile Include="Source.cs" />
+    <Compile Include="Units.cs" />
     <Compile Include="USBRModel.cs" />
     <Compile Include="Variable.cs" />
     <Compile Include="LogWriter.cs" />
