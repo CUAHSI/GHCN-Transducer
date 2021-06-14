@@ -183,7 +183,7 @@ namespace USBRHarvester
             object metadataIDResult;
             var metadata = new ISOMetadata
             {
-                TopicCategory = "",
+                TopicCategory = "Unknown",
                 Title = "Reclamation Information Sharing Environment (RISE)",
                 Abstract = @"The Reclamation Information Sharing Environment (RISE) is a new Reclamation-wide system for viewing, accessing, and downloading Reclamation's data via a centralized data portal.
 With RISE you can:
@@ -194,7 +194,7 @@ With RISE you can:
 - Plot and map data.
 - Get machine readable time series datasets to use as input for your models, applications and analyses via manual downloads or automated data exchange via web service.
 RISE helps fulfill Reclamation’s responsibilities under the OPEN Government Data Act to make data assets available in open and machine-readable formats. RISE is the replacement for the Reclamation Water Information System (RWIS). RWIS will be retired after a period of concurrent operation with RISE.",
-                ProfileVersion = "",
+                ProfileVersion = "Unknown",
                 MetadataLink = "https://data.usbr.gov/catalog"
             };
 

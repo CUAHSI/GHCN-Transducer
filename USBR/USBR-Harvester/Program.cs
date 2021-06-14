@@ -11,6 +11,7 @@ namespace USBRHarvester
         {
             var catalogTimeseriesItems = new List<USBRCatalogItem.Data>();
             var catalogLocations = new List<USBRLocationPointRoot>();
+            var catalogItemsWithPointLocation = new List<ItemLocationParameter>();
             // Ensure correct TLS settings.
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -34,9 +35,10 @@ namespace USBRHarvester
                 var result = RISE_APIM.GetCatalogItemsAsync(catalogRecords).GetAwaiter().GetResult();
                 ////Get timeseries
                 catalogTimeseriesItems = result.Item1;
-                logger.LogWrite(String.Format("Found {0} distinct timeseries items", catalogTimeseriesItems.Count));
+                catalogItemsWithPointLocation = result.Item2;
+                logger.LogWrite(String.Format("Found {0} distinct timeseries items", catalogItemsWithPointLocation.Count));
                 ////get locations
-                catalogLocations = result.Item2;
+                catalogLocations = result.Item3;
                 logger.LogWrite(String.Format("Found {0} distinct locations", catalogLocations.Count));
                 
             }
@@ -68,7 +70,7 @@ namespace USBRHarvester
 
                 // (5) updating the series catalog
                 SeriesCatalogManager seriesM = new SeriesCatalogManager(logger);
-                //seriesM.UpdateSeriesCatalog_fast(catalogTimeseriesItems);
+                seriesM.UpdateSeriesCatalog_fast(catalogRecords, catalogTimeseriesItems, catalogItemsWithPointLocation);
         }
     }
 }

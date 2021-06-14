@@ -125,8 +125,8 @@ namespace USBRHarvester
             public string locationSourceCode { get; set; }
             public string parameterSourceCode { get; set; }
             public object modelNameSourceCode { get; set; }
-            public DateTime temporalStartDate { get; set; }
-            public DateTime temporalEndDate { get; set; }
+            public string temporalStartDate { get; set; }
+            public string temporalEndDate { get; set; }
             public object spatialShortDescription { get; set; }
             public object publicationAuthor { get; set; }
             public object publicationEditor { get; set; }
@@ -153,7 +153,7 @@ namespace USBRHarvester
             public object spatialOpenDataURL { get; set; }
             public object modelName { get; set; }
             public UpdateFrequency updateFrequency { get; set; }
-            public DateTime updateDate { get; set; }
+            public string updateDate { get; set; }
         }
 
         public class Data
@@ -482,6 +482,24 @@ namespace USBRHarvester
         public class USBRLocationPointRoot
         {
             public Data data { get; set; }
+        }
+    }
+
+    public class ItemLocationParameter
+    {
+        public string itemId { get; set; }
+        public string locationId { get; set; }
+        public string parameterId { get; set; }
+        public string temporalStartDate { get; set; }
+        public string temporalEndDate { get; set; }
+
+        public ItemLocationParameter(string ItemId, string LocationId, string ParameterId, string TemporalStartDate, string TemporalEndDate)
+        {
+             itemId = ItemId;
+             locationId = LocationId;
+             parameterId = ParameterId;
+             temporalStartDate = TemporalStartDate;
+             temporalEndDate = TemporalEndDate;
         }
     }
 }

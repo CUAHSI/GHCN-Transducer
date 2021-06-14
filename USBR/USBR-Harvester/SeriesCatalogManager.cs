@@ -75,15 +75,15 @@ namespace USBRHarvester
                             string code = reader.GetString(1);
                             var variable = new Variable
                             {
-                                //VariableID = reader.GetInt32(0),
-                                //VariableCode = code,
-                                //VariableName = reader.GetString(2),
-                                //VariableUnitsID = reader.GetInt32(3),
+                                VariableID = reader.GetInt32(0),
+                                VariableCode = code,
+                                VariableName = reader.GetString(2),
+                                VariableUnitsID = reader.GetInt32(3),
                                 //SampleMedium = reader.GetString(4),
                                 //DataType = reader.GetString(5),
                                 //TimeSupport = Convert.ToSingle(reader.GetValue(6)),
                                 //TimeUnitsID = reader.GetInt32(7)
-                 
+
                             };
                             lookup.Add(code, variable);
                         }
@@ -121,9 +121,9 @@ namespace USBRHarvester
                             {
                                 MethodID = reader.GetInt32(0),
                                 MethodDescription = reader.GetString(1),
-                                MethodLink = reader.GetString(2)
+                                MethodLink = (reader.IsDBNull(2) ? "" : reader.GetString(2))
                             };
-                            lookup.Add(m.MethodLink, m);
+                            lookup.Add(m.MethodID.ToString(), m);
                         }
                         reader.Close();
                         cmd.Connection.Close();
@@ -177,163 +177,200 @@ namespace USBRHarvester
         }
 
 
-        //public void UpdateSeriesCatalog_fast(List<USBRCatalogItem.Data> catalogTimeseriesItems)
-        //{
-        //    var siteLookup = GetSiteLookup();
-        //    var variableLookup = getVariableLookup();
-        //    var methodLookup = getMethodLookup();
-        //    var source = getSource();
+        public void UpdateSeriesCatalog_fast(List<USBRCatalogRecord.Data> catalogRecords, List<USBRCatalogItem.Data> catalogItemList, List<ItemLocationParameter> catalogItemsWithPointLocation)
+        { 
+            var siteLookup = GetSiteLookup();
+            var variableLookup = getVariableLookup();
+            var methodLookup = getMethodLookup();
+            var source = getSource();
 
-            
-           
 
-        //    Console.WriteLine("updating series catalog for " + catalogTimeseriesItems.Count.ToString() + " series ...");
 
-        //    string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
-        //    using (SqlConnection connection = new SqlConnection(connString))
-        //    {
-        //        // delete old entries from series catalog
-        //        string sql = "TRUNCATE TABLE dbo.SeriesCatalog";
-        //        using (SqlCommand cmd = new SqlCommand(sql, connection))
-        //        {
-        //            try
-        //            {
-        //                connection.Open();
-        //                cmd.ExecuteNonQuery();
-        //                Console.WriteLine("deleted old series from SeriesCatalog");
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine("error deleting old series from SeriesCatalog");
-        //                _log.LogWrite("UpdateSeriesCatalog: error deleting old series from SeriesCatalog");
-        //                return;
-        //            }
-        //            finally
-        //            {
-        //                connection.Close();
-        //            }
-        //        }
 
-        //        int batchSize = 500;
-        //        int numBatches = (catalogTimeseriesItems.Count / batchSize) + 1;
-        //        long seriesID = 0L;
+            Console.WriteLine("updating series catalog for " + catalogItemsWithPointLocation.Count.ToString() + " series ...");
 
-        //        try
-        //        {
-        //            for (int b = 0; b < numBatches; b++)
-        //            {
-        //                // prepare for bulk insert
-        //                DataTable bulkTable = new DataTable();
-        //                bulkTable.Columns.Add("SeriesID", typeof(long));
-        //                bulkTable.Columns.Add("SiteID", typeof(long));
-        //                bulkTable.Columns.Add("SiteCode", typeof(string));
-        //                bulkTable.Columns.Add("SiteName", typeof(string));
-        //                bulkTable.Columns.Add("SiteType", typeof(string));
-        //                bulkTable.Columns.Add("VariableID", typeof(int));
-        //                bulkTable.Columns.Add("VariableCode", typeof(string));
-        //                bulkTable.Columns.Add("VariableName", typeof(string));
-        //                bulkTable.Columns.Add("Speciation", typeof(string));
-        //                bulkTable.Columns.Add("VariableUnitsID", typeof(int));
-        //                bulkTable.Columns.Add("VariableUnitsName", typeof(string));
-        //                bulkTable.Columns.Add("SampleMedium", typeof(string));
-        //                bulkTable.Columns.Add("ValueType", typeof(string));
-        //                bulkTable.Columns.Add("TimeSupport", typeof(float));
-        //                bulkTable.Columns.Add("TimeUnitsID", typeof(int));
-        //                bulkTable.Columns.Add("TimeUnitsName", typeof(string));
-        //                bulkTable.Columns.Add("DataType", typeof(string));
-        //                bulkTable.Columns.Add("GeneralCategory", typeof(string));
-        //                bulkTable.Columns.Add("MethodID", typeof(int));
-        //                bulkTable.Columns.Add("MethodDescription", typeof(string));
-        //                bulkTable.Columns.Add("SourceID", typeof(int));
-        //                bulkTable.Columns.Add("Organization", typeof(string));
-        //                bulkTable.Columns.Add("SourceDescription", typeof(string));
-        //                bulkTable.Columns.Add("Citation", typeof(string));
-        //                bulkTable.Columns.Add("QualityControlLevelID", typeof(int));
-        //                bulkTable.Columns.Add("QualityControlLevelCode", typeof(string));
-        //                bulkTable.Columns.Add("BeginDateTime", typeof(DateTime));
-        //                bulkTable.Columns.Add("EndDateTime", typeof(DateTime));
-        //                bulkTable.Columns.Add("BeginDateTimeUTC", typeof(DateTime));
-        //                bulkTable.Columns.Add("EndDateTimeUTC", typeof(DateTime));
-        //                bulkTable.Columns.Add("ValueCount", typeof(int));
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                //delete old entries from series catalog
+                string sql = "TRUNCATE TABLE dbo.SeriesCatalog";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine("deleted old series from SeriesCatalog");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("error deleting old series from SeriesCatalog");
+                        _log.LogWrite("UpdateSeriesCatalog: error deleting old series from SeriesCatalog");
+                        return;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
 
-        //                int batchStart = b * batchSize;
-        //                int batchEnd = batchStart + batchSize;
-        //                if (batchEnd >= catalogTimeseriesItems.Count)
-        //                {
-        //                    batchEnd = catalogTimeseriesItems.Count;
-        //                }
-        //                for (int i = batchStart; i < batchEnd; i++)
-        //                {
-        //                    try
-        //                    {
-        //                        var variableCode = catalogTimeseriesItems[i].attributes..relationships.parameter.data.id;
-        //                        var siteCode = catalogTimeseriesItems[i];
-        //                        var methodCode = catalogTimeseriesItems[i].MethodCode;
+                int batchSize = 500;
+                int numBatches = (catalogItemList.Count / batchSize) + 1;
+                long seriesID = 0L;
 
-        //                        // only include series for variables which are already in the Variables table
-        //                        // for example "DIAG" series are excluded because the "DIAG" variable has no CUAHSI equivalent ...
-        //                        if (_variableLookup.ContainsKey(variableCode) && siteLookup.ContainsKey(siteCode) && methodLookup.ContainsKey(methodCode))
-        //                        {
-        //                            var row = bulkTable.NewRow();
-        //                            seriesID = seriesID + 1;
-        //                            Variable v = _variableLookup[variableCode];
-        //                            Site s = siteLookup[siteCode];
-        //                            MethodInfo m = methodLookup[methodCode];
+                try
+                {
+                    for (int b = 0; b < numBatches; b++)
+                    {
+                       //prepare for bulk insert
 
-        //                            row["SeriesID"] = seriesID;
-        //                            row["SiteID"] = s.SiteID;
-        //                            row["SiteCode"] = seriesList[i].SiteCode;
-        //                            row["SiteName"] = s.SiteName;
-        //                            row["SiteType"] = "Atmosphere";
-        //                            row["VariableID"] = v.VariableID;
-        //                            row["VariableCode"] = v.VariableCode;
-        //                            row["VariableName"] = v.VariableName;
-        //                            row["Speciation"] = v.Speciation;
-        //                            row["VariableUnitsID"] = v.VariableUnitsID;
-        //                            row["VariableUnitsName"] = v.VariableUnitsName;
-        //                            row["SampleMedium"] = v.SampleMedium;
-        //                            row["ValueType"] = v.ValueType;
-        //                            row["TimeSupport"] = v.TimeSupport;
-        //                            row["TimeUnitsID"] = v.TimeUnitsID;
-        //                            row["TimeUnitsName"] = "Day"; // todo get from DB !!!
-        //                            row["DataType"] = v.DataType;
-        //                            row["GeneralCategory"] = v.GeneralCategory;
-        //                            row["MethodID"] = m.MethodID;
-        //                            row["MethodDescription"] = m.MethodDescription;
-        //                            row["SourceID"] = source.SourceID;
-        //                            row["Organization"] = source.Organization;
-        //                            row["SourceDescription"] = source.SourceDescription;
-        //                            row["Citation"] = source.Citation;
-        //                            row["QualityControlLevelID"] = 1;
-        //                            row["QualityControlLevelCode"] = "1";
-        //                            row["BeginDateTime"] = seriesList[i].BeginDateTime;
-        //                            row["EndDateTime"] = seriesList[i].EndDateTime;
-        //                            row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
-        //                            row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
-        //                            row["ValueCount"] = seriesList[i].ValueCount;
-        //                            bulkTable.Rows.Add(row);
-        //                        }
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        Console.WriteLine(ex.Message);
-        //                    }
-        //                }
-        //                SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
-        //                bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
-        //                connection.Open();
-        //                bulkCopy.WriteToServer(bulkTable);
-        //                connection.Close();
-        //                Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
-        //            }
-        //            Console.WriteLine("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
-        //            _log.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _log.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
-        //        }
-        //    }
-        //}
+                       DataTable bulkTable = new DataTable();
+                        bulkTable.Columns.Add("SeriesID", typeof(long));
+                        bulkTable.Columns.Add("SiteID", typeof(long));
+                        bulkTable.Columns.Add("SiteCode", typeof(string));
+                        bulkTable.Columns.Add("SiteName", typeof(string));
+                        bulkTable.Columns.Add("SiteType", typeof(string));
+                        bulkTable.Columns.Add("VariableID", typeof(int));
+                        bulkTable.Columns.Add("VariableCode", typeof(string));
+                        bulkTable.Columns.Add("VariableName", typeof(string));
+                        bulkTable.Columns.Add("Speciation", typeof(string));
+                        bulkTable.Columns.Add("VariableUnitsID", typeof(int));
+                        bulkTable.Columns.Add("VariableUnitsName", typeof(string));
+                        bulkTable.Columns.Add("SampleMedium", typeof(string));
+                        bulkTable.Columns.Add("ValueType", typeof(string));
+                        bulkTable.Columns.Add("TimeSupport", typeof(float));
+                        bulkTable.Columns.Add("TimeUnitsID", typeof(int));
+                        bulkTable.Columns.Add("TimeUnitsName", typeof(string));
+                        bulkTable.Columns.Add("DataType", typeof(string));
+                        bulkTable.Columns.Add("GeneralCategory", typeof(string));
+                        bulkTable.Columns.Add("MethodID", typeof(int));
+                        bulkTable.Columns.Add("MethodDescription", typeof(string));
+                        bulkTable.Columns.Add("SourceID", typeof(int));
+                        bulkTable.Columns.Add("Organization", typeof(string));
+                        bulkTable.Columns.Add("SourceDescription", typeof(string));
+                        bulkTable.Columns.Add("Citation", typeof(string));
+                        bulkTable.Columns.Add("QualityControlLevelID", typeof(int));
+                        bulkTable.Columns.Add("QualityControlLevelCode", typeof(string));
+                        bulkTable.Columns.Add("BeginDateTime", typeof(DateTime));
+                        bulkTable.Columns.Add("EndDateTime", typeof(DateTime));
+                        bulkTable.Columns.Add("BeginDateTimeUTC", typeof(DateTime));
+                        bulkTable.Columns.Add("EndDateTimeUTC", typeof(DateTime));
+                        bulkTable.Columns.Add("ValueCount", typeof(int));
+
+                        int batchStart = b * batchSize;
+                        int batchEnd = batchStart + batchSize;
+                        if (batchEnd >= catalogItemsWithPointLocation.Count)
+                        {
+                            batchEnd = catalogItemsWithPointLocation.Count;
+                        }
+                        for (int i = batchStart; i < batchEnd; i++)
+                        {
+                            try
+                            {
+                                //TODO
+                                //get variablecode by getting itemid from catalogTimeseriesItems  and request item from RISE then get parameterid
+
+                                //
+
+                                var itemid = catalogItemsWithPointLocation[i].itemId;
+                                var siteCode = catalogItemsWithPointLocation[i].locationId;
+                                var variableCode = catalogItemsWithPointLocation[i].parameterId;
+                                var temporalStartDate = catalogItemsWithPointLocation[i].temporalStartDate;
+                                var temporalEndDate = catalogItemsWithPointLocation[i].temporalEndDate;
+                                //foreach (var r in catalogItemList)
+                                //{
+                                //    if (r.id.Split('/')[4] == itemid)
+                                //    {
+                                //        var l = catalogRecords.Find(e => catalogRecords[0].relationships.catalogItems.data[0].id.Contains(itemid));
+                                //        variableCode = catalogItemList[i].relationships.parameter.data.id.Split('/')[4];
+                                //    }
+                                //}
+                                //for(int n=0;n < catalogItemsWithPointLocation.Count;n++)
+                                //{
+                                //    if (catalogItemsWithPointLocation[n].locationId != null)
+                                //    {
+                                //        if (catalogItemsWithPointLocation[n].itemId == itemid)
+                                //        {
+                                //            siteCode = catalogItemsWithPointLocation[n].locationId;
+                                //        }
+                                //    }
+                                //}
+
+                                //var siteCode = catalogTimeseriesItems[i].relationships.catalogRecord.data.attributes._id.ToString();
+                                var methodCode = "0"; //Unknown
+
+                                //only include series for variables which are already in the Variables table
+                                // for example "DIAG" series are excluded because the "DIAG" variable has no CUAHSI equivalent...
+
+                                //bool hasvar, hassite, hasMeth = false;
+
+                                var hasvar =_variableLookup.ContainsKey(variableCode);
+                                var hassite = siteLookup.ContainsKey(siteCode);
+                                var hasMeth = methodLookup.ContainsKey(methodCode);
+
+
+                                if (_variableLookup.ContainsKey(variableCode) && siteLookup.ContainsKey(siteCode) && methodLookup.ContainsKey(methodCode))
+                                {
+                                    var row = bulkTable.NewRow();
+                                    seriesID = seriesID + 1;
+                                    Variable v = _variableLookup[variableCode];
+                                    Site s = siteLookup[siteCode];
+                                    MethodInfo m = methodLookup[methodCode];
+
+                                    row["SeriesID"] = seriesID;
+                                    row["SiteID"] = s.SiteID;
+                                    //row["SiteCode"] = seriesList[i].SiteCode;
+                                    row["SiteName"] = s.SiteName;
+                                    row["SiteType"] = "Atmosphere";
+                                    row["VariableID"] = v.VariableID;
+                                    row["VariableCode"] = v.VariableCode;
+                                    row["VariableName"] = v.VariableName;
+                                    row["Speciation"] = v.Speciation;
+                                    row["VariableUnitsID"] = v.VariableUnitsID;
+                                    row["VariableUnitsName"] = v.VariableUnitsName;
+                                    row["SampleMedium"] = v.SampleMedium;
+                                    row["ValueType"] = v.ValueType;
+                                    row["TimeSupport"] = v.TimeSupport;
+                                    row["TimeUnitsID"] = v.TimeUnitsID;
+                                    row["TimeUnitsName"] = "Day"; // todo get from DB !!!
+                                    row["DataType"] = v.DataType;
+                                    row["GeneralCategory"] = v.GeneralCategory;
+                                    row["MethodID"] = m.MethodID;
+                                    row["MethodDescription"] = m.MethodDescription;
+                                    row["SourceID"] = source.SourceID;
+                                    row["Organization"] = source.Organization;
+                                    row["SourceDescription"] = source.SourceDescription;
+                                    row["Citation"] = source.Citation;
+                                    row["QualityControlLevelID"] = 1;
+                                    row["QualityControlLevelCode"] = "1";
+                                    row["BeginDateTime"] = temporalStartDate;
+                                    row["EndDateTime"] = temporalEndDate;
+                                    //row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
+                                    //row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
+                                    //row["ValueCount"] = seriesList[i].ValueCount;
+                                    bulkTable.Rows.Add(row);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+                        SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
+                        bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
+                        connection.Open();
+                        bulkCopy.WriteToServer(bulkTable);
+                        connection.Close();
+                        Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
+                    }
+                    //Console.WriteLine("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
+                    //_log.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
+                }
+            }
+        }
     }
 }
