@@ -54,7 +54,7 @@ namespace USBRHarvester
                     }
                     catch (Exception ex)
                     {
-                       // _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
+                        _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
                         continue;
                     }
                     //Lookup up and map variablenames

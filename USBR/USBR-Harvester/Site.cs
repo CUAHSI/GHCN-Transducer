@@ -27,13 +27,8 @@ namespace USBRHarvester
         /// ODM Site code. The code is formed from the AWDB station triplet by replacing ":" with "_".
         /// The AWDB station triplet is a three-part identifier of the station, in the format stationId:stateCode:networkCode.
         /// </summary>
-        public string SiteCode { get; set; }
-
-        /// <summary>
-        /// The AWDB station triplet is a three-part identifier of the station, in the format stationId:stateCode:networkCode.
-        /// </summary>
-        public string StationTriplet { get; set; }
-
+        public string SiteCode { get; set; }      
+       
         /// <summary>
         /// U.S. County name
         /// </summary>
@@ -79,30 +74,12 @@ namespace USBRHarvester
         /// The time zone of the actual location of the station 
         /// (Note: This is currently set to the same value as the stationDataTimeZone).
         /// </summary>
-        public decimal TimeZone { get; set; }
-
-        /// <summary>
-        /// The "acton" id of a station.  This is only used for SNOTEL stations and has also been known as the "CDBS" id.  
-        /// (For example, for station '302', the acton id is '17D02S').
-        /// </summary>
-        public string ActonId { get; set; }
-
-        /// <summary>
-        /// The id of the station that is used when sending data to the National Water Service via the SHEF system.
-        /// </summary>
-        public string ShefId { get; set; }
+        public decimal TimeZone { get; set; }         
         
         /// <summary>
         /// The comments value to be inserted into ODM. includes the beginDate, endDate, HUC, HUD, TimeZone, actonId, shefId, stationTriplet
         /// </summary>
-        public string Comments
-        {
-            get
-            {
-                return String.Format("beginDate={0}|endDate={1}|HUC={2}|HUD={3}|TimeZone={4}|actonId={5}|shefId={6}|stationTriplet={7}|isActive={8}",
-                    BeginDate, EndDate, HUC, HUD, TimeZone, ActonId, ShefId, StationTriplet, IsActive);
-            }
-
-        }
+        public string Comments { get; set; }
+        
     }
 }

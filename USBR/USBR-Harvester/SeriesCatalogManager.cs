@@ -319,7 +319,7 @@ namespace USBRHarvester
 
                                     row["SeriesID"] = seriesID;
                                     row["SiteID"] = s.SiteID;
-                                    //row["SiteCode"] = seriesList[i].SiteCode;
+                                    row["SiteCode"] = siteCode;
                                     row["SiteName"] = s.SiteName;
                                     row["SiteType"] = "Atmosphere";
                                     row["VariableID"] = v.VariableID;
@@ -345,8 +345,8 @@ namespace USBRHarvester
                                     row["QualityControlLevelCode"] = "1";
                                     row["BeginDateTime"] = temporalStartDate;
                                     row["EndDateTime"] = temporalEndDate;
-                                    //row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
-                                    //row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
+                                    row["BeginDateTimeUTC"] = temporalStartDate;
+                                    row["EndDateTimeUTC"] = temporalEndDate;
                                     //row["ValueCount"] = seriesList[i].ValueCount;
                                     bulkTable.Rows.Add(row);
                                 }

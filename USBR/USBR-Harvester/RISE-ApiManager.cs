@@ -298,6 +298,10 @@ namespace USBRHarvester
             //TODO:iterate through pages
             //string parameterId = string.Empty;
             //string temporalStartDate, temporalEndDate = string.Empty
+            //https://data.usbr.gov/rise/api/result/download?type=json&itemId=6112&before=2021-06-15&after=2011-06-14&filename=Nambe%20Falls%20Reservoir%20and%20Dam%20Daily%20Lake%2FReservoir%20Elevation-ft%20Time%20Series%20Data%20(2011-06-14%20-%202021-06-13)&order=ASC://data.usbr.gov/rise/api/result/download?type=json&itemId
+            //https://data.usbr.gov/rise/api/result/download?type=json&itemId=6113&before=2021-06-15&after=2011-06-14&filename=Nambe%20Falls%20Reservoir%20and%20Dam%20Daily%20Lake%2FReservoir%20Storage-af%20Time%20Series%20Data
+            string _USBRAPIurl = "https://data.usbr.gov/rise/api/result/download?type=json&itemId";
+
             string parameterId, temporalStartDate, temporalEndDate;
             try
             {

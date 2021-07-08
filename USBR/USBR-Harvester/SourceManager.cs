@@ -35,7 +35,7 @@ namespace USBRHarvester
                     City = "",
                     State = "",
                     ZipCode = "",
-                    Citation = @"USDA NRCS Snow Telemetry (SNOTEL) Network",
+                    Citation = @"",
                     SourceCode = "USBR-RISE",
                     MetadataID = metadataID
                 };
