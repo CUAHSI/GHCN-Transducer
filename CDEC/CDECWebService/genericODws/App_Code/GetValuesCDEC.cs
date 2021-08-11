@@ -502,13 +502,13 @@ namespace WaterOneFlow.odws
 
             using (SqlConnection conn = new SqlConnection(cnn))
             {
-                using (SqlCommand cmd = new SqlCommand())
+                using ( SqlCommand cmd = new SqlCommand())
                 {
                     string sql = @"select v.*, u.*, 
-tu.UnitsName AS UnitsName1, tu.UnitsAbbreviation as UnitsAbrev1, tu.UnitsType as UnitsType1 FROM dbo.variables v 
-inner join dbo.units u on v.VariableUnitsID = u.UnitsID
-inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID
-WHERE v.VariableCode = @variableCode";
+                    tu.UnitsName AS UnitsName1, tu.UnitsAbbreviation as UnitsAbrev1, tu.UnitsType as UnitsType1 FROM dbo.variables v 
+                    inner join dbo.units u on v.VariableUnitsID = u.UnitsID
+                    inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID
+                    WHERE v.VariableCode = @variableCode";
                     cmd.CommandText = sql;
                     cmd.Connection = conn;
                     cmd.Parameters.Add(new SqlParameter("@variableCode", variableCode));
@@ -604,9 +604,9 @@ WHERE v.VariableCode = @variableCode";
                 using (SqlCommand cmd = new SqlCommand())
                 {
                     string sql = @"select v.*, u.*, 
-tu.UnitsName AS UnitsName1, tu.UnitsAbbreviation as UnitsAbrev1, tu.UnitsType as UnitsType1 FROM dbo.variables v 
-inner join dbo.units u on v.VariableUnitsID = u.UnitsID
-inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
+                    tu.UnitsName AS UnitsName1, tu.UnitsAbbreviation as UnitsAbrev1, tu.UnitsType as UnitsType1 FROM dbo.variables v 
+                    inner join dbo.units u on v.VariableUnitsID = u.UnitsID
+                    inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     cmd.CommandText = sql;
                     cmd.Connection = conn;
                     conn.Open();
@@ -989,6 +989,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                                 newValue.sourceCode = "1";
                                 newValue.sourceID = "1";
                                 newValue.qualityControlLevelCode = "1";
+                                
 
                                 // assign dataValue
                                 if (dataValueStr == "" || dataValueStr.Contains ("-"))

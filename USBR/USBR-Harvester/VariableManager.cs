@@ -10,6 +10,7 @@ using OfficeOpenXml;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using CsvHelper;
 
 namespace USBRHarvester
 {
@@ -31,13 +32,22 @@ namespace USBRHarvester
             int unitId;
             string unitName;
             //get Units from ODM
-            var odmUnits = GetODMUnits();           
+            var odmUnits = GetODMUnits();
 
             //Get VariableCV from ODM
             var odmVariableCV = GetODMVariableCV();
 
-       
-            
+            //var distinct = (from p in parameters select new { id = p.attributes.parameterTransformation }).ToList().Distinct().ToList();
+
+
+            //using (var writer = new StreamWriter("c:/temp/parameters.csv"))
+            //using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            //{
+            //    csv.WriteRecords(parameters);
+            //}
+
+
+
             try
             {
                 foreach (var p in parameters)
@@ -70,10 +80,60 @@ namespace USBRHarvester
                         _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterName + ", " + p.attributes.parameterDescription));
                         continue;
                     }
+
+                    int timeunitId = 0;
+                    int timeSupport = 0;
+                    //timesupport
+                    //var distinct = (from p in parameters select new { id = p.attributes.parameterTimestep }).ToList().Distinct().ToList();
+                    //parameterTimestep options from parameters:  monthly, intermittent, daily, one minute, quarterly, biannually, periodic 
+                    switch (p.attributes.parameterTimestep)
+                    {
+                        case "monthly":                            
+                                timeunitId = 106;
+                                timeSupport = 1;
+                            break;
+                        case "daily":
+                            timeunitId = 106;
+                            timeSupport = 1;
+                            break;
+                        case "one minute":
+                            timeunitId = 102;
+                            timeSupport = 1;
+                            break;
+                        default:
+                            timeunitId = 104; 
+                            timeSupport = 0;
+                            break;
+
+                    }
+
+                    var dataType = string.Empty;
+
+                    switch (p.attributes.parameterTransformation)
+                    {
+                        case "calculation":
+                            dataType = "Unknown";
+                            break;
+                        case "instant":
+                            dataType = "Unknown";
+                            break;
+                        case "sum":
+                            dataType = "Cumulative";
+                            break;
+                        case "average":
+                            dataType = "Average";
+                            break;
+                        default:
+                            dataType = "Unknown";
+                            break;
+
+                    }
                     //string timeUnitsName = Convert.ToString(worksheet.Cells[row, 7].Value);
                     //timeUnitsObj = worksheet.Cells[row, 8].Value;
                     //int timeUnitsID = Convert.ToInt32(worksheet.Cells[row, 8].Value);
                     //float timeSupport = float.Parse(Convert.ToString(worksheet.Cells[row, 9].Value), CultureInfo.InvariantCulture);
+
+
 
                     Variable v = new Variable
                     {
@@ -81,10 +141,10 @@ namespace USBRHarvester
                         VariableName = variableName,
                         VariableUnitsID = unitId,
                         VariableUnitsName = unitName,
-                    //    DataType = dataType,
+                        DataType = dataType,
                     //    SampleMedium = sampleMedium,
-                    //    TimeUnitsID = timeUnitsID,
-                    //    TimeSupport = timeSupport
+                        TimeUnitsID = timeunitId,
+                        TimeSupport = timeSupport
                     };
                     variables.Add(v);
                 }
@@ -355,7 +415,7 @@ namespace USBRHarvester
             string syn = String.Empty;
             //adding synanyms for cv entries missing
             var VariablenameSynonym = new Dictionary<String, String>();//usbr code, ODM term
-            VariablenameSynonym.Add("af", "ac ft");
+            VariablenameSynonym.Add("Water Temperature", "Temperature");
 
             VariablenameSynonym.TryGetValue(term, out syn);
             return syn;

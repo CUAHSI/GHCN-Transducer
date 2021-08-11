@@ -109,10 +109,10 @@ namespace CDEC_Harvester
                         //udate DataType from CV
                         var dataType = "Unknown";
                         if (sensor.DESCRIPTION.ToLower().Contains("median")) { dataType = "Median"; };
-                        if (sensor.DESCRIPTION.ToLower().StartsWith("min") || (sensor.DESCRIPTION.ToLower().Contains("minimum"))) { dataType = "Minimum"; };
-                        if (sensor.DESCRIPTION.ToLower().StartsWith("max") || (sensor.DESCRIPTION.ToLower().Contains("maximum"))) { dataType = "Maximum"; };
+                        if (sensor.DESCRIPTION.ToLower().StartsWith("min") || sensor.DESCRIPTION.ToLower().EndsWith("min") || (sensor.DESCRIPTION.ToLower().Contains("minimum"))) { dataType = "Minimum"; };
+                        if (sensor.DESCRIPTION.ToLower().StartsWith("max") || sensor.DESCRIPTION.ToLower().EndsWith("max") || (sensor.DESCRIPTION.ToLower().Contains("maximum"))) { dataType = "Maximum"; };
                         if (sensor.DESCRIPTION.ToLower().Contains("accumulated")) { dataType = "Cumulative"; };
-                        if (sensor.DESCRIPTION.ToLower().Contains("average")) { dataType = "Average"; };
+                        if (sensor.DESCRIPTION.ToLower().Contains("average") || sensor.DESCRIPTION.ToLower().Contains("avg")) { dataType = "Average"; };
                         if (sensor.DESCRIPTION.ToLower().Contains("incremental")) { dataType = "Incremental"; };
 
                         variable.VariableID = sensor.SENSORNUM;
@@ -122,8 +122,13 @@ namespace CDEC_Harvester
                         //variable.VariableUnitsName = unitName;
                         variable.DataType = dataType;
                         variable.SampleMedium = sampleMedium;
+                        variable.ValueType = "Field Observation";
+                        //timesupport: CDEC provide hourly and daily for certain variables, the duration can be determined at a later time so adding hourly and daily variables her , 
+                        //for not concentrate on daily data 
+                        //TODO: hourly data implementation
+
                         variable.TimeUnitsID = 104; //arbitraily set to 104:day 
-                        //variable.TimeSupport = timeSupport
+                        variable.TimeSupport = 1; 
 
 
                         object variableID = SaveOrUpdateVariable(variable, connection);

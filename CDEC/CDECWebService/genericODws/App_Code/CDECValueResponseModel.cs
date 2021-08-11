@@ -17,7 +17,7 @@ public class CDECValueResponseModel
     public string SENSOR_TYPE { get; set; }
     public string DATETIME { get; set; }
     public string OBSDATE { get; set; }
-    public double VALUE { get; set; }
+    public string VALUE { get; set; }
     public string DATA_FLAG { get; set; }
     public string UNITS { get; set; }
 }

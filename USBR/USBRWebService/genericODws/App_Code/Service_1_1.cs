@@ -181,10 +181,10 @@ namespace WaterOneFlow.odws
             {
                 //GlobalClass.WaterAuth.DataValuesServiceAllowed(Context, authToken);
                 //debug
-                location = "3246"; //Brackish Groundwater National Desalination Research Facility (BGNDRF) Well 4
-                variable = "USBR:1334";//Chloride
-                startDate = "2011-03-15 14:11:00.00";
-                endDate = "2012-03-15 14:11:00.00";
+                //location = "10831"; //Brackish Groundwater National Desalination Research Facility (BGNDRF) Well 4
+                //variable = "USBR:33";//Chloride
+                //startDate = "2021-01-01";
+                //endDate = "2021-01-15";
 
                 if (!useODForValues) throw new SoapException("GetValues implemented external to this service. Call GetSiteInfo, and SeriesCatalog includes the service Wsdl for GetValues. Attribute:serviceWsdl on Element:seriesCatalog XPath://seriesCatalog/[@serviceWsdl]", new XmlQualifiedName("ServiceException"));
 
@@ -194,9 +194,9 @@ namespace WaterOneFlow.odws
                 }
                 catch (Exception we)
                 {
-                    log.Warn(we.Message);
+                    log.Error(we.Message);
                     throw SoapExceptionGenerator.WOFExceptionToSoapException(we);
-
+                    
                 }
  
 

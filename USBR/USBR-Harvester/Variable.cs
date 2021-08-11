@@ -14,9 +14,9 @@ namespace USBRHarvester
         public string VariableUnitsName { get; set; }
         public int VariableUnitsID { get; set; }
         public string SampleMedium { get { return ("Unknown"); } }
-        public string DataType { get { return ("Unknown"); } }
-        public float TimeSupport { get { return 0; } }
-        public int TimeUnitsID { get { return 104; } } //arbitrarily set to 104 = day as there is no n/a
+        public string DataType { get; set; }
+        public float TimeSupport { get; set; }
+        public int TimeUnitsID { get; set; } //arbitrarily set to 104 = day as there is no n/a
 
         public string ValueType { get { return "Field Observation"; } }
         public bool IsRegular { get { return false; } }

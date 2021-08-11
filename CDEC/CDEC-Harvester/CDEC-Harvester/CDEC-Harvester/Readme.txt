@@ -8,4 +8,4 @@ Save in files: CDEC_Stations.csv
 
 save to files: CDEC_SensorDefinition.csv
 
-3.
+3. map sensor definition terms to variable names available, incomplete as not all terms are avaialble  TODO: add missing terms to VariablenmameCV

@@ -235,7 +235,7 @@ namespace CDEC_Harvester
                             //if (sensorsAtStation[i].Duration.Contains("daily")) { v.TimeUnitsID = 104; };
                             //if (sensorsAtStation[i].Duration.Contains("hour")) { v.TimeUnitsID = 103; };
 
-                            //v.ValueType = "Unknown"; //TODO : research if this can be derived fron table 
+                            v.ValueType = "Field Observation"; //TODO : research if this can be derived fron table 
                             //if (sensorsAtStation[i].DataCollection.ToLower().Contains("manual")) { v.ValueType = "Sample"; };
 
 
@@ -372,6 +372,16 @@ namespace CDEC_Harvester
                                     MethodInfo m = methodLookup[methodCode];
                                     var variableUnitName = unitsLookup.First(u => u.UnitsID == v.VariableUnitsID).UnitsName;
                                     var timeUnitName = unitsLookup.First(u => u.UnitsID == v.TimeUnitsID).UnitsName;
+                                    double valueCount = 0;
+                                    //calculate value count using timesupport 
+                                    if (timeUnitName.ToLower() == "day")
+                                    {
+                                        //calc days in period
+                                        var totalDays = (seriesList[i].EndDateTime - seriesList[i].BeginDateTime).TotalDays;
+                                        //One meassurement per day
+                                        valueCount = totalDays;
+                                    }
+                                   
 
                                     row["SeriesID"] = seriesID;
                                     row["SiteID"] = s.SiteID;
@@ -403,7 +413,7 @@ namespace CDEC_Harvester
                                     row["EndDateTime"] = seriesList[i].EndDateTime;
                                     row["BeginDateTimeUTC"] = seriesList[i].BeginDateTime;
                                     row["EndDateTimeUTC"] = seriesList[i].EndDateTime;
-                                    row["ValueCount"] = seriesList[i].ValueCount;
+                                    row["ValueCount"] = valueCount ;
                                     bulkTable.Rows.Add(row);
                                 }
                             }

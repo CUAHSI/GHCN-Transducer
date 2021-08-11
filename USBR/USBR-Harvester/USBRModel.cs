@@ -184,10 +184,8 @@ namespace USBRHarvester
         {
             public Links links { get; set; }
             public Meta meta { get; set; }
-            public List<Data> data { get; set; }
+            public Data data { get; set; }
         }
-
-
     }
 
     public class USBRCatalogRecord

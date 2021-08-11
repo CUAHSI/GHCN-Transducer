@@ -255,7 +255,7 @@ namespace WaterOneFlow.odws
             #endregion
 
             #region values
-            public TimeSeriesResponseType GetValues(string SiteNumber,
+            public TimeSeriesResponseType GetValues(string Site,
                                                     string Variable,
                                                     string StartDate,
                                                     string EndDate)
@@ -264,14 +264,14 @@ namespace WaterOneFlow.odws
                 GetValuesOD obj = new GetValuesOD();
                 // queryLog.Info("GetValues|" + SiteNumber + "|" + Variable + "|" + StartDate + "|" + EndDate);
                 //String network,method,location, variable, start, end, , processing time,count
-                queryLog2.LogValuesStart(Logging.Methods.GetValues,  SiteNumber, Variable, StartDate, EndDate, appContext.Request.UserHostName);
+                queryLog2.LogValuesStart(Logging.Methods.GetValues, Site, Variable, StartDate, EndDate, appContext.Request.UserHostName);
 
                 //TimeSeriesResponseType resp = obj.getValues(SiteNumber, Variable, StartDate, EndDate);
 
                 // USE CUSTOM CODE here !!!!
-                TimeSeriesResponseType resp = GetValuesSnotel.GetValues(SiteNumber, Variable, StartDate, EndDate);
+                TimeSeriesResponseType resp = GetValuesUSBR.GetValues(Site, Variable, StartDate, EndDate);
 
-                queryLog2.LogValuesEnd(Logging.Methods.GetValues,  SiteNumber, Variable, StartDate, EndDate, timer.ElapsedMilliseconds, resp.timeSeries[0].values[0].value.Length, appContext.Request.UserHostName);
+                queryLog2.LogValuesEnd(Logging.Methods.GetValues, Site, Variable, StartDate, EndDate, timer.ElapsedMilliseconds, resp.timeSeries[0].values[0].value.Length, appContext.Request.UserHostName);
 
                 return resp;
 

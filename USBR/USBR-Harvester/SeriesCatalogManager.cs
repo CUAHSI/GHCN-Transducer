@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Net;
+using static USBRHarvester.USBRCatalogItem;
 
 namespace USBRHarvester
 {
@@ -80,9 +81,9 @@ namespace USBRHarvester
                                 VariableName = reader.GetString(2),
                                 VariableUnitsID = reader.GetInt32(3),
                                 //SampleMedium = reader.GetString(4),
-                                //DataType = reader.GetString(5),
-                                //TimeSupport = Convert.ToSingle(reader.GetValue(6)),
-                                //TimeUnitsID = reader.GetInt32(7)
+                                DataType = reader.GetString(5),
+                                TimeSupport = Convert.ToSingle(reader.GetValue(6)),
+                                TimeUnitsID = reader.GetInt32(7)
 
                             };
                             lookup.Add(code, variable);
@@ -177,13 +178,13 @@ namespace USBRHarvester
         }
 
 
-        public void UpdateSeriesCatalog_fast(List<USBRCatalogRecord.Data> catalogRecords, List<USBRCatalogItem.Data> catalogItemList, List<ItemLocationParameter> catalogItemsWithPointLocation)
+        public void UpdateSeriesCatalog_fast(List<USBRCatalogRecord.Data> catalogRecords, List<USBRCatalogitemRoot> catalogItemList, List<ItemLocationParameter> catalogItemsWithPointLocation)
         { 
             var siteLookup = GetSiteLookup();
             var variableLookup = getVariableLookup();
-            var methodLookup = getMethodLookup();
+            var methodLookup = getMethodLookup();            
+            var unitsLookup = getUnitsLookup();
             var source = getSource();
-
 
 
 
@@ -277,24 +278,7 @@ namespace USBRHarvester
                                 var variableCode = catalogItemsWithPointLocation[i].parameterId;
                                 var temporalStartDate = catalogItemsWithPointLocation[i].temporalStartDate;
                                 var temporalEndDate = catalogItemsWithPointLocation[i].temporalEndDate;
-                                //foreach (var r in catalogItemList)
-                                //{
-                                //    if (r.id.Split('/')[4] == itemid)
-                                //    {
-                                //        var l = catalogRecords.Find(e => catalogRecords[0].relationships.catalogItems.data[0].id.Contains(itemid));
-                                //        variableCode = catalogItemList[i].relationships.parameter.data.id.Split('/')[4];
-                                //    }
-                                //}
-                                //for(int n=0;n < catalogItemsWithPointLocation.Count;n++)
-                                //{
-                                //    if (catalogItemsWithPointLocation[n].locationId != null)
-                                //    {
-                                //        if (catalogItemsWithPointLocation[n].itemId == itemid)
-                                //        {
-                                //            siteCode = catalogItemsWithPointLocation[n].locationId;
-                                //        }
-                                //    }
-                                //}
+                                
 
                                 //var siteCode = catalogTimeseriesItems[i].relationships.catalogRecord.data.attributes._id.ToString();
                                 var methodCode = "0"; //Unknown
@@ -304,7 +288,10 @@ namespace USBRHarvester
 
                                 //bool hasvar, hassite, hasMeth = false;
 
-                                var hasvar =_variableLookup.ContainsKey(variableCode);
+
+                               
+
+                                var hasvar =variableLookup.ContainsKey(variableCode);
                                 var hassite = siteLookup.ContainsKey(siteCode);
                                 var hasMeth = methodLookup.ContainsKey(methodCode);
 
@@ -312,12 +299,40 @@ namespace USBRHarvester
                                 if (_variableLookup.ContainsKey(variableCode) && siteLookup.ContainsKey(siteCode) && methodLookup.ContainsKey(methodCode))
                                 {
                                     var row = bulkTable.NewRow();
-                                    seriesID = seriesID + 1;
-                                    Variable v = _variableLookup[variableCode];
+                                    //seriesID = seriesID + 1;
+                                    Variable v = variableLookup[variableCode];
                                     Site s = siteLookup[siteCode];
                                     MethodInfo m = methodLookup[methodCode];
+                                    Units variableUnit = unitsLookup[v.VariableUnitsID];
+                                    var timeUnitsName = string.Empty;
+                                    if (v.TimeUnitsID != 0) 
+                                    { 
+                                        Units timeUnit = unitsLookup[v.TimeUnitsID];
+                                        timeUnitsName = timeUnit.UnitsName;
+                                    }
 
-                                    row["SeriesID"] = seriesID;
+                                    var valuecount = 0;
+                                    //calculate valuecount
+                                    switch (v.TimeUnitsID)
+                                    {
+                                        case 106:                                            
+                                            int monthsApart = 12 * (Convert.ToDateTime(temporalStartDate).Year - Convert.ToDateTime(temporalEndDate).Year) + Convert.ToDateTime(temporalStartDate).Month - Convert.ToDateTime(temporalEndDate).Month;
+                                            valuecount = Math.Abs(monthsApart);
+                                            break;
+                                        case 104:
+                                            valuecount =(int)(Convert.ToDateTime(temporalEndDate) - Convert.ToDateTime(temporalStartDate)).TotalDays;                                            
+                                            break;
+                                        case 102:
+                                            valuecount = (int)(Convert.ToDateTime(temporalEndDate) - Convert.ToDateTime(temporalStartDate)).TotalMinutes;
+                                            break;
+                                        default:
+                                            valuecount = 0;
+                                            break;
+
+                                    }
+                                    
+
+                                    row["SeriesID"] = itemid;
                                     row["SiteID"] = s.SiteID;
                                     row["SiteCode"] = siteCode;
                                     row["SiteName"] = s.SiteName;
@@ -327,12 +342,12 @@ namespace USBRHarvester
                                     row["VariableName"] = v.VariableName;
                                     row["Speciation"] = v.Speciation;
                                     row["VariableUnitsID"] = v.VariableUnitsID;
-                                    row["VariableUnitsName"] = v.VariableUnitsName;
+                                    row["VariableUnitsName"] = variableUnit.UnitsName;
                                     row["SampleMedium"] = v.SampleMedium;
                                     row["ValueType"] = v.ValueType;
                                     row["TimeSupport"] = v.TimeSupport;
                                     row["TimeUnitsID"] = v.TimeUnitsID;
-                                    row["TimeUnitsName"] = "Day"; // todo get from DB !!!
+                                    row["TimeUnitsName"] = timeUnitsName; 
                                     row["DataType"] = v.DataType;
                                     row["GeneralCategory"] = v.GeneralCategory;
                                     row["MethodID"] = m.MethodID;
@@ -347,7 +362,7 @@ namespace USBRHarvester
                                     row["EndDateTime"] = temporalEndDate;
                                     row["BeginDateTimeUTC"] = temporalStartDate;
                                     row["EndDateTimeUTC"] = temporalEndDate;
-                                    //row["ValueCount"] = seriesList[i].ValueCount;
+                                    row["ValueCount"] = valuecount;
                                     bulkTable.Rows.Add(row);
                                 }
                             }
@@ -356,10 +371,21 @@ namespace USBRHarvester
                                 Console.WriteLine(ex.Message);
                             }
                         }
-                        SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
+                        SqlBulkCopy bulkCopy = new SqlBulkCopy(connString, SqlBulkCopyOptions.KeepIdentity);
                         bulkCopy.DestinationTableName = "dbo.SeriesCatalog";
+                     
                         connection.Open();
+                        //allow identity insert to maintain itemid
+  
+                        //var cmd = connection.CreateCommand();
+                        //cmd.CommandText = "SET IDENTITY_INSERT variables ON";
+                        //cmd.ExecuteNonQuery();
+
                         bulkCopy.WriteToServer(bulkTable);
+
+                        //cmd.CommandText = "SET IDENTITY_INSERT variables OFF";
+                        //cmd.ExecuteNonQuery();
+
                         connection.Close();
                         Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
                     }
@@ -371,6 +397,40 @@ namespace USBRHarvester
                     _log.LogWrite("UpdateSeriesCatalog ERROR: " + ex.Message);
                 }
             }
+        }
+
+        
+        private Dictionary<int, Units> getUnitsLookup()
+        {
+            var lookup = new Dictionary<int, Units>();
+
+            string connString = ConfigurationManager.ConnectionStrings["OdmConnection"].ConnectionString;
+
+            using (SqlConnection connection = new SqlConnection(connString))
+            {
+                string sql = "select unitsid, unitsname, unitstype, unitsabbreviation FROM Units";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Connection.Open();
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        var unitsId = Convert.ToInt16(reader["unitsid"]);
+                        var unit = new Units
+                        {
+                            UnitsID = Convert.ToInt16(reader["unitsid"]),
+                            UnitsName = Convert.ToString(reader["unitsname"]),
+                            UnitsType = Convert.ToString(reader["unitstype"]),
+                            UnitsAbbreviation = Convert.ToString(reader["unitsabbreviation"])
+                        };
+                        lookup.Add(unitsId, unit);
+                    }
+                    reader.Close();
+                    cmd.Connection.Close();
+                }
+            }
+            return lookup;
         }
     }
 }

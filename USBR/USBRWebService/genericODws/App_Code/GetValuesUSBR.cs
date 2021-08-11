@@ -14,6 +14,13 @@ using System.Net;
 using System.IO;
 using System.Linq;
 using System.Globalization;
+using Newtonsoft.Json;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace WaterOneFlow.odws
 {
@@ -62,12 +69,14 @@ namespace WaterOneFlow.odws
         /// <param name="StartDate">yyyy-MM-dd</param>
         /// <param name="EndDate">yyyy-MM-dd</param>
         /// <returns></returns>
-        public USBRTimeseriesObject GetValues(string SiteNumber, string Variable, string StartDate, string EndDate)
+        public static TimeSeriesResponseType GetValues(string Site, string Variable, string StartDate, string EndDate)
         {
             //get siteId, variableId
-            string siteId = SiteNumber.Substring(SiteNumber.LastIndexOf(":") + 1);
+            string siteId = Site.Substring(Site.LastIndexOf(":") + 1);
             string variableId = Variable.Substring(Variable.LastIndexOf(":") + 1);
 
+            //get ItemId to provide to 
+            var itemId = getItemIdFromDB(siteId, variableId);
             DateTime startDateTime = new DateTime(2000, 1, 1);
             DateTime endDateTime = DateTime.Now;
 
@@ -81,49 +90,93 @@ namespace WaterOneFlow.odws
                 endDateTime = DateTime.Parse(EndDate);
             }
 
-            var resp = new USBRTimeseriesObject();
+            var resp = new TimeSeriesResponseType();
 
-            try
-            {
-                using (WebClient webClient = new WebClient())
-                {
-                    webClient.BaseAddress = _USBRAPIurl;
-                    var jsonData = webClient.DownloadString("catalog-item?id=" + itemId);
-                    var catalogItem = JsonConvert.DeserializeObject<USBRCatalogitemRoot>(jsonData);
-                    parameterId = catalogItem.data[0].relationships.parameter.data.id;
-                    temporalStartDate = catalogItem.data[0].attributes.temporalStartDate;
-                    temporalEndDate = catalogItem.data[0].attributes.temporalEndDate;
-                    //_log.LogWrite(String.Format("Found {0} distinct USBRCatalogRecord.", USBRParameters..Count));
-                }
-            }
-            catch (WebException ex)
-            {
-                throw ex;
-            }
+            //try
+            //{
+            //https://data.usbr.gov/rise/api/result?itemId=10831&dateTime%5Bbefore%5D=03-01-2021&dateTime%5Bafter%5D=01-01-2021
+            //    debug
+            //    ItemId = "10831";
+            //    EndDate = "03-01-2021";
+            //    StartDate = "01-01-2021";
+            //    using (WebClient webClient = new WebClient())
+            //    {
+
+            //        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            //        var sb = new StringBuilder();
+            //        webClient.BaseAddress = "https://data.usbr.gov/rise/api/result?";
+            //        sb.AppendFormat("catalog-item?id = " + ItemId);
+            //        sb.Append("&dateTime%5Bbefore=" + EndDate);
+            //        sb.Append("&dateTime%5Bafter=" + StartDate);
+            //        var jsonData = webClient.DownloadString(sb.ToString());
+            //        var resultsValues = JsonConvert.DeserializeObject<USBRResultsValues>(jsonData);
+
+            //        _log.LogWrite(String.Format("Found {0} distinct USBRCatalogRecord.", USBRParameters..Count));
+            //    }
+            //}
+            //catch (WebException ex)
+            //{
+            //    throw ex;
+            //}
 
 
             //resp.timeSeries[0].values[0].
-            //resp.timeSeries = new TimeSeriesType[1];
-            //resp.timeSeries[0] = new TimeSeriesType();
-            //resp.timeSeries[0].sourceInfo = GetSiteFromDb2(siteId);
-            //resp.timeSeries[0].variable = GetVariableInfoFromDb(variableId);
+            resp.timeSeries = new TimeSeriesType[1];
+            resp.timeSeries[0] = new TimeSeriesType();
+            resp.timeSeries[0].sourceInfo = GetSiteFromDb2(itemId);
+            resp.timeSeries[0].variable = GetVariableInfoFromDb(variableId);
 
-            //resp.timeSeries[0].values = new TsValuesSingleVariableType[1];
+            resp.timeSeries[0].values = new TsValuesSingleVariableType[1];
 
-            //resp.timeSeries[0].values[0] = GetValuesFromDb(siteId, variableId, startDateTime, endDateTime);
+            resp.timeSeries[0].values[0] = GetValuesFromDb(itemId, variableId, startDateTime, endDateTime);
 
-            ////set the query info
-            //resp.queryInfo = new QueryInfoType();
-            //resp.queryInfo.criteria = new QueryInfoTypeCriteria();
+            //set the query info
+            resp.queryInfo = new QueryInfoType();
+            resp.queryInfo.criteria = new QueryInfoTypeCriteria();
 
-            //resp.queryInfo.creationTime = DateTime.UtcNow;
-            //resp.queryInfo.creationTimeSpecified = true;
+            resp.queryInfo.creationTime = DateTime.UtcNow;
+            resp.queryInfo.creationTimeSpecified = true;
             //resp.queryInfo.criteria.locationParam = SiteNumber;
-            //resp.queryInfo.criteria.variableParam = Variable;
-            //resp.queryInfo.criteria.timeParam = CuahsiBuilder.createQueryInfoTimeCriteria(StartDate, EndDate);
+            resp.queryInfo.criteria.variableParam = Variable;
+            resp.queryInfo.criteria.timeParam = CuahsiBuilder.createQueryInfoTimeCriteria(StartDate, EndDate);
 
             return resp;
 
+        }
+
+        private static string getItemIdFromDB(string siteId, string variableId)
+        {
+            try 
+            {
+                string cnn = GetConnectionString();
+                var itemId = string.Empty;
+                using (SqlConnection conn = new SqlConnection(cnn))
+                {
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        string sql = @"SELECT seriesId FROM dbo.seriescatalog WHERE siteCode = @siteId AND variableCode = @variableId";
+                        cmd.CommandText = sql;
+                        cmd.Connection = conn;
+                        cmd.Parameters.Add(new SqlParameter("@siteId", siteId));
+                        cmd.Parameters.Add(new SqlParameter("@variableId", variableId));
+                        conn.Open();
+                        SqlDataReader dr = cmd.ExecuteReader();
+                        dr.Read();
+                    
+                        itemId = Convert.ToString(dr["seriesId"]);
+                    
+                    }
+                }
+                return itemId;
+            } 
+            
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+           
+
+           
         }
 
 
@@ -679,75 +732,92 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         }
 
 
-        public static SiteInfoType GetSiteFromDb2(string siteCode)
+        public static SiteInfoType GetSiteFromDb2(string itemId)
         {
             string cnn = GetConnectionString();
             string serviceCode = ConfigurationManager.AppSettings["network"];
             SiteInfoType si = new SiteInfoType();
 
-            if (siteCode.StartsWith(serviceCode))
+            //if (siteCode.StartsWith(serviceCode))
+            //{
+            //    siteCode = siteCode.Substring(serviceCode.Length + 1);
+            //}
+            try
             {
-                siteCode = siteCode.Substring(serviceCode.Length + 1);
-            }
-
-            using (SqlConnection conn = new SqlConnection(cnn))
-            {
-                using (SqlCommand cmd = new SqlCommand())
+                using (SqlConnection conn = new SqlConnection(cnn))
                 {
-                    string sqlSite = "SELECT * FROM dbo.Sites WHERE SiteCode=@siteCode";
-
-                    cmd.CommandText = sqlSite;
-                    cmd.Connection = conn;
-                    cmd.Parameters.Add(new SqlParameter("@siteCode", siteCode));
-                    conn.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    dr.Read();
-                    if (dr.HasRows)
+                    using (SqlCommand cmd = new SqlCommand())
                     {
-                        if (dr["Elevation_m"] != DBNull.Value)
+                        //get site Id from series catalog as the seriesId corrresponds to the ItemID
+                        string sql = "SELECT siteId FROM dbo.seriescatalog WHERE seriesId=@itemId";
+                        cmd.CommandText = sql;
+                        cmd.Parameters.Add(new SqlParameter("@itemId", itemId));
+                        cmd.Connection = conn;
+                        //get connection
+                        conn.Open();
+
+                        var siteId = cmd.ExecuteScalar();
+
+                        //get site info with ID
+                        sql = "SELECT * FROM dbo.Sites WHERE SiteId=@siteId";
+
+                        cmd.CommandText = sql;
+
+                        cmd.Parameters.Add(new SqlParameter("@siteId", siteId));
+                        //conn.Open();
+                        SqlDataReader dr = cmd.ExecuteReader();
+
+                        dr.Read();
+                        if (dr.HasRows)
                         {
-                            si.elevation_m = Math.Round(Convert.ToDouble(dr["Elevation_m"]), 1);
-                            si.elevation_mSpecified = true;
+                            if (dr["Elevation_m"] != DBNull.Value)
+                            {
+                                si.elevation_m = Math.Round(Convert.ToDouble(dr["Elevation_m"]), 1);
+                                si.elevation_mSpecified = true;
+                            }
+                            else
+                            {
+                                si.elevation_m = 0;
+                                si.elevation_mSpecified = true;
+                            }
+                            si.geoLocation = new SiteInfoTypeGeoLocation();
+
+                            LatLonPointType latLon = new LatLonPointType();
+                            latLon.latitude = Math.Round(Convert.ToDouble(dr["Latitude"]), 4);
+                            latLon.longitude = Math.Round(Convert.ToDouble(dr["Longitude"]), 4);
+                            latLon.srs = "EPSG:4326";
+                            si.geoLocation.geogLocation = latLon;
+                            //si.geoLocation.localSiteXY = new SiteInfoTypeGeoLocationLocalSiteXY[1];
+                            //si.geoLocation.localSiteXY[0] = new SiteInfoTypeGeoLocationLocalSiteXY();
+                            //si.geoLocation.localSiteXY[0].X = latLon.longitude;
+                            //si.geoLocation.localSiteXY[0].Y = latLon.latitude;
+                            //si.geoLocation.localSiteXY[0].ZSpecified = false;
+                            //si.geoLocation.localSiteXY[0].projectionInformation = si.geoLocation.geogLocation.srs;
+
+                            si.metadataTimeSpecified = false;
+                            //si.oid = Convert.ToString(dr["st_id"]);
+                            //si.note = new NoteType[1];
+                            //si.note[0] = new NoteType();
+                            //si.note[0].title = "my note";
+                            //si.note[0].type = "custom";
+                            //si.note[0].Value = "CHMI-D";
+                            si.verticalDatum = "MSL";
+
+                            si.siteCode = new SiteInfoTypeSiteCode[1];
+                            si.siteCode[0] = new SiteInfoTypeSiteCode();
+                            si.siteCode[0].network = serviceCode;
+                            si.siteCode[0].siteID = Convert.ToInt32(dr["SiteID"]);
+                            si.siteCode[0].siteIDSpecified = true;
+                            si.siteCode[0].Value = Convert.ToString(dr["SiteCode"]);
+
+                            si.siteName = Convert.ToString(dr["SiteName"]);
                         }
-                        else
-                        {
-                            si.elevation_m = 0;
-                            si.elevation_mSpecified = true;
-                        }
-                        si.geoLocation = new SiteInfoTypeGeoLocation();
-
-                        LatLonPointType latLon = new LatLonPointType();
-                        latLon.latitude = Math.Round(Convert.ToDouble(dr["Latitude"]), 4);
-                        latLon.longitude = Math.Round(Convert.ToDouble(dr["Longitude"]), 4);
-                        latLon.srs = "EPSG:4326";
-                        si.geoLocation.geogLocation = latLon;
-                        //si.geoLocation.localSiteXY = new SiteInfoTypeGeoLocationLocalSiteXY[1];
-                        //si.geoLocation.localSiteXY[0] = new SiteInfoTypeGeoLocationLocalSiteXY();
-                        //si.geoLocation.localSiteXY[0].X = latLon.longitude;
-                        //si.geoLocation.localSiteXY[0].Y = latLon.latitude;
-                        //si.geoLocation.localSiteXY[0].ZSpecified = false;
-                        //si.geoLocation.localSiteXY[0].projectionInformation = si.geoLocation.geogLocation.srs;
-
-                        si.metadataTimeSpecified = false;
-                        //si.oid = Convert.ToString(dr["st_id"]);
-                        //si.note = new NoteType[1];
-                        //si.note[0] = new NoteType();
-                        //si.note[0].title = "my note";
-                        //si.note[0].type = "custom";
-                        //si.note[0].Value = "CHMI-D";
-                        si.verticalDatum = "MSL";
-
-                        si.siteCode = new SiteInfoTypeSiteCode[1];
-                        si.siteCode[0] = new SiteInfoTypeSiteCode();
-                        si.siteCode[0].network = serviceCode;
-                        si.siteCode[0].siteID = Convert.ToInt32(dr["SiteID"]);
-                        si.siteCode[0].siteIDSpecified = true;
-                        si.siteCode[0].Value = Convert.ToString(dr["SiteCode"]);
-
-                        si.siteName = Convert.ToString(dr["SiteName"]);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
             return si;
         }
@@ -861,31 +931,81 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
         /// <param name="startDateTime"></param>
         /// <param name="endDateTime"></param>
         /// <returns></returns>
-        internal static TsValuesSingleVariableType GetValuesFromDb(string siteCode, string variableCode, DateTime startDateTime, DateTime endDateTime)
+        internal static TsValuesSingleVariableType GetValuesFromDb(string itemId, string variableCode, DateTime startDateTime, DateTime endDateTime)
         {
-            // for storing heightDepth value
-            int heightDepthVal = 0;
 
-            // methodID is taken from the variableCode
-            string vc = variableCode;
-            if (vc.IndexOf(":") > -1)
-            {
-                vc = vc.Substring(vc.IndexOf(":") + 1);
-            }
-            string[] vcSplit = variableCode.Split('_');
-            string elementCd = vcSplit[0];
-            string methodCode = "NOTSPECIFIED";
-            int offsetTypeID = 1;
-            string offsetTypeCode = "H";
-
-            if (vcSplit.Length > 2)
-            {
-                methodCode = vcSplit[2];
-            }
-
-
-            //default methodID and qcID
             int methodID = 0;
+
+            // Variable Info (from DB)
+            VariableInfoType v = GetVariableInfoFromDb(variableCode);
+
+            MethodType meth = new MethodType();
+            string cnn = GetConnectionString();
+            using (SqlConnection conn = new SqlConnection(cnn))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    string sql = @"SELECT MethodID, MethodCode, MethodDescription, MethodLink FROM dbo.Methods WHERE MethodID = @MethodID";
+                    cmd.CommandText = sql;
+                    cmd.Connection = conn;
+                    cmd.Parameters.Add(new SqlParameter("@MethodID", methodID));
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    dr.Read();
+
+                    meth.methodCode = Convert.ToString(dr["MethodID"]);
+                    meth.methodID = Convert.ToInt32(dr["MethodID"]);
+                    meth.methodIDSpecified = true;
+                    meth.methodDescription = Convert.ToString(dr["MethodDescription"]);
+                    meth.methodLink = Convert.ToString(dr["MethodLink"]);
+                }
+            }
+
+            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
+
+            //get values from RISE API
+            using (WebClient webClient = new WebClient())
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                // fetching the data URL
+                //download api example
+                //https://data.usbr.gov/rise/api/result/download?type=csv&itemId=10831&before=2021-03-15&after=2020-03-15&filename=resp.csv&order=ASC 
+                ///rise result api 
+                //https://data.usbr.gov/rise/api/result?itemId=10831&dateTime%5Bbefore%5D=03-01-2021&dateTime%5Bafter%5D=01-01-2021
+               
+
+                var values = GetCatalogRecordsAsync(itemId, startDateTime, endDateTime).GetAwaiter().GetResult();
+
+               
+
+                foreach (var item in values)
+                {
+                    // create a WaterML value object and add it to TimeSeries list.
+                    var newValue = new ValueSingleVariable();
+                    newValue.censorCode = "nc";
+                    //newValue.dateTime = PST_dt;
+                    //format datetime to conform to date convention
+                    var format = "yyyy-MM-ddTHH:mm:ssZ";
+                    var dT = item.attributes.dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                    
+                    CultureInfo provider = CultureInfo.InvariantCulture;
+                    newValue.dateTime = item.attributes.dateTime;
+                    newValue.dateTimeUTC = DateTime.ParseExact(dT, format, provider);//2020-01-30T08:00:00Z
+                    newValue.dateTimeUTCSpecified = true;
+                    newValue.timeOffset = "0";
+                    newValue.methodCode = meth.methodCode;
+                    newValue.methodID = Convert.ToString(meth.methodID);
+                    newValue.sourceCode = "1";
+                    newValue.sourceID = "1";
+                    newValue.qualityControlLevelCode = "1";
+                    newValue.Value = (decimal)item.attributes.result;
+                    valuesList.Add(newValue);
+                }
+            }
+
+
+
             int qcID = 1;
             int sourceID = 1;
 
@@ -900,26 +1020,9 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
             // method object from database
             s.method = new MethodType[1];
-            s.method[0] = GetMethodByCode(methodCode);
+            s.method[0] = meth;
             s.method[0].methodIDSpecified = true;
-            methodID = s.method[0].methodID;
 
-            // heightDepth, offset type id and code based on method code (if relevant)
-            if (methodCode.StartsWith("H"))
-            {
-                heightDepthVal = Convert.ToInt32(methodCode.Substring(1));
-                offsetTypeID = methodID;
-                offsetTypeCode = methodCode;
-            }
-            else if (methodCode.StartsWith("D"))
-            {
-                heightDepthVal = (-1) * Convert.ToInt32(methodCode.Substring(1));
-                offsetTypeID = methodID;
-                offsetTypeCode = methodCode;
-            }
-
-            //variable
-            VariableInfoType v = GetVariableInfoFromDb(variableCode);
 
             //time units
             s.units = v.timeScale.unit;
@@ -933,268 +1036,18 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             s.source = new SourceType[1];
             s.source[0] = GetSourceFromDb();
 
-            //qualifiers - not used by SCAN
+            //qualifiers - not used by NEON for now
             s.qualifier = new QualifierType[3];
             s.qualifier[0] = new QualifierType();
             Dictionary<string, QualifierType> allQualifiers = GetQualifiersFromDb();
             var usedQualifiers = new Dictionary<string, QualifierType>();
 
-            //values: get from AWDB web service
-
-            // !!! necessary configuration to prevent the "Bad Gateway" error
-            // see https://www.wcc.nrcs.usda.gov/web_service/awdb_web_service_faq.htm
-            System.Net.ServicePointManager.Expect100Continue = false;
-            
-            // connecting to the AWDB web service
-            Awdb.AwdbWebServiceClient wc = new Awdb.AwdbWebServiceClient();
-            // add TLS requirement
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            // !!! necessary configuration to prevent MaxReceivedMessageSize error
-            System.ServiceModel.BasicHttpBinding httpBinding = wc.ChannelFactory.Endpoint.Binding as System.ServiceModel.BasicHttpBinding;
-            httpBinding.MaxReceivedMessageSize = int.MaxValue;
-
-            // the AWDB station parameter must be in form ID:STATE:NETWORK
-            string[] stationTriplets = new string[] { siteCode.Replace("_", ":") };
-
-            // selecting the duration parameter
-            Awdb.duration duration = Awdb.duration.HOURLY;
-            string durationCode = vcSplit[1];
-            int hourIncrement = 1;
-            switch (durationCode)
-            {
-                case "H":
-                    duration = Awdb.duration.HOURLY;
-                    hourIncrement = 1;
-                    break;
-                case "D":
-                    duration = Awdb.duration.DAILY;
-                    hourIncrement = 24;
-                    break;
-                case "sm":
-                    duration = Awdb.duration.SEMIMONTHLY;
-                    hourIncrement = 24 * 15;
-                    break;
-                case "m":
-                    duration = Awdb.duration.MONTHLY;
-                    hourIncrement = 24 * 30;
-                    break;
-                case "season":
-                    duration = Awdb.duration.SEASONAL;
-                    hourIncrement = 24 * 30 * 3;
-                    break;
-                case "wy":
-                    duration = Awdb.duration.WATER_YEAR;
-                    hourIncrement = 24 * 365;
-                    break;
-                case "y":
-                    duration = Awdb.duration.CALENDAR_YEAR;
-                    hourIncrement = 24 * 365;
-                    break;
-                case "a":
-                    duration = Awdb.duration.ANNUAL;
-                    hourIncrement = 24 * 365;
-                    break;
-                default:
-                    duration = Awdb.duration.HOURLY;
-                    hourIncrement = 1;
-                    break;
-            }
-
-            // selecting the heightDepth parameter and offset
-            Awdb.heightDepth heightDepth = null;
-            if (heightDepthVal != 0)
-            {
-                heightDepth = new Awdb.heightDepth();
-                heightDepth.unitCd = "in";
-                heightDepth.value = heightDepthVal;
-                heightDepth.valueSpecified = true;
-
-                s.offset = new OffsetType[1];
-                s.offset[0] = new OffsetType();
-                s.offset[0].offsetDescription = s.method[0].methodDescription;
-                s.offset[0].offsetIsVertical = true;
-                s.offset[0].offsetTypeCode = offsetTypeCode;
-                s.offset[0].offsetTypeID = offsetTypeID;
-                s.offset[0].offsetTypeIDSpecified = true;
-                s.offset[0].offsetValue = heightDepthVal;
-                s.offset[0].unit = new UnitsType();
-                s.offset[0].unit.unitAbbreviation = "in";
-                s.offset[0].unit.unitName = "international inch";
-                s.offset[0].unit.unitCode = "49";
-                s.offset[0].unit.unitType = "Length";
-                s.offset[0].unit.unitID = 49;
-                s.offset[0].unit.unitIDSpecified = true;
-            }
-
-            // ordinal parameter - should be set to 1 ...
-            var ordinal = 1;
-
+            //values: get from NEON API           
             string beginDateStr = startDateTime.ToString("yyyy-MM-dd HH:mm:ss");
             string endDateStr = endDateTime.ToString("yyyy-MM-dd HH:mm:ss");
 
-            // increasing AWDB SOAP service timeout ...
-            wc.Endpoint.Binding.CloseTimeout = new TimeSpan(1);
-            wc.Endpoint.Binding.ReceiveTimeout = new TimeSpan(1);
-            wc.Endpoint.Binding.OpenTimeout = new TimeSpan(1);
 
-            List<ValueSingleVariable> valuesList = new List<ValueSingleVariable>();
-
-            if (duration == Awdb.duration.HOURLY)
-            {
-                // hourly data
-
-                beginDateStr = startDateTime.ToString("yyyy-MM-dd HH:mm");
-                endDateStr = endDateTime.ToString("yyyy-MM-dd HH:mm");
-                int beginHour = startDateTime.Hour;
-                int endHour = endDateTime.Hour;
-
-                // get all hourly data in the specified time range (all hours of day)
-                Awdb.hourlyData[] valuesObjH = wc.getHourlyData(stationTriplets, elementCd, ordinal, heightDepth, beginDateStr, endDateStr, 0, 23);
-                var vals0 = valuesObjH[0];
-                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-                DateTime endDate = Convert.ToDateTime(vals0.endDate);
-                Awdb.hourlyDataValue[] vals = vals0.values;
-
-                for (int i = 0; i < vals.Length; i++)
-                {
-                    DateTime valDateTime = Convert.ToDateTime(vals[i].dateTime);
-
-                    if (valDateTime < startDateTime || valDateTime > endDateTime)
-                    {
-                        continue;
-                    }
-
-                    ValueSingleVariable val = new ValueSingleVariable();
-                    val.censorCode = "nc";
-
-                    val.dateTime = valDateTime;
-                    val.dateTimeUTC = valDateTime;
-                    val.dateTimeUTCSpecified = true;
-                    val.methodCode = methodID.ToString();
-                    val.methodID = methodID.ToString();
-
-                    // offset value (if relevant)
-                    if (heightDepthVal != 0)
-                    {
-                        val.offsetValueSpecified = true;
-                        val.offsetValue = heightDepthVal;
-                        val.offsetTypeID = offsetTypeID.ToString();
-                        val.offsetTypeCode = offsetTypeCode;
-                    }
-                    val.qualityControlLevelCode = qcID.ToString();
-                    val.sourceCode = sourceID.ToString();
-                    if (vals[i] == null)
-                    {
-                        val.Value = -9999.0M;
-                    }
-                    else
-                    {
-                        val.Value = vals[i].value;
-                    }
-
-                    // qualifier (if relevant)
-                    var flag = vals[i].flag;
-                    if (flag != null)
-                    {
-                        val.qualifiers = vals[i].flag;
-                        if (!usedQualifiers.ContainsKey(flag))
-                        {
-                            QualifierType qual = FlagToQualifier(flag);
-                            usedQualifiers.Add(flag, qual);
-                        }
-                    }
-
-                    valuesList.Add(val);
-                }
-
-            }
-            else
-            {
-                // daily, semimonthly, monthly, seasonal or yearly data
-
-                Awdb.data[] valuesObj = wc.getData(stationTriplets, elementCd, ordinal, heightDepth, duration, true, beginDateStr, endDateStr, false);
-
-                // getting parameters
-                var vals0 = valuesObj[0];
-                DateTime begDate = Convert.ToDateTime(vals0.beginDate);
-                DateTime endDate = Convert.ToDateTime(vals0.endDate);
-
-                decimal?[] vals = vals0.values;
-                string[] flags = vals0.flags;
-
-                for (int i = 0; i < vals.Length; i++)
-                {
-                    ValueSingleVariable val = new ValueSingleVariable();
-                    val.censorCode = "nc";
-
-                    switch (duration)
-                    {
-                        case Awdb.duration.DAILY:
-                            val.dateTime = begDate.AddDays(i);
-                            break;
-                        case Awdb.duration.SEMIMONTHLY:
-                            val.dateTime = begDate.AddDays(i * 15);
-                            break;
-                        case Awdb.duration.MONTHLY:
-                            val.dateTime = begDate.AddMonths(i);
-                            break;
-                        case Awdb.duration.SEASONAL:
-                            val.dateTime = begDate.AddMonths(i * 3);
-                            break;
-                        case Awdb.duration.ANNUAL:
-                        case Awdb.duration.CALENDAR_YEAR:
-                        case Awdb.duration.WATER_YEAR:
-                            val.dateTime = begDate.AddYears(i);
-                            break;
-                        default:
-                            val.dateTime = begDate.AddHours(hourIncrement);
-                            break;
-                    }
-
-                    val.dateTimeUTC = val.dateTime;
-                    val.dateTimeUTCSpecified = true;
-                    //val.timeOffset = "00:00";
-                    //val.timeOffsetSpecified = false;
-                    val.methodCode = methodID.ToString();
-                    val.methodID = methodID.ToString();
-
-                    // offset value
-                    if (heightDepthVal != 0)
-                    {
-                        val.offsetValueSpecified = true;
-                        val.offsetValue = heightDepthVal;
-                        val.offsetTypeID = offsetTypeID.ToString();
-                        val.offsetTypeCode = offsetTypeCode;
-                    }
-                    val.qualityControlLevelCode = qcID.ToString();
-                    val.sourceCode = sourceID.ToString();
-                    if (vals[i] == null)
-                    {
-                        val.Value = -9999.0M;
-                    }
-                    else
-                    {
-                        val.Value = Convert.ToDecimal(vals[i]);
-                    }
-
-                    // flag -> qualifier code
-                    var flag = flags[i];
-                    if (flag != null)
-                    {
-                        val.qualifiers = flag;
-                        if (!usedQualifiers.ContainsKey(flag))
-                        {
-                            QualifierType qual = FlagToQualifier(flag);
-                            usedQualifiers.Add(flag, qual);
-                        }
-                    }
-                    
-
-                    valuesList.Add(val);
-                }
-
-            }
-
+            // assign data values
             s.value = valuesList.ToArray();
 
             // adding qualifiers
@@ -1204,7 +1057,75 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             return s;
         }
 
+        internal static async Task<List<USBRResultsValues.Data>> GetCatalogRecordsAsync(string itemId, DateTime startDateTime, DateTime endDateTime, Action<USBRResultsValues.USBRResultsValuesRoot> callBack = null)
+        {
+            //GetCatalogItems from API that are timeseries "itemstructureId=1, Geospatial=2, FileUpload=3" max per page = 100
+            //TODO:iterate through pages
+            var results = new List<USBRResultsValues.Data>();
+            HttpClient httpClient = new HttpClient();
 
+            var baseDataUrl = "https://data.usbr.gov/rise/api/result";                     
+
+            //build url parameters
+            var sb = new StringBuilder();
+           
+            //JSON
+            sb.AppendFormat("?itemId=" + itemId);
+            sb.Append("&dateTime%5Bbefore%5D=" + endDateTime.ToString("dd-MM-yyyy"));
+            sb.Append("&dateTime%5Bafter%5D=" + startDateTime.ToString("dd-MM-yyyy"));
+            sb.Append("&page=1&itemsPerPage=5000");
+            sb.Append("&order%5BdateTime%5D=ASC");
+
+            //var resultsValues = JsonConvert.DeserializeObject<USBRResultsValues.USBRResultsValuesRoot>(jsonData);
+
+
+            httpClient.BaseAddress = new Uri(baseDataUrl);
+
+            var nextUrl = sb.ToString();
+
+            do
+            {
+                await httpClient.GetAsync(nextUrl)
+                    .ContinueWith(async (recordSearchTask) =>
+                    {
+                        HttpResponseMessage response = await recordSearchTask;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string jsonString = await response.Content.ReadAsStringAsync();
+
+                            var jss = new JsonSerializerSettings
+                            {
+                                //DateFormatHandling = DateFormatHandling.Format(0, "yyyy-MM-ddTHH:mm:ssZ'"),
+                                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                                //DateFormatString = "yyyy-MM-ddTHH:mm:ssZ"
+                                //DateParseHandling = DateParseHandling.DateTimeOffset
+                            };
+                            var resp = JsonConvert.DeserializeObject<USBRResultsValues.USBRResultsValuesRoot>(jsonString, jss);
+                            if (resp != null)
+                            {
+                                // Build the full list to return later after the loop.
+                                if (resp.data.Any())
+                                    results.AddRange(resp.data.ToList());
+
+                                // Run the callback method, passing the current page of data from the API.
+                                //if (callBack != null)
+                                //        callBack(result);
+
+                                // Get the URL for the next page
+                                nextUrl = (resp.links.next != null) ? resp.links.next : string.Empty;
+                            }
+                        }
+                        else
+                        {
+                            // End loop if we get an error response.
+                            nextUrl = string.Empty;
+                        }
+                    });
+
+            } while (!string.IsNullOrEmpty(nextUrl));
+            return results;
+
+        }
 
         private static QualifierType FlagToQualifier(string flag)
         {

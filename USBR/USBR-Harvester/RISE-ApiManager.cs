@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using CsvHelper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -71,12 +73,12 @@ namespace USBRHarvester
 
         }
 
-        public async Task<(List<USBRCatalogItem.Data>, List<ItemLocationParameter>, List<USBRLocationPointRoot>)> GetCatalogItemsAsync(List<USBRCatalogRecord.Data> catalogRecords)
+        public async Task<(List<USBRCatalogitemRoot>, List<ItemLocationParameter>, List<USBRLocationPointRoot>)> GetCatalogItemsAsync(List<USBRCatalogRecord.Data> catalogRecords)
        
         {
             //GetCatalogItems from API that are timeseries "itemstructureId=1, Geospatial=2, FileUpload=3" max per page = 100
             //TODO:iterate through pages
-            var catalogItems = new List<USBRCatalogItem.Data>();
+            var catalogItems = new List<USBRCatalogitemRoot>();
             //string[,] catalogItemsWithPointLocation = new string[1000,2];
             var catalogItemsWithPointLocation = new List<ItemLocationParameter>();
             var locations = new List<USBRLocationPointRoot>();
@@ -86,8 +88,9 @@ namespace USBRHarvester
 
             //var nextUrl = "catalog-item?id="+ catalogRecords[0].id + "&hasItemStructure=true&itemsPerPage=1";
             //truncate list for testing
-            catalogRecords.RemoveRange(1, 400);
-            //catalogRecords.Where(p => p.relationships.location.data.id != "398");
+            //catalogRecords.RemoveRange(100, 418);
+            //catalogRecords = catalogRecords.Where(p => p.id.Contains("2477")).ToList();
+            //catalogRecords = catalogRecords.Where(p => p.id.Contains("2304")).ToList();
             //foreach (var record in catalogRecords.Where(p => p.relationships.location.data.id == "/rise/api/location/398"))
 
 
@@ -121,17 +124,27 @@ namespace USBRHarvester
                                             {
                                                 //get list of items for this location
                                                 //getparameter for item
-                                                var values = GetValueIdsForItemId(item.id);
+
+                                                var values = GetValueIdsForItemId(item.id.Split('/').Last());
                                                 var l = new ItemLocationParameter(
                                                         item.id.Split('/').Last(),
                                                         record.relationships.location.data.id.Split('/').Last(),
                                                         values.Item1.Split('/').Last(),
-                                                        values.Item2, values.Item3); 
-                                                catalogItemsWithPointLocation.Add(l);                                                
+                                                        values.Item2, values.Item3);
+                                                //var c = catalogItemsWithPointLocation.FindAll(x => x.itemId.Contains(item.id.Split('/').Last()));
+                                                //if (c.Count() < 2)
+                                                //{
+                                                    catalogItemsWithPointLocation.Add(l);
+                                                //}
+                                                //else
+                                                //{
+                                                //     _log.LogWrite("Duplicate entry detected");
+                                                //}
                                             }
+
                                             catch (Exception ex)
                                             {
-                                            _log.LogWrite(ex.Message);
+                                                _log.LogWrite(ex.Message);
                                             }
                                         }                                        
                                     }
@@ -151,7 +164,9 @@ namespace USBRHarvester
                             
                         });
 
-                    foreach (var item in record.relationships.catalogItems.data.ToList())
+                
+
+                foreach (var item in record.relationships.catalogItems.data.ToList())
                     //foreach (var item in catalogItemsWithPointLocation)
                     {
                         await httpClient.GetAsync("catalog-item?id=" + item)
@@ -161,13 +176,13 @@ namespace USBRHarvester
                                 if (response.IsSuccessStatusCode)
                                 {
                                     string jsonString = await response.Content.ReadAsStringAsync();
-                                    var result = JsonConvert.DeserializeObject<USBRCatalogItem.USBRCatalogitemRoot>(jsonString);
+                                    var result = JsonConvert.DeserializeObject<USBRCatalogitemRoot>(jsonString);
                                     if (result != null)
                                     {
                                     // Build the full list to return later after the loop.
-                                    if (result.data.Any())
+                                    if (result.data !=null)
                                         {
-                                            catalogItems.AddRange(result.data.ToList());
+                                            catalogItems.Add(result);
 
                                         // _log.LogWrite(result.data[0].relationships.catalogRecord.data.attributes._id.ToString() + ", " + result.data[0].relationships.catalogRecord.data.attributes.locationSourceCode.ToString());
                                     }
@@ -187,7 +202,18 @@ namespace USBRHarvester
                             }
                             });
                     }
-            } 
+            }
+            using (var writer = new StreamWriter("c:\\temp\\catalogItemsWithPointLocation.csv"))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteHeader<ItemLocationParameter>();
+                csv.NextRecord();
+                foreach (var item in catalogItemsWithPointLocation)
+                {
+                    csv.WriteRecord(item);
+                    csv.NextRecord();
+                }
+            }
             return (catalogItems, catalogItemsWithPointLocation, locations);
 
         }
@@ -300,7 +326,8 @@ namespace USBRHarvester
             //string temporalStartDate, temporalEndDate = string.Empty
             //https://data.usbr.gov/rise/api/result/download?type=json&itemId=6112&before=2021-06-15&after=2011-06-14&filename=Nambe%20Falls%20Reservoir%20and%20Dam%20Daily%20Lake%2FReservoir%20Elevation-ft%20Time%20Series%20Data%20(2011-06-14%20-%202021-06-13)&order=ASC://data.usbr.gov/rise/api/result/download?type=json&itemId
             //https://data.usbr.gov/rise/api/result/download?type=json&itemId=6113&before=2021-06-15&after=2011-06-14&filename=Nambe%20Falls%20Reservoir%20and%20Dam%20Daily%20Lake%2FReservoir%20Storage-af%20Time%20Series%20Data
-            string _USBRAPIurl = "https://data.usbr.gov/rise/api/result/download?type=json&itemId";
+            //string _USBRAPIurl = "https://data.usbr.gov/rise/api/result/download?type=json&itemId=";
+            string _USBRAPIurl = "https://data.usbr.gov/rise/api/catalog-item/";
 
             string parameterId, temporalStartDate, temporalEndDate;
             try
@@ -308,11 +335,12 @@ namespace USBRHarvester
                 using (WebClient webClient = new WebClient())
                 {
                     webClient.BaseAddress = _USBRAPIurl;
-                    var jsonData = webClient.DownloadString("catalog-item?id=" + itemId);
+
+                    var jsonData = webClient.DownloadString(itemId);
                     var catalogItem = JsonConvert.DeserializeObject<USBRCatalogitemRoot>(jsonData);
-                    parameterId = catalogItem.data[0].relationships.parameter.data.id;
-                    temporalStartDate = catalogItem.data[0].attributes.temporalStartDate;
-                    temporalEndDate = catalogItem.data[0].attributes.temporalEndDate;
+                    parameterId = catalogItem.data.relationships.parameter.data.id;
+                    temporalStartDate = catalogItem.data.attributes.temporalStartDate;
+                    temporalEndDate = catalogItem.data.attributes.temporalEndDate;
                     //_log.LogWrite(String.Format("Found {0} distinct USBRCatalogRecord.", USBRParameters..Count));
                 }
             }

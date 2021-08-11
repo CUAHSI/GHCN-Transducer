@@ -18,7 +18,7 @@ namespace CDEC_Harvester
         public float TimeSupport { get; set; }
         public int TimeUnitsID { get; set; }  
 
-        public string ValueType { get { return ("Unknown"); } }
+        public string ValueType { get; set; }
         public bool IsRegular { get { return (true); } }
 
         public string Speciation { get { return ("Not Applicable"); } }

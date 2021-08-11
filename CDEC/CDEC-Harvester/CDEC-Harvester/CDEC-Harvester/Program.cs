@@ -33,8 +33,9 @@ namespace CDEC_Harvester
             var stationsIds = siteM.getStationList();
 
             //limit size while debugging
-            //stationsIds.RemoveRange(0, 2000);
-
+            //stationsIds.RemoveRange(0, 2800);//Where(p => p.id.Contains("4371")).ToList();
+            //stationsIds = stationsIds.Where(p => p.Contains("PMD")).ToList();
+          
             var stations = siteM.getMetadatafromStationPage(stationsIds);          
 
             //serialize list for debugging 
