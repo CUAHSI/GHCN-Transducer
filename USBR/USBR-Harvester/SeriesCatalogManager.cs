@@ -5,7 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Net;
-using static USBRHarvester.USBRCatalogItem;
+using static USBRHarvester.UsbrCatalogItem;
 
 namespace USBRHarvester
 {
@@ -178,7 +178,7 @@ namespace USBRHarvester
         }
 
 
-        public void UpdateSeriesCatalog_fast(List<USBRCatalogRecord.Data> catalogRecords, List<USBRCatalogitemRoot> catalogItemList, List<ItemLocationParameter> catalogItemsWithPointLocation)
+        public void UpdateSeriesCatalog_fast(List<USBRCatalogRecord.Data> catalogRecords, List<UsbrCatalogItem> catalogItemList, List<ItemLocationParameter> catalogItemsWithPointLocation)
         { 
             var siteLookup = GetSiteLookup();
             var variableLookup = getVariableLookup();
@@ -381,13 +381,13 @@ namespace USBRHarvester
                         //cmd.CommandText = "SET IDENTITY_INSERT variables ON";
                         //cmd.ExecuteNonQuery();
 
-                        bulkCopy.WriteToServer(bulkTable);
+                       bulkCopy.WriteToServer(bulkTable);
 
                         //cmd.CommandText = "SET IDENTITY_INSERT variables OFF";
                         //cmd.ExecuteNonQuery();
 
                         connection.Close();
-                        Console.WriteLine("SeriesCatalog inserted row " + batchEnd.ToString());
+                        Console.WriteLine("SeriesCatalog inserted row " + bulkTable.Rows.Count);
                     }
                     //Console.WriteLine("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");
                     //_log.LogWrite("UpdateSeriesCatalog: " + seriesList.Count.ToString() + " series updated.");

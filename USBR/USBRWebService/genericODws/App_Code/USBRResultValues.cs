@@ -37,7 +37,7 @@ namespace WaterOneFlow.odws
             public int locationId { get; set; }
             public string sourceCode { get; set; }
             public DateTime dateTime { get; set; }
-            public double result { get; set; }
+            public string result { get; set; }
             public object status { get; set; }
             public object modelRunMemberId { get; set; }
             public object modelRunId { get; set; }

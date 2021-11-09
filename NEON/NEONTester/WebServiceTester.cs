@@ -48,15 +48,22 @@ namespace NEONTester
         public void Run()
         {
             var siteCodes = TestGetSites();
+
+             //siteCodes = siteCodes.Where(p => p.id.Contains("2304")).ToList();
+            siteCodes.RemoveRange(1, 450);
+
             Console.WriteLine(String.Format("testing {0} sites from url {1}...", siteCodes.Count, _asmxUrl));
             List<DataValuesInfo> testResultList = new List<DataValuesInfo>();
             int numSites = siteCodes.Count;
             int iSite = 0;
+
+           
             foreach (var siteCode in siteCodes)
             {
                 iSite += 1;
                 var seriesList = TestGetSiteInfo(siteCode);
 
+                Console.WriteLine(String.Format("testing sites  {0}...", siteCode));
                 int numSeriesAtSite = seriesList.Count;
                 int iSeries = 0;
                 foreach (TimeSeriesInfo seriesInfo in seriesList)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using static USBRHarvester.USBRCatalogItem;
+using static USBRHarvester.UsbrCatalogItem;
 using static USBRHarvester.USBRLocationPoint;
 
 namespace USBRHarvester
@@ -11,7 +11,7 @@ namespace USBRHarvester
     {
         static void Main(string[] args)
         {
-            var catalogTimeseriesItems = new List<USBRCatalogitemRoot>();
+            var catalogTimeseriesItems = new List<UsbrCatalogItem>();
             var catalogLocations = new List<USBRLocationPointRoot>();
             var catalogItemsWithPointLocation = new List<ItemLocationParameter>();
             // Ensure correct TLS settings.

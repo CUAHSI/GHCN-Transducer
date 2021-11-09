@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.Collections.Specialized;
 
 namespace WaterOneFlow.odws
 {
@@ -999,7 +1000,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                     newValue.sourceCode = "1";
                     newValue.sourceID = "1";
                     newValue.qualityControlLevelCode = "1";
-                    newValue.Value = (decimal)item.attributes.result;
+                    newValue.Value = Convert.ToDecimal(item.attributes.result);
                     valuesList.Add(newValue);
                 }
             }
@@ -1054,6 +1055,16 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             QualifierType[] usedQuals = usedQualifiers.Values.ToArray();
             s.qualifier = usedQuals;
 
+            //for debug puposes
+            //System.Xml.Serialization.XmlSerializer writer =
+            //       new System.Xml.Serialization.XmlSerializer(typeof(TsValuesSingleVariableType));
+
+            //var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "//SerializationOverview.xml";
+            //System.IO.FileStream file = System.IO.File.Create(path);
+
+            //writer.Serialize(file, s);
+            //file.Close();
+
             return s;
         }
 
@@ -1068,13 +1079,15 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
             //build url parameters
             var sb = new StringBuilder();
-           
+
+
             //JSON
             sb.AppendFormat("?itemId=" + itemId);
             sb.Append("&dateTime%5Bbefore%5D=" + endDateTime.ToString("dd-MM-yyyy"));
             sb.Append("&dateTime%5Bafter%5D=" + startDateTime.ToString("dd-MM-yyyy"));
-            sb.Append("&page=1&itemsPerPage=5000");
-            sb.Append("&order%5BdateTime%5D=ASC");
+            sb.Append("&itemsPerPage=4000");
+            sb.Append("&page=1");            
+            //sb.Append("&order%5BdateTime%5D=ASC");
 
             //var resultsValues = JsonConvert.DeserializeObject<USBRResultsValues.USBRResultsValuesRoot>(jsonData);
 
@@ -1082,6 +1095,9 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
             httpClient.BaseAddress = new Uri(baseDataUrl);
 
             var nextUrl = sb.ToString();
+            var pageCount = 0;
+            var pageCounter = 0;
+            var resp = new USBRResultsValues.USBRResultsValuesRoot();
 
             do
             {
@@ -1092,7 +1108,8 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         if (response.IsSuccessStatusCode)
                         {
                             string jsonString = await response.Content.ReadAsStringAsync();
-
+                            //set nextUrl to empty to avoid infinity loop if something goes wrong
+                            //nextUrl = string.Empty;
                             var jss = new JsonSerializerSettings
                             {
                                 //DateFormatHandling = DateFormatHandling.Format(0, "yyyy-MM-ddTHH:mm:ssZ'"),
@@ -1100,7 +1117,18 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                                 //DateFormatString = "yyyy-MM-ddTHH:mm:ssZ"
                                 //DateParseHandling = DateParseHandling.DateTimeOffset
                             };
-                            var resp = JsonConvert.DeserializeObject<USBRResultsValues.USBRResultsValuesRoot>(jsonString, jss);
+
+                           
+                            try
+                            {
+                                 resp = JsonConvert.DeserializeObject<USBRResultsValues.USBRResultsValuesRoot>(jsonString, jss);
+                            }
+                            catch (JsonException ex)
+                            {
+                                Console.Write(ex.Message);
+                                throw;
+                            }
+
                             if (resp != null)
                             {
                                 // Build the full list to return later after the loop.
@@ -1113,6 +1141,26 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
 
                                 // Get the URL for the next page
                                 nextUrl = (resp.links.next != null) ? resp.links.next : string.Empty;
+                                // get count of pages 
+                                if (resp.links.last != null && pageCount == 0)//first time
+                                {
+                                    //get querystring
+                                    var querystring = (resp.links.last.Split('?')[1]);
+                                    // Parse the query string variables into a NameValueCollection.
+                                    NameValueCollection qscoll = HttpUtility.ParseQueryString(querystring);
+                                    if (qscoll.AllKeys.Contains("page"))
+                                    {
+                                        //Get page count
+                                        pageCount = Convert.ToInt32(qscoll["page"]);
+                                        pageCounter = 1;
+                                    }
+                                    
+                                }
+                                //increase pageCounter
+                                pageCounter++;
+                                
+                                //pageCount = (resp.links.last != null) ? resp.links.last. : string.Empty;
+
                             }
                         }
                         else
@@ -1122,7 +1170,7 @@ inner join dbo.units tu on v.TimeUnitsID = tu.UnitsID";
                         }
                     });
 
-            } while (!string.IsNullOrEmpty(nextUrl));
+            } while (!string.IsNullOrEmpty(nextUrl) || pageCounter == pageCount);//Adding two cases to exit loop as sometimes the API does not return correctly which creates an infinity loop. This should prevent that from happening. 
             return results;
 
         }

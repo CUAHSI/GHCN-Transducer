@@ -45,8 +45,9 @@ namespace USBRHarvester
             //{
             //    csv.WriteRecords(parameters);
             //}
-
-
+            //DEBUG:use to filter parameters
+            //parameters = parameters.Where(p => p.id.Split('/').Last().Equals("1374")).ToList();
+            
 
             try
             {
@@ -61,24 +62,57 @@ namespace USBRHarvester
                     {
                          unitId = (from u in odmUnits where u.UnitsAbbreviation.ToLower() == unitsAbbr.ToLower() select u.UnitsID).First();
                          unitName = (from u in odmUnits where u.UnitsAbbreviation.ToLower() == unitsAbbr.ToLower() select u.UnitsName).First();
+                        
                     }
                     catch (Exception ex)
                     {
-                        _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
+                        _log.LogWrite(String.Format("No match was found: " + p.id.Split('/').Last() + ", " + p.attributes.parameterName + ", " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
                         continue;
                     }
                     //Lookup up and map variablenames
-                    string variableName = (getVariablenameSynonym(p.attributes.parameterName) != null) ? getVariablenameSynonym(p.attributes.parameterName) : p.attributes.parameterName;
+                    //string variableName = (getVariablenameSynonym(p.attributes.parameterName) != null) ? getVariablenameSynonym(p.attributes.parameterName) : p.attributes.parameterName;
+                    string variableName = (getVariablenameMapping(p.attributes.parameterName) != null) ? getVariablenameMapping(p.attributes.parameterName) : p.attributes.parameterName;
+                    
 
                     try
                     {
-                        var odmvariableName = (from item in odmVariableCV where item.Key.ToLower() == variableName.ToLower() select item.Key).First();
-                        _log.LogWrite(String.Format("SUCCESS:  match was found: " + p.attributes.parameterName));
+                        var odmvariableName = (from item in odmVariableCV where item.Key.ToLower() == variableName.ToLower() select item.Key).FirstOrDefault();
+                        //try to match to term + dissolved  (sometimes the term is a like this "Manganese (Dissolved)" so i match only the first term also need to take care of this case Manganese (Total)
+
+                        if (string.IsNullOrEmpty(odmvariableName))
+                        {
+                            if (variableName.ToLower().Contains("dissolved") || variableName.ToLower().Contains("total"))//e.g this case "Manganese (Dissolved) and Manganese (Total)" 
+                            {
+                                if (variableName.ToLower().Contains("dissolved")) { odmvariableName = (from item in odmVariableCV where item.Key.ToLower().Contains(variableName.ToLower().Split(' ').First()) && item.Key.ToLower().Contains("dissolved") select item.Key).FirstOrDefault(); }
+                                if (variableName.ToLower().Contains("total")) { odmvariableName = (from item in odmVariableCV where item.Key.ToLower().Contains(variableName.ToLower().Split(' ').First()) && item.Key.ToLower().Contains("total") select item.Key).FirstOrDefault(); }
+                            }
+                        }
+                        if (string.IsNullOrEmpty(odmvariableName))
+                        {
+                            odmvariableName = (from item in odmVariableCV where item.Key.ToLower().Contains(variableName.ToLower().Split(' ').First()) && item.Key.ToLower().Contains("dissolved")  select item.Key).FirstOrDefault();
+                        }
+                        //try to match to term + dissolved
+                        if (string.IsNullOrEmpty(odmvariableName))
+                        {
+                            odmvariableName = (from item in odmVariableCV where item.Key.ToLower().StartsWith(variableName.ToLower().Split(' ').First()) && item.Key.ToLower().Contains("total") select item.Key).FirstOrDefault();
+                        }
+
+                        if (string.IsNullOrEmpty(odmvariableName))
+                        {
+                            _log.LogWrite(String.Format("No match was found: " + p.id.Split('/').Last() + ", " + p.attributes.parameterName + ", " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
+                            continue;
+                        }
+                        else //set variable name to new term
+                        {
+                            variableName = odmvariableName;
+                        }
+                        //_log.LogWrite(String.Format("SUCCESS:  match was found: " + p.attributes.parameterName));
                     }
                     catch (Exception ex)
                     {
-                        _log.LogWrite(String.Format("ERROR: No match was found: " + p.attributes.parameterName + ", " + p.attributes.parameterDescription));
-                        continue;
+                        //_log.LogWrite(String.Format("No match was found: " + p.id.Split('/').Last() + ", " + p.attributes.parameterName + ", " + p.attributes.parameterUnit + ", " + p.attributes.parameterDescription));
+                        _log.LogWrite("UpdateVariables:" + ex.Message);
+                       
                     }
 
                     int timeunitId = 0;
@@ -93,7 +127,7 @@ namespace USBRHarvester
                                 timeSupport = 1;
                             break;
                         case "daily":
-                            timeunitId = 106;
+                            timeunitId = 104;
                             timeSupport = 1;
                             break;
                         case "one minute":
@@ -152,7 +186,7 @@ namespace USBRHarvester
             }
             catch (Exception ex)
             {
-
+                _log.LogWrite("UpdateVariables:" + ex.Message);
             }
 
             _log.LogWrite(String.Format("Found {0} distinct variables.", variables.Count));
@@ -173,7 +207,6 @@ namespace USBRHarvester
                     {
                         _log.LogWrite("error updating variable: " + variable.VariableCode + " " + ex.Message);
                     }
-
                 }
             }
             _log.LogWrite("UpdateVariables OK: " + variables.Count.ToString() + " variables.");
@@ -401,7 +434,7 @@ namespace USBRHarvester
             unitAbbreviationSynonyms.Add("acres", "ac"); 
             unitAbbreviationSynonyms.Add("kwH", "kW hr");
             unitAbbreviationSynonyms.Add("kw", "kW");
-            //unitAbbreviationSynonyms.Add("mwh", "kW");
+            unitAbbreviationSynonyms.Add("ug/m3", "ug/m^3");
 
 
             //syn = unitAbbreviationSynonyms.Where (v => v.Key == term).FirstOrDefault().ToString();
@@ -421,6 +454,45 @@ namespace USBRHarvester
             return syn;
 
         }
+
+        public string getVariablenameMapping(string term)
+        {
+
+            //set filename from manual mappings!
+            string fileName = "USBR Mapping.csv";
+            //Get path to file
+            string path = AppDomain.CurrentDomain.BaseDirectory + "/Files/" + fileName;
+            var VariablenameSynonym = new List<Variablemappings>();
+            //var VariablenameSynonym = new Dictionary<String, String>();
+            try
+            {
+                using (var reader = new StreamReader(path))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    csv.Context.RegisterClassMap<VariablemappingsMap>();
+                    VariablenameSynonym = csv.GetRecords<Variablemappings>().ToList();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _log.LogWrite("Error: read mappings csv: " + ex.Message);
+            }
+
+
+            string syn = String.Empty;
+            //adding synanyms for cv entries missing
+            //var VariablenameSynonym = new Dictionary<String, String>();//usbr code, ODM term
+            //VariablenameSynonym.Add("Water Temperature", "Temperature");
+
+            syn = (from u in VariablenameSynonym where u.USBRVariableName == term select u.CVVariableName).FirstOrDefault();
+            if (!string.IsNullOrEmpty(syn))
+                return syn;
+            else
+                return term;
+
+        }
+
 
         public string ToReadableString(IDbCommand command)
         {

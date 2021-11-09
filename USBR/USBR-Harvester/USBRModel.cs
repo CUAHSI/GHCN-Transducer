@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CsvHelper.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,140 +54,248 @@ namespace USBRHarvester
         }
     }
 
-    public class USBRCatalogItem
-    {
-        // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
-        public class Links
-        {
-            public string self { get; set; }
-            public string first { get; set; }
-            public string last { get; set; }
-            public string next { get; set; }
-        }
+    //public class USBRCatalogItem
+    //{
+    //    Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    //    public class Links
+    //    {
+    //        public string self { get; set; }
+    //        public string first { get; set; }
+    //        public string last { get; set; }
+    //        public string next { get; set; }
+    //    }
 
-        public class Meta
-        {
-            public int totalItems { get; set; }
-            public int itemsPerPage { get; set; }
-            public int currentPage { get; set; }
-        }
+    //    public class Meta
+    //    {
+    //        public int totalItems { get; set; }
+    //        public int itemsPerPage { get; set; }
+    //        public int currentPage { get; set; }
+    //    }
 
-        public class ItemType
-        {
-            public string _id { get; set; }
-            public string definition { get; set; }
-            public DateTime createDate { get; set; }
-        }
+    //    public class ItemType
+    //    {
+    //        public string _id { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
 
-        public class Matrix
-        {
-            public int _id { get; set; }
-            public string matrix { get; set; }
-            public string definition { get; set; }
-            public DateTime createDate { get; set; }
-        }
+    //    public class Matrix
+    //    {
+    //        public int _id { get; set; }
+    //        public string matrix { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
 
-        public class SpatialGeometry
-        {
-            public int _id { get; set; }
-            public string spatialGeometry { get; set; }
-            public string definition { get; set; }
-            public DateTime createDate { get; set; }
-        }
+    //    public class SpatialGeometry
+    //    {
+    //        public int _id { get; set; }
+    //        public string spatialGeometry { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
 
-        public class SpatialTransformation
-        {
-            public int _id { get; set; }
-            public string spatialTransformation { get; set; }
-            public string definition { get; set; }
-            public DateTime createDate { get; set; }
-        }
+    //    public class SpatialTransformation
+    //    {
+    //        public int _id { get; set; }
+    //        public string spatialTransformation { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
 
-        public class UpdateFrequency
-        {
-            public int _id { get; set; }
-            public string updatefrequency { get; set; }
-            public string definition { get; set; }
-            public DateTime createDate { get; set; }
-        }
+    //    public class UpdateFrequency
+    //    {
+    //        public int _id { get; set; }
+    //        public string updatefrequency { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
 
-        public class Attributes
-        {
-            public int _id { get; set; }
-            public string itemTitle { get; set; }
-            public string itemDescription { get; set; }
-            public int itemRecordStatusId { get; set; }
-            public object metadataFilePath { get; set; }
-            public object binaryFilePath { get; set; }
-            public bool isModeled { get; set; }
-            public string disclaimer { get; set; }
-            public int temporalParameterId { get; set; }
-            public string sourceCode { get; set; }
-            public string locationSourceCode { get; set; }
-            public string parameterSourceCode { get; set; }
-            public object modelNameSourceCode { get; set; }
-            public string temporalStartDate { get; set; }
-            public string temporalEndDate { get; set; }
-            public object spatialShortDescription { get; set; }
-            public object publicationAuthor { get; set; }
-            public object publicationEditor { get; set; }
-            public object publicationPublisher { get; set; }
-            public object publicationPublisherLocation { get; set; }
-            public object publicationFirstPublicationDate { get; set; }
-            public object publicationPeriodicalName { get; set; }
-            public object publicationSerialNumber { get; set; }
-            public object publicationDoi { get; set; }
-            public object publicationVolume { get; set; }
-            public object publicationIssue { get; set; }
-            public object publicationSection { get; set; }
-            public object publicationStartPage { get; set; }
-            public object publicationEndPage { get; set; }
-            public DateTime createDate { get; set; }
-            public string fileFormat { get; set; }
-            public string dataStructure { get; set; }
-            public int itemStructureId { get; set; }
-            public ItemType itemType { get; set; }
-            public Matrix matrix { get; set; }
-            public SpatialGeometry spatialGeometry { get; set; }
-            public object spatialResolution { get; set; }
-            public SpatialTransformation spatialTransformation { get; set; }
-            public object spatialOpenDataURL { get; set; }
-            public object modelName { get; set; }
-            public UpdateFrequency updateFrequency { get; set; }
-            public string updateDate { get; set; }
-        }
+    //    public class Attributes
+    //    {
+    //        public int _id { get; set; }
+    //        public string itemTitle { get; set; }
+    //        public string itemDescription { get; set; }
+    //        public int itemRecordStatusId { get; set; }
+    //        public object metadataFilePath { get; set; }
+    //        public object binaryFilePath { get; set; }
+    //        public bool isModeled { get; set; }
+    //        public string disclaimer { get; set; }
+    //        public int temporalParameterId { get; set; }
+    //        public string sourceCode { get; set; }
+    //        public string locationSourceCode { get; set; }
+    //        public string parameterSourceCode { get; set; }
+    //        public object modelNameSourceCode { get; set; }
+    //        public string temporalStartDate { get; set; }
+    //        public string temporalEndDate { get; set; }
+    //        public object spatialShortDescription { get; set; }
+    //        public object publicationAuthor { get; set; }
+    //        public object publicationEditor { get; set; }
+    //        public object publicationPublisher { get; set; }
+    //        public object publicationPublisherLocation { get; set; }
+    //        public object publicationFirstPublicationDate { get; set; }
+    //        public object publicationPeriodicalName { get; set; }
+    //        public object publicationSerialNumber { get; set; }
+    //        public object publicationDoi { get; set; }
+    //        public object publicationVolume { get; set; }
+    //        public object publicationIssue { get; set; }
+    //        public object publicationSection { get; set; }
+    //        public object publicationStartPage { get; set; }
+    //        public object publicationEndPage { get; set; }
+    //        public DateTime createDate { get; set; }
+    //        public string fileFormat { get; set; }
+    //        public string dataStructure { get; set; }
+    //        public int itemStructureId { get; set; }
+    //        public ItemType itemType { get; set; }
+    //        public Matrix matrix { get; set; }
+    //        public SpatialGeometry spatialGeometry { get; set; }
+    //        public object spatialResolution { get; set; }
+    //        public SpatialTransformation spatialTransformation { get; set; }
+    //        public object spatialOpenDataURL { get; set; }
+    //        public object modelName { get; set; }
+    //        public UpdateFrequency updateFrequency { get; set; }
+    //        public string updateDate { get; set; }
+    //    }
 
-        public class Data
-        {
-            public string type { get; set; }
-            public string id { get; set; }
-            public Attributes attributes { get; set; }
-            public Relationships relationships { get; set; }
-        }
+    //    public class Data
+    //    {
+    //        public string type { get; set; }
+    //        public string id { get; set; }
+    //        public Attributes attributes { get; set; }
+    //        public Relationships relationships { get; set; }
+    //    }
 
-        public class Parameter
-        {
-            public Data data { get; set; }
-        }
+    //    public class Parameter
+    //    {
+    //        public Data data { get; set; }
+    //    }
 
-        public class CatalogRecord
-        {
-            public Data data { get; set; }
-        }
+    //    public class CatalogRecord
+    //    {
+    //        public Data data { get; set; }
+    //    }
 
-        public class Relationships
-        {
-            public Parameter parameter { get; set; }
-            public CatalogRecord catalogRecord { get; set; }
-        }
+    //    public class Relationships
+    //    {
+    //        public Parameter parameter { get; set; }
+    //        public CatalogRecord catalogRecord { get; set; }
+    //    }
 
-        public class USBRCatalogitemRoot
-        {
-            public Links links { get; set; }
-            public Meta meta { get; set; }
-            public Data data { get; set; }
-        }
-    }
+    //    public class USBRCatalogItemRoot
+    //    {
+    //        public Links links { get; set; }
+    //        public Meta meta { get; set; }
+    //        public Data data { get; set; }
+    //    }
+    //}
+
+    //public class USBRCatalogItem
+    //{
+    //    Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    //    public class ItemType
+    //    {
+    //        public string _id { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
+
+    //    public class Matrix
+    //    {
+    //        public int _id { get; set; }
+    //        public string matrix { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
+
+    //    public class UpdateFrequency
+    //    {
+    //        public int _id { get; set; }
+    //        public string updatefrequency { get; set; }
+    //        public string definition { get; set; }
+    //        public DateTime createDate { get; set; }
+    //    }
+
+    //    public class Attributes
+    //    {
+    //        public int _id { get; set; }
+    //        public string itemTitle { get; set; }
+    //        public string itemDescription { get; set; }
+    //        public int itemRecordStatusId { get; set; }
+    //        public object metadataFilePath { get; set; }
+    //        public object binaryFilePath { get; set; }
+    //        public bool isModeled { get; set; }
+    //        public string disclaimer { get; set; }
+    //        public string sourceCode { get; set; }
+    //        public string locationSourceCode { get; set; }
+    //        public string parameterSourceCode { get; set; }
+    //        public object modelNameSourceCode { get; set; }
+    //        public string temporalStartDate { get; set; }
+    //        public string temporalEndDate { get; set; }
+    //        public object spatialShortDescription { get; set; }
+    //        public object publicationAuthor { get; set; }
+    //        public object publicationEditor { get; set; }
+    //        public object publicationPublisher { get; set; }
+    //        public object publicationPublisherLocation { get; set; }
+    //        public object publicationFirstPublicationDate { get; set; }
+    //        public object publicationPeriodicalName { get; set; }
+    //        public object publicationSerialNumber { get; set; }
+    //        public object publicationDoi { get; set; }
+    //        public object publicationVolume { get; set; }
+    //        public object publicationIssue { get; set; }
+    //        public object publicationSection { get; set; }
+    //        public object publicationStartPage { get; set; }
+    //        public object publicationEndPage { get; set; }
+    //        public DateTime createDate { get; set; }
+    //        public string dataStructure { get; set; }
+    //        public int itemStructureId { get; set; }
+    //        public ItemType itemType { get; set; }
+    //        public Matrix matrix { get; set; }
+    //        public object spatialGeometry { get; set; }
+    //        public object spatialResolution { get; set; }
+    //        public object spatialTransformation { get; set; }
+    //        public object spatialOpenDataURL { get; set; }
+    //        public object modelName { get; set; }
+    //        public int parameterId { get; set; }
+    //        public string parameterName { get; set; }
+    //        public string parameterUnit { get; set; }
+    //        public string parameterTimestep { get; set; }
+    //        public string parameterTransformation { get; set; }
+    //        public UpdateFrequency updateFrequency { get; set; }
+    //        public DateTime updateDate { get; set; }
+    //    }
+
+    //    public class Data2
+    //    {
+    //        public string type { get; set; }
+    //        public string id { get; set; }
+    //        public Attributes attributes { get; set; }
+    //        public Relationships relationships { get; set; }
+    //    }
+
+    //    public class Parameter
+    //    {
+    //        public Data2 data { get; set; }
+    //    }
+
+    //    public class CatalogRecord
+    //    {
+    //        public Data2 data { get; set; }
+    //    }
+
+    //    public class Relationships
+    //    {
+    //        public Parameter parameter { get; set; }
+    //        public CatalogRecord catalogRecord { get; set; }
+    //    }
+
+    //    public class USBRCatalogItemRoot
+    //    {
+    //        public Data2 data { get; set; }
+    //    }
+
+    //}
+
+
 
     public class USBRCatalogRecord
     {
@@ -498,6 +607,20 @@ namespace USBRHarvester
              parameterId = ParameterId;
              temporalStartDate = TemporalStartDate;
              temporalEndDate = TemporalEndDate;
+        }
+    }
+    public class Variablemappings
+    {
+        public string USBRVariableName { get; set; }
+        public string CVVariableName { get; set; }
+    }
+    public class VariablemappingsMap : ClassMap<Variablemappings>
+    {
+        public VariablemappingsMap()
+        {
+            Map(m => m.USBRVariableName).Name("USBRVariableName");
+            Map(m => m.CVVariableName).Name("CVVariableName");
+
         }
     }
 }
